@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 1000px;
+        width: 100%;
+        border-color: green;
+        border-width: 1px;
+      }
+    </style>
+    <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
+    <title>OpenLayers example</title>
+  </head>
+  <body>
+    <h2>My Map</h2>
+    <h3 id = "date"></h3>
+    <div id="map" class="map"></div>
+    <script type="text/javascript">
+        var imageURL = '';
+        var extent = [0,0,128,128]  // image size is 128x128 px
+        var projection = new ol.proj.Projection({
+            code: 'local_image',
+            units: 'pixels',
+            extent: extent
+        });
+
+        var map = new ol.Map({
+            target: 'map',
+            view: new ol.View({
+                projection: projection,
+                center: ol.extent.getCenter(extent),
+                zoom: 1.6,
+            }),
+            controls: [],
+        });
+
+
+        function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function animate() {
+                for (year = 1999; year < 2019; year++) {
+                    for (month = 1; month < 13; month++) {
+                        for (day = 1; day < 2; day++) {
+                            var layers = [...map.getLayers().getArray()];
+                            if (layers.length > 2) {
+                            map.removeLayer(layers[0]);}
+                            var monthStr = ""+month;  
+                            if (month < 10) {
+                                monthStr = "0"+month;
+                            }
+                            var dayStr = ""+day;  
+                            if (day < 10) {
+                                dayStr = "0"+day;
+                            }
+                            var yearStr = ""+year;
+                            imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_extent_raster_monthly_n&styles=NSIDC:g02135_extent_raster_basemap&bbox=-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
+                            await map.addLayer(new ol.layer.Image({
+                                source: new ol.source.ImageStatic({
+                                    url: imageURL,  // image size is 128x128 px
+                                    projection: projection,
+                                    imageExtent: extent
+                                })
+                            }));
+                            document.getElementById("date").innerHTML = "Date: "+yearStr+"-"+monthStr+"-"+dayStr;
+                            await sleep(100);
+                        }
+                    }
+                }
+            }
+    
+
+        animate();
+        function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+  </body>
+</html>
