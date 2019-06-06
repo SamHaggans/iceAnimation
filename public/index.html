@@ -5,20 +5,83 @@
     <style>
       .map {
         height: 1000px;
-        width: 100%;
+        width: 40%;
+        border-style: solid;
         border-color: green;
-        border-width: 1px;
+        border-width: 5px;
       }
     </style>
     <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script src = "script.js"></script>
-    <title>OpenLayers example</title>
+    <title>Sea Ice Animation</title>
   </head>
   <body>
-    <h2>Ice Animation</h2>
+    <h2>Sea Ice Animation</h2>
     <h3 id = "date"></h3>
-    <button id = "animatey" type="button">Animate</button>
+    <form id = "customize">
+        <input type="radio" value="extent" name="ext-con">Extent
+        <input type="radio" value="concentration" name="ext-con">Concentration
+        <br>
+        <input type="radio" value="n" name="n-s">Arctic
+        <input type="radio" value="s" name="n-s">Antarctic
+        <br>
+        <input type="radio" value="Daily" name="dates">Every Day
+        <input type="radio" value="Monthly" name="dates">Every Month
+        <input type="radio" value="SameMonth" name="dates">Same Month Through Years:  <select name="monthsLoop">
+                                                                                        <option value="1">January</option>
+                                                                                        <option value="2">February</option>
+                                                                                        <option value="3">March</option>
+                                                                                        <option value="4">April</option>
+                                                                                        <option value="5">May</option>
+                                                                                        <option value="6">June</option>
+                                                                                        <option value="7">July</option>
+                                                                                        <option value="8">August</option>
+                                                                                        <option value="9">September</option>
+                                                                                        <option value="10">October</option>
+                                                                                        <option value="11">November</option>
+                                                                                        <option value="12">December</option>
+                                                                                      </select> 
+        <br>
+         Starting Year (1979-2018): <input type="number" name="sYear" min="1979" max="2018"> Starting Month: <select name="sMonth">
+                                                                                              <option value="1">January</option>
+                                                                                              <option value="2">February</option>
+                                                                                              <option value="3">March</option>
+                                                                                              <option value="4">April</option>
+                                                                                              <option value="5">May</option>
+                                                                                              <option value="6">June</option>
+                                                                                              <option value="7">July</option>
+                                                                                              <option value="8">August</option>
+                                                                                              <option value="9">September</option>
+                                                                                              <option value="10">October</option>
+                                                                                              <option value="11">November</option>
+                                                                                              <option value="12">December</option>
+                                                                                            </select> 
+           Starting Day (1-28): <input type="number" name="sDay" min="1" max="28">
+          <br>
+           Ending Year (1979-2018): <input type="number" name="eYear" min="1979" max="2018"> Ending Month: <select name="eMonth">
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select> 
+           Ending Day (1-28): <input type="number" name="eDay" min="1" max="28">
+          <br>
+          <button id = "animate" type="button">Animate</button>
+          
+    </form>
+    <br>Speed:<br>
+    Slowest <input type="range" name="speed" min="0" max="1900"> Fastest
+    <br>
+    <button id = "stopAnimation" type="button">Stop Animation</button>
     <div id="map" class="map"></div>
     
   </body>
