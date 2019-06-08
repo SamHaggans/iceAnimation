@@ -2,7 +2,8 @@
 
 var stop = false; //Global variable to stop the animation
    
-async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//Main animation function
+async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {//Main animation function
+    
     var displayDates = [];//Array for the dates to be displayed
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
@@ -67,32 +68,35 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
                 dayStart = 1;
             }
             for (day = dayStart; day <= dayEnd; day++) {//loop days
-                if (stop) return;//Catch to stop animation
-                var monthStr = ""+month;//create the string for month, ensuring it is 2 digits
-                if (month < 10) {
-                    monthStr = "0"+month;
-                }
-                var dayStr = ""+day;//string for the day, ensuring 2 digits
-                if (day < 10) {
-                    dayStr = "0"+day;
-                }
-                var yearStr = ""+year;//String for year
-                await displayDates.push("Date: "+yearStr+"-"+monthStr+"-"+dayStr);
-                    imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
-                    await map.addLayer(new ol.layer.Image({
-                        source: new ol.source.ImageStatic({
-                            url: imageURL,
-                            projection: projection,
-                            imageExtent: extent
-                        })
-                    }));
-                if (!(map.getLayers().getArray().length < 30)) {//If there are 30 layers already loaded, display them. Otherwise, just load the layers but do not display.
-                    map.removeLayer(map.getLayers().getArray()[0]);//remove the current top layer
-                    map.getLayers().getArray()[0].setZIndex(100);//set the next layer to be on top
-                    displayDates.splice(0,1);//remove the current date value
-                    $("#date").html(displayDates[0]);//set the date to be the next day, what is displayed by the layer
-                    await sleep(2000-Number($("input[name=speed]").val()));//sleep for the time specified by the slider bar
-                
+                if (year >=1989 || day %2 ==1){
+                    var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
+                    if (stop) return;//Catch to stop animation
+                    var monthStr = ""+month;//create the string for month, ensuring it is 2 digits
+                    if (month < 10) {
+                        monthStr = "0"+month;
+                    }
+                    var dayStr = ""+day;//string for the day, ensuring 2 digits
+                    if (day < 10) {
+                        dayStr = "0"+day;
+                    }
+                    var yearStr = ""+year;//String for year
+                    await displayDates.push("Date: "+yearStr+"-"+monthStr+"-"+dayStr);
+                        imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
+                        await map.addLayer(new ol.layer.Image({
+                            source: new ol.source.ImageStatic({
+                                url: imageURL,
+                                projection: projection,
+                                imageExtent: extent
+                            })
+                        }));
+                    if (!(map.getLayers().getArray().length < 30)) {//If there are 30 layers already loaded, display them. Otherwise, just load the layers but do not display.
+                        map.removeLayer(map.getLayers().getArray()[0]);//remove the current top layer
+                        map.getLayers().getArray()[0].setZIndex(100);//set the next layer to be on top
+                        displayDates.splice(0,1);//remove the current date value
+                        $("#date").html(displayDates[0]);//set the date to be the next day, what is displayed by the layer
+                        await sleep(2000-Number($("input[name=speed]").val()));//sleep for the time specified by the slider bar
+                    
+                    }
                 }
             }
         }
@@ -108,6 +112,13 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
 }
 
 $("document").ready(async function() {//When DOM is loaded
+    $('input:radio[name=ext-con]').val(['extent']);
+    $('input:radio[name=n-s]').val(['n']);
+    $('input:radio[name=dates]').val(['Daily']);
+    $('input[name=sYear]').val(1990);
+    $('input[name=eYear]').val(2018);
+    $('input[name=sDay]').val(1);
+    $('input[name=eDay]').val(28);
     $("#animate").click( function() {//When animation button is clicked
         stop = false;//Don't stop animation
         var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
