@@ -1,9 +1,8 @@
 //Information about the loading of images and not rendering them/storing 30 frames at a time can be seen in the README file.
 
 var stop = false; //Global variable to stop the animation
-   
+
 async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {//Main animation function
-    
     var displayDates = [];//Array for the dates to be displayed
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
@@ -11,11 +10,19 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
     var imageURL = '';//Variable to hold the url to fetch from the server
     if (norSouth == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
         var extent = [0,0,304,448];//Size of map
+        $("#map").css("width","304");
+        $("#map").css("height","448");
         var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
+        var fullZoom = 0.9;
+        imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
     }
     else {//Information for southern hemisphere
         var extent = [0,0,730,768];//Map size
+        $("#map").css("width","730");
+        $("#map").css("height","768");
         var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
+        var fullZoom = 1.7;
+        imageURL = "sLoad.jpg";
     }
     var projection = new ol.proj.Projection({//Map projection
         code: 'local_image',
@@ -28,11 +35,13 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
         view: new ol.View({
             projection: projection,
             center: ol.extent.getCenter(extent),//Start in the center of the image
-            zoom: 1.6,//Good start for zoom
+            zoom: fullZoom,//Good start for zoom,
+            minZoom: fullZoom,
         }),
-        controls: []//Empty controls for now
+        controls: [],//Empty controls for now
+        maxExtent: extent,
+        restrictedExtent: [100,100,200,200],
     });
-    imageURL = "blank.jpeg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
     map.addLayer(new ol.layer.Image({
         source: new ol.source.ImageStatic({
             url: imageURL,
@@ -40,6 +49,7 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
             imageExtent: extent
         })
     }));
+    map.getLayers().getArray()[0].setZIndex(1000);
     displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
     for (year = starting[0]; year <= ending[0]; year++) {//loop through all years
         var monthStart = 1;//default starting month
@@ -81,21 +91,22 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
                     }
                     var yearStr = ""+year;//String for year
                     await displayDates.push("Date: "+yearStr+"-"+monthStr+"-"+dayStr);
-                        imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
-                        await map.addLayer(new ol.layer.Image({
-                            source: new ol.source.ImageStatic({
-                                url: imageURL,
-                                projection: projection,
-                                imageExtent: extent
-                            })
-                        }));
-                    if (!(map.getLayers().getArray().length < 30)) {//If there are 30 layers already loaded, display them. Otherwise, just load the layers but do not display.
+                    imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
+                    await map.addLayer(new ol.layer.Image({
+                        source: new ol.source.ImageStatic({
+                            url: imageURL,
+                            projection: projection,
+                            imageExtent: extent
+                        })
+                    }));
+                    await sleep(10);
+                    if (map.getLayers().getArray().length >= 30) {//If there are 30 layers already loaded, display them. Otherwise, just load the layers but do not display.
+                        //await alert("Loaded layers");
                         map.removeLayer(map.getLayers().getArray()[0]);//remove the current top layer
                         map.getLayers().getArray()[0].setZIndex(100);//set the next layer to be on top
                         displayDates.splice(0,1);//remove the current date value
                         $("#date").html(displayDates[0]);//set the date to be the next day, what is displayed by the layer
                         await sleep(2000-Number($("input[name=speed]").val()));//sleep for the time specified by the slider bar
-                    
                     }
                 }
             }
@@ -133,6 +144,7 @@ $("document").ready(async function() {//When DOM is loaded
         stop = true;//stop the animation
         $( "#customize :input").prop( "disabled", false );//Reenable the form to allow the animation to be restarted
     });
+    
 });
 
 function sleep(ms) { //Sleep function for pauses between frames
