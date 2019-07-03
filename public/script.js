@@ -3,6 +3,29 @@
 var stop = false; //Global variable to stop the animation
 
 async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {//Main animation function
+    function openMap() {
+        
+        var view = map.getView();
+        var zoom = map.getView().getZoom();
+        var center = map.getView().getCenter();
+        var size = map.getSize();
+        var width = ol.extent.getWidth(extent);
+        var height = ol.extent.getHeight(extent);
+        if (size[0]/size[1] > width/height) {
+            view.fit([extent[0],(extent[1]+extent[3])/2,extent[2],(extent[1]+extent[3])/2], { constrainResolution: false });
+        } else {
+            view.fit([(extent[0]+extent[2])/2,extent[1],(extent[0]+extent[2])/2,extent[3]], { constrainResolution: false });
+        }
+        view.setZoom(zoom);
+            
+        
+    
+    }
+    $("#resetView").click( function() {
+        
+        var view = map.getView();
+        view.setZoom(fullZoom);
+    });
     var displayDates = [];//Array for the dates to be displayed
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
@@ -15,13 +38,14 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
         var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
         var fullZoom = 0.9;
         imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
+    
     }
     else {//Information for southern hemisphere
         var extent = [0,0,730,768];//Map size
-        $("#map").css("width","730");
-        $("#map").css("height","768");
+        $("#map").css("width","580");
+        $("#map").css("height","610");
         var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
-        var fullZoom = 1.7;
+        var fullZoom = 1.3;
         imageURL = "sLoad.jpg";
     }
     var projection = new ol.proj.Projection({//Map projection
@@ -42,6 +66,7 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
         maxExtent: extent,
         restrictedExtent: [100,100,200,200],
     });
+    //map.on('moveend', openMap);
     map.addLayer(new ol.layer.Image({
         source: new ol.source.ImageStatic({
             url: imageURL,

@@ -1,5 +1,4 @@
 var express = require("express");
-
 var server = express();
 var port = process.env.PORT || 3003;
 server.use(express.static('public'));

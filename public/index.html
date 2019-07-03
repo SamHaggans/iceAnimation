@@ -4,11 +4,16 @@
     <link rel="stylesheet" href="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/css/ol.css" type="text/css">
     <style>
       .map {
-        height: 1000px;
+        height: 500px;
         width: 40%;
         border-style: solid;
         border-color: green;
         border-width: 5px;
+        display:inline-block;
+      }
+      .config {
+        display:inline-block;
+        vertical-align: top;
       }
     </style>
     <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
@@ -19,6 +24,8 @@
   <body>
     <h2>Sea Ice Animation</h2>
     <h3 id = "date"></h3>
+    <div id="map" class="map"></div>
+    <div class = "config">
     <input type="radio" value="extent" name="ext-con">Extent
     <input type="radio" value="concentration" name="ext-con">Concentration
     <br>
@@ -82,7 +89,9 @@
     Slowest <input type="range" name="speed" min="0" max="1900"> Fastest
     <br>
     <button id = "stopAnimation" type="button">Stop Animation</button>
-    <div id="map" class="map"></div>
+    <button id = "resetView" type="button">Reset View</button>
+  </div>
+    
     
     
   </body>
