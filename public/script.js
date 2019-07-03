@@ -4,27 +4,31 @@ var stop = false; //Global variable to stop the animation
 
 async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {//Main animation function
     function openMap() {
-        
         var view = map.getView();
         var zoom = map.getView().getZoom();
         var center = map.getView().getCenter();
-        var size = map.getSize();
-        var width = ol.extent.getWidth(extent);
-        var height = ol.extent.getHeight(extent);
-        if (size[0]/size[1] > width/height) {
-            view.fit([extent[0],(extent[1]+extent[3])/2,extent[2],(extent[1]+extent[3])/2], { constrainResolution: false });
-        } else {
-            view.fit([(extent[0]+extent[2])/2,extent[1],(extent[0]+extent[2])/2,extent[3]], { constrainResolution: false });
+        var xVal = extent[2];
+        var yVal = extent[3];
+        if (center[0]<xVal/(2**zoom)){
+            view.setCenter([xVal/(2**zoom),center[1]]);
         }
-        view.setZoom(zoom);
-            
-        
-    
+        center = map.getView().getCenter();
+        if (xVal-center[0]<xVal/(2**zoom)){
+            view.setCenter([xVal-xVal/(2**zoom),center[1]]);
+        }
+        center = map.getView().getCenter();
+        if (center[1]<yVal/(2**zoom)){
+            view.setCenter([center[0],yVal/(2**zoom)]);
+        }
+        center = map.getView().getCenter();
+        if (yVal-center[1]<yVal/(2**zoom)){
+            view.setCenter([center[0],yVal-yVal/(2**zoom)]);
+        }
     }
     $("#resetView").click( function() {
-        
         var view = map.getView();
         view.setZoom(fullZoom);
+        view.setCenter(extent.getCenter());
     });
     var displayDates = [];//Array for the dates to be displayed
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
@@ -33,19 +37,18 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
     var imageURL = '';//Variable to hold the url to fetch from the server
     if (norSouth == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
         var extent = [0,0,304,448];//Size of map
-        $("#map").css("width","304");
-        $("#map").css("height","448");
+        $("#map").css("width","340");
+        $("#map").css("height","502");
         var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
-        var fullZoom = 0.9;
+        var fullZoom = 1;
         imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
-    
     }
     else {//Information for southern hemisphere
         var extent = [0,0,730,768];//Map size
-        $("#map").css("width","580");
-        $("#map").css("height","610");
+        $("#map").css("width","480");
+        $("#map").css("height","504");
         var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
-        var fullZoom = 1.3;
+        var fullZoom = 1;
         imageURL = "sLoad.jpg";
     }
     var projection = new ol.proj.Projection({//Map projection
@@ -66,7 +69,7 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
         maxExtent: extent,
         restrictedExtent: [100,100,200,200],
     });
-    //map.on('moveend', openMap);
+    map.on('moveend', openMap);
     map.addLayer(new ol.layer.Image({
         source: new ol.source.ImageStatic({
             url: imageURL,
