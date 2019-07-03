@@ -64,9 +64,7 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
             zoom: fullZoom,//Good start for zoom,
             minZoom: fullZoom,
         }),
-        controls: [],//Empty controls for now
-        maxExtent: extent,
-        restrictedExtent: [100,100,200,200],
+        controls: ol.control.PanZoom
     });
     map.on('moveend', openMap);
     map.addLayer(new ol.layer.Image({
