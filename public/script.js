@@ -28,7 +28,6 @@ async function animate(extCon1, norSouth, dates, monthLoop, starting, ending) {/
     $("#resetView").click( function() {
         var view = map.getView();
         view.setZoom(fullZoom);
-        view.setCenter(extent.getCenter());
     });
     var displayDates = [];//Array for the dates to be displayed
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
