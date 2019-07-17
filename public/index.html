@@ -19,6 +19,9 @@
         display:inline-block;
         vertical-align: top;
       }
+      .ol-control button{ 
+        background-image: url("arrowsButton.png");
+      }
     </style>
     <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v5.3.0/build/ol.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
@@ -33,10 +36,8 @@
     <input type="radio" value="extent" name="ext-con">Extent
     <input type="radio" value="concentration" name="ext-con">Concentration
     <br>
-    <form id = "customize">
-        <input type="radio" value="n" name="n-s">Arctic
-        <input type="radio" value="s" name="n-s">Antarctic
-        <br>
+    
+        
         <input type="radio" value="Daily" name="dates">Every Day
         <input type="radio" value="Monthly" name="dates">Every Month
         <input type="radio" value="SameMonth" name="dates">Same Month Through Years:  <select name="monthsLoop">
@@ -54,6 +55,10 @@
                                                                                         <option value="12">December</option>
                                                                                       </select> 
         <br>
+        <form id = "customize">
+            <input type="radio" value="n" name="n-s">Arctic
+            <input type="radio" value="s" name="n-s">Antarctic
+            <br>
          Starting Year (1979-2018): <input type="number" name="sYear" min="1979" max="2018"> Starting Month: <select name="sMonth">
                                                                                               <option value="1">January</option>
                                                                                               <option value="2">February</option>
@@ -69,6 +74,7 @@
                                                                                               <option value="12">December</option>
                                                                                             </select> 
            Starting Day (1-28): <input type="number" name="sDay" min="1" max="28">
+          </form>
           <br>
            Ending Year (1979-2018): <input type="number" name="eYear" min="1979" max="2018"> Ending Month: <select name="eMonth">
             <option value="1">January</option>
@@ -88,15 +94,13 @@
           <br>
           <button id = "animate" type="button">Animate</button>
           
-    </form>
+          
+    
+    <button id = "updateParams" type="button">Update Parameters</button>
     <br>Speed:<br>
     Slowest <input type="range" name="speed" min="0" max="1900"> Fastest
     <br>
     <button id = "stopAnimation" type="button">Stop Animation</button>
-    <button id = "resetView" type="button">Reset View</button>
   </div>
-    
-    
-    
   </body>
 </html>
