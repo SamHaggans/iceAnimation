@@ -1,5 +1,3 @@
-//Information about the loading of images and not rendering them/storing 30 frames at a time can be seen in the README file.
-
 var stop = false; //Global variable to stop the animation
 var pause = false;
 async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//Main animation function
@@ -8,34 +6,32 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
         monthVal = "monthly";
     }
 
-    function openMap() {
+    function restrictCenter() {//Function to ensure map does not go outside of bounds
         var view = map.getView();
         var zoom = map.getView().getZoom();
         var center = map.getView().getCenter();
-        var xVal = extent[2];
-        var yVal = extent[3];
-        if (center[0]<xVal/(2**zoom)){
+        var xVal = extent[2];//Max x extent
+        var yVal = extent[3];//Max y extent
+        if (center[0]<xVal/(2**zoom)){//prevents panning too far left
             view.setCenter([xVal/(2**zoom),center[1]]);
         }
         center = map.getView().getCenter();
-        if (xVal-center[0]<xVal/(2**zoom)){
+        if (xVal-center[0]<xVal/(2**zoom)){//prevents panning too far right
             view.setCenter([xVal-xVal/(2**zoom),center[1]]);
         }
         center = map.getView().getCenter();
-        if (center[1]<yVal/(2**zoom)){
+        if (center[1]<yVal/(2**zoom)){//prevents panning too far up
             view.setCenter([center[0],yVal/(2**zoom)]);
         }
         center = map.getView().getCenter();
-        if (yVal-center[1]<yVal/(2**zoom)){
+        if (yVal-center[1]<yVal/(2**zoom)){//prevents panning too far down
             view.setCenter([center[0],yVal-yVal/(2**zoom)]);
         }
     }
+
     $("#updateParams").click( async function() {
-        $( "#updateParams:input").prop( "disabled", true );//Disable form entering while animation is running
-        
-        pause = true;
-        
-        
+        $( "#updateParams:input").prop( "disabled", true );//Don't allow user to click to update multiple times too fast
+        pause = true;//pause the frames
         extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
         dates = $('input[name=dates]:checked').val();//Get value for the looping style
         monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
@@ -59,23 +55,23 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
         
         var i = 0;
         var layers = await map.getLayers().getArray();
+        await layers.forEach((layer) => map.removeLayer(layer));//remove all layers, for some reason it needed to be run multiple times
         await layers.forEach((layer) => map.removeLayer(layer));
         await layers.forEach((layer) => map.removeLayer(layer));
         await layers.forEach((layer) => map.removeLayer(layer));
         await layers.forEach((layer) => map.removeLayer(layer));
         await layers.forEach((layer) => map.removeLayer(layer));
-        await layers.forEach((layer) => map.removeLayer(layer));
-        await map.addLayer(new ol.layer.Image({
+        await map.addLayer(new ol.layer.Image({//add loading layer
             source: new ol.source.ImageStatic({
                 url: imageURL,
                 projection: projection,
                 imageExtent: extent
             })
         }));
-        await map.getLayers().getArray()[0].setZIndex(10000);//add the new layer
-        await sleep(1000);
-        
-        while (map.getLayers().getArray().length < 29) {
+
+        await map.getLayers().getArray()[0].setZIndex(10000);//add the new layer to top
+        await sleep(1000);//sleep so that loading screen appears for long enough to not be confusing
+        while (map.getLayers().getArray().length < 29) {//until there are 29 layers, load in layers
             imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_"+monthVal+"_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+displayDates[i].split(" ")[1];
             await map.addLayer(new ol.layer.Image({
                 source: new ol.source.ImageStatic({
@@ -87,12 +83,14 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
             map.getLayers().getArray()[0].setZIndex(100);//add the new layer  
             i++;
         }
-        pause = false;
-        $( "#updateParams:input").prop( "disabled", false );//Disable form entering while animation is running
-        map.removeLayer(map.getLayers().getArray()[0]);
-        map.getLayers().getArray()[0].setZIndex(100);//add the new layer
+
+        pause = false;//unpause
+        $( "#updateParams:input").prop( "disabled", false );//Allow updating again
+        map.removeLayer(map.getLayers().getArray()[0]);//Disable the loading layer
+        map.getLayers().getArray()[0].setZIndex(100);//Set next layer to be on top
     });
-    var displayDates = [];
+
+    var displayDates = [];//dates to be displayed
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
     var monthDays = [31,28,31,30,31,30,31,31,30,31,30,31];//Days in each month
@@ -133,16 +131,16 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
         controls: ol.control.PanZoom
         
     });
-    map.addControl(zoomToExtentControl);
-    map.on('moveend', openMap);
-    map.addLayer(new ol.layer.Image({
+    map.addControl(zoomToExtentControl);//Add control to reset view
+    map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
+    map.addLayer(new ol.layer.Image({//add a loading layer for the first frame
         source: new ol.source.ImageStatic({
             url: imageURL,
             projection: projection,
             imageExtent: extent
         })
     }));
-    map.getLayers().getArray()[0].setZIndex(1000);
+    map.getLayers().getArray()[0].setZIndex(1000);//loading on top
     displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
     for (year = starting[0]; year <= ending[0]; year++) {//loop through all years
         var monthStart = 1;//default starting month
