@@ -1,6 +1,11 @@
 var stop = false; //Global variable to stop the animation
 var pause = false;
 async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//Main animation function
+    $("#pauseAnimation").html("Pause Animation");
+    var displayDates = [];
+    var currentYear = 0;
+    var currentDay = 0;
+    var currentMonth = 0;
     var monthVal = "daily";
     if (dates == "Monthly" || dates == "SameMonth") {
         monthVal = "monthly";
@@ -71,26 +76,18 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
 
         await map.getLayers().getArray()[0].setZIndex(10000);//add the new layer to top
         await sleep(1000);//sleep so that loading screen appears for long enough to not be confusing
-        while (map.getLayers().getArray().length < 29) {//until there are 29 layers, load in layers
-            imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_"+monthVal+"_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+displayDates[i].split(" ")[1];
-            await map.addLayer(new ol.layer.Image({
-                source: new ol.source.ImageStatic({
-                    url: imageURL,
-                    projection: projection,
-                    imageExtent: extent
-                })
-            }));    
-            map.getLayers().getArray()[0].setZIndex(100);//add the new layer  
-            i++;
-        }
-
+        currentYear = Number(displayDates[0].split(" ")[1].split("-")[0]);
+        currentMonth = Number(displayDates[0].split(" ")[1].split("-")[1]);
+        currentDay = Number(displayDates[0].split(" ")[1].split("-")[2]);
+        displayDates = [];//dates to be displayed
+        await getFrames(true);
         pause = false;//unpause
         $( "#updateParams:input").prop( "disabled", false );//Allow updating again
         map.removeLayer(map.getLayers().getArray()[0]);//Disable the loading layer
         map.getLayers().getArray()[0].setZIndex(100);//Set next layer to be on top
     });
 
-    var displayDates = [];//dates to be displayed
+    
     $( "#customize :input").prop( "disabled", true );//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
     var monthDays = [31,28,31,30,31,30,31,31,30,31,30,31];//Days in each month
@@ -143,78 +140,117 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
     displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
     $(".ol-zoom-extent").find("button").html("");
-    for (year = starting[0]; year <= ending[0]; year++) {//loop through all years
-        var monthStart = 1;//default starting month
-        var monthEnd = 12;//default ending month
-        if (year == starting[0]) {//If on the starting year, start on the specified month. Otherwise it just starts at 1 (January)
-            monthStart = starting[1];
+    await getFrames(false);
+    if (!stop){
+        while (map.getLayers().getArray().length>1){//While there are unrendered layers remaining, loop through them
+            displayDates.splice(0,1);//remove the date
+            $("#date").html(displayDates[0]);//update the date to current
+            map.removeLayer(map.getLayers().getArray()[0]);//remove current layer
+            map.getLayers().getArray()[0].setZIndex(100);//add the new layer
+            await sleep(2000-Number($("input[name=speed]").val()));//sleep for the correct time
         }
-        if (year == ending[0]) {//If on the last year, end on the specified month. Otherwise it ends on 12 (December)
-            monthEnd = ending[1];
+    }
+    $( "#customize :input").prop( "disabled", false );//reenable the form when everything is done
+    async function getFrames(onlyLoad){
+        if (onlyLoad){
+            starting = [currentYear, currentMonth, currentDay];
         }
-        if (dates == "SameMonth") {//If it is looping the same month, just loop through that one month
-            monthStart = monthLoop;
-            monthEnd = monthLoop;
-        }
-        for (month = monthStart; month <= monthEnd; month++) {//Loop months
-            var dayStart = 1;//default starting day
-            var dayEnd = monthDays[month-1];//default ending day, month -1 because index starts at 0
-            if (month == starting[1] && year == starting[0]) {//if on first month and year, start at the specified date
-                dayStart = starting[2];
+        var numFrames = 0;
+        for (year = starting[0]; year <= ending[0]; year++) {//loop through all years
+            var monthStart = 1;//default starting month
+            var monthEnd = 12;//default ending month
+            if (year == starting[0]) {//If on the starting year, start on the specified month. Otherwise it just starts at 1 (January)
+                monthStart = starting[1];
             }
-            if (month == ending[1] && year == ending[0]) {//if on the last month and year, end at the last date
-                dayEnd = ending[2];
+            if (year == ending[0]) {//If on the last year, end on the specified month. Otherwise it ends on 12 (December)
+                monthEnd = ending[1];
             }
-            if (dates == "Monthly" || dates == "SameMonth") {//If it is looping only months or the same month, just use the first day of the month
-                dayEnd = 1;
-                dayStart = 1;
+            if (dates == "SameMonth") {//If it is looping the same month, just loop through that one month
+                monthStart = monthLoop;
+                monthEnd = monthLoop;
             }
-            for (day = dayStart; day <= dayEnd; day++) {//loop days
-                if (year >=1989 || day %2 ==1){
-                    
-                    if (stop) return;//Catch to stop animation
-                    while (pause) {
-                        await sleep (100);
+            for (month = monthStart; month <= monthEnd; month++) {//Loop months
+                var dayStart = 1;//default starting day
+                var dayEnd = monthDays[month-1];//default ending day, month -1 because index starts at 0
+                if (month == starting[1] && year == starting[0]) {//if on first month and year, start at the specified date
+                    dayStart = starting[2];
+                }
+                if (month == ending[1] && year == ending[0]) {//if on the last month and year, end at the last date
+                    dayEnd = ending[2];
+                }
+                if (dates == "Monthly" || dates == "SameMonth") {//If it is looping only months or the same month, just use the first day of the month
+                    dayEnd = 1;
+                    dayStart = 1;
+                }
+                if (onlyLoad){
+                    for (day = dayStart; day <= dayEnd; day++) {//loop days
+                        if (numFrames < 31){
+                            if (year >=1989 || day %2 ==1){
+                                if (stop) return;//Catch to stop animation
+                                var monthStr = ""+month;//create the string for month, ensuring it is 2 digits
+                                if (month < 10) {
+                                    monthStr = "0"+month;
+                                }
+                                var dayStr = ""+day;//string for the day, ensuring 2 digits
+                                if (day < 10) {
+                                    dayStr = "0"+day;
+                                }
+                                var yearStr = ""+year;//String for year
+                                await displayDates.push("Date: "+yearStr+"-"+monthStr+"-"+dayStr);
+                                imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
+                                await map.addLayer(new ol.layer.Image({
+                                    source: new ol.source.ImageStatic({
+                                        url: imageURL,
+                                        projection: projection,
+                                        imageExtent: extent
+                                    })
+                                }));
+                                await sleep(20);
+                            }
+                            numFrames++;
+                        }
                     }
-                    var monthStr = ""+month;//create the string for month, ensuring it is 2 digits
-                    if (month < 10) {
-                        monthStr = "0"+month;
-                    }
-                    var dayStr = ""+day;//string for the day, ensuring 2 digits
-                    if (day < 10) {
-                        dayStr = "0"+day;
-                    }
-                    var yearStr = ""+year;//String for year
-                    await displayDates.push("Date: "+yearStr+"-"+monthStr+"-"+dayStr);
-                    imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
-                    await map.addLayer(new ol.layer.Image({
-                        source: new ol.source.ImageStatic({
-                            url: imageURL,
-                            projection: projection,
-                            imageExtent: extent
-                        })
-                    }));
-                    await sleep(20);
-                    if (map.getLayers().getArray().length >= 30) {//If there are 30 layers already loaded, display them. Otherwise, just load the layers but do not display.
-                        //await alert("Loaded layers");
-                        map.removeLayer(map.getLayers().getArray()[0]);//remove the current top layer
-                        map.getLayers().getArray()[0].setZIndex(100);//set the next layer to be on top
-                        displayDates.splice(0,1);//remove the current date value
-                        $("#date").html(displayDates[0]);//set the date to be the next day, what is displayed by the layer
-                        await sleep(2000-Number($("input[name=speed]").val()));//sleep for the time specified by the slider bar
+                }
+                else{
+                    for (day = dayStart; day <= dayEnd; day++) {//loop days\
+                        if (year >=1989 || day %2 ==1){
+                            if (stop) return;
+                            while (pause) {
+                                await sleep (100);
+                            }
+                            var monthStr = ""+month;//create the string for month, ensuring it is 2 digits
+                            if (month < 10) {
+                                monthStr = "0"+month;
+                            }
+                            var dayStr = ""+day;//string for the day, ensuring 2 digits
+                            if (day < 10) {
+                                dayStr = "0"+day;
+                            }
+                            var yearStr = ""+year;//String for year
+                            await displayDates.push("Date: "+yearStr+"-"+monthStr+"-"+dayStr);
+                            imageURL = "https://nsidc.org/api/mapservices/NSIDC/wms?service=WMS&version=1.1.0&request=GetMap&layers=NSIDC:g02135_"+extCon+"_raster_daily_"+norSouth+"&styles=NSIDC:g02135_"+extCon+"_raster_basemap&bbox="+locationVal+"&format=image/png&TIME="+yearStr+"-"+monthStr+"-"+dayStr;
+                            await map.addLayer(new ol.layer.Image({
+                                source: new ol.source.ImageStatic({
+                                    url: imageURL,
+                                    projection: projection,
+                                    imageExtent: extent
+                                })
+                            }));
+                            await sleep(20);
+                            if (map.getLayers().getArray().length >= 30) {//If there are 30 layers already loaded, display them. Otherwise, just load the layers but do not display.
+                                //await alert("Loaded layers");
+                                map.removeLayer(map.getLayers().getArray()[0]);//remove the current top layer
+                                map.getLayers().getArray()[0].setZIndex(100);//set the next layer to be on top
+                                displayDates.splice(0,1);//remove the current date value
+                                $("#date").html(displayDates[0]);//set the date to be the next day, what is displayed by the layer
+                                await sleep(2000-Number($("input[name=speed]").val()));//sleep for the time specified by the slider bar
+                            }
+                        }
                     }
                 }
             }
         }
     }
-    while (map.getLayers().getArray().length>1){//While there are unrendered layers remaining, loop through them
-        displayDates.splice(0,1);//remove the date
-        $("#date").html(displayDates[0]);//update the date to current
-        map.removeLayer(map.getLayers().getArray()[0]);//remove current layer
-        map.getLayers().getArray()[0].setZIndex(100);//add the new layer
-        await sleep(2000-Number($("input[name=speed]").val()));//sleep for the correct time
-    }
-    $( "#customize :input").prop( "disabled", false );//reenable the form when everything is done
 }
 
 $("document").ready(async function() {//When DOM is loaded
@@ -242,6 +278,7 @@ $("document").ready(async function() {//When DOM is loaded
     $("#pauseAnimation").click( function() {//Stop button
         if (pause){
             pause = false;
+            $("#pauseAnimation").html("Pause Animation");
         }
         else{
             pause = true;
@@ -254,4 +291,21 @@ $("document").ready(async function() {//When DOM is loaded
 
 function sleep(ms) { //Sleep function for pauses between frames
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function nextDay(day,month,year){
+    if (day< monthDays[month-1]){
+        day++;
+    }
+    else if (day == monthDays[month-1]){
+        if (month< 12) {
+            month++;
+            day = 1;
+        }
+        else {
+            month = 1;
+            year++;
+            day = 1;
+        } 
+    }
 }
