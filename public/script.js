@@ -142,6 +142,7 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
     }));
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
     displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
+    $(".ol-zoom-extent").find("button").html("");
     for (year = starting[0]; year <= ending[0]; year++) {//loop through all years
         var monthStart = 1;//default starting month
         var monthEnd = 12;//default ending month
@@ -237,6 +238,15 @@ $("document").ready(async function() {//When DOM is loaded
     $("#stopAnimation").click( function() {//Stop button
         stop = true;//stop the animation
         $( "#customize :input").prop( "disabled", false );//Reenable the form to allow the animation to be restarted
+    });
+    $("#pauseAnimation").click( function() {//Stop button
+        if (pause){
+            pause = false;
+        }
+        else{
+            pause = true;
+            $("#pauseAnimation").html("Resume Animation");
+        }
     });
     
     
