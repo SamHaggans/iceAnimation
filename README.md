@@ -1,6 +1,7 @@
 # Sea Ice Animation Project
-This site uses OpenLayers as the API to load images from NSIDC's Geoserver of Sea Ice data. 
+This site uses OpenLayers to load images from NSIDC's Geoserver of Sea Ice data. 
 The site currently uses an expressjs server to load the page, but otherwise it is just the data in /public.
+The main logic behind the project is in /public/script.js, and the page with the map is /public/index.html.
 
 # Information about loading layers
 Because OpenLayers is not designed to be actively loading layers frequently, which an animation needs, zooming or panning 
