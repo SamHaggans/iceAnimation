@@ -35,27 +35,78 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
         var fullZoom = 1;
         imageURL = "sLoad.jpg";
     }
-    var projection = new ol.proj.Projection({//Map projection
-        code: 'local_image',
-        units: 'pixels',
-        extent: extent
-    });
+
+    projection = getProjection(extent);
+    map = getMap(projection,extent,fullZoom);
+
     var zoomToExtentControl = new ol.control.ZoomToExtent({
         extent: extent,
         size: [10, 10]
     });
-    var map = new ol.Map({//New map
-        target: 'map',//Div in which the map is displayed
-        view: new ol.View({
-            projection: projection,
-            center: ol.extent.getCenter(extent),//Start in the center of the image
-            zoom: fullZoom,//Good start for zoom,
-            minZoom: fullZoom,
-            extent: extent
-        }),
-        controls: ol.control.PanZoom
 
+    map.addControl(zoomToExtentControl);//Add control to reset view
+    
+    // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
+    map.addLayer(new ol.layer.Image({//add a loading layer for the first frame
+        source: new ol.source.ImageStatic({
+            url: imageURL,
+            projection: projection,
+            imageExtent: extent
+        })
+    }));
+    map.getLayers().getArray()[0].setZIndex(1000);//loading on top
+    displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
+    $(".ol-zoom-extent").find("button").html("");
+    await getFrames(false);
+    if (!stop) {
+        await nextLoop(map, displayDates);
+    }
+    $("#customize :input").prop("disabled", false);//reenable the form when everything is done
+    async function getFrames(onlyLoad) {
+        if (onlyLoad) {
+            starting = [currentYear, currentMonth, currentDay];
+        }
+        await loadFrames(map, extent, projection, displayDates, onlyLoad, starting, ending, locationVal);
+    }
+}
+
+function main() {
+    $('input:radio[name=ext-con]').val(['extent']);
+    $('input:radio[name=n-s]').val(['n']);
+    $('input:radio[name=dates]').val(['Daily']);
+    $('input[name=sYear]').val(1990);
+    $('input[name=eYear]').val(2018);
+    $('input[name=sDay]').val(1);
+    $('input[name=eDay]').val(28);
+    
+    $("#animate").click(function () {//When animation button is clicked
+        console.log("here");
+        stop = false;//Don't stop animation
+        var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
+        var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
+        var dates = $('input[name=dates]:checked').val();//Get value for the looping style
+        var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
+        var starting = [Number($('input[name=sYear]').val()), Number($('select[name=sMonth]').val()), Number($('input[name=sDay]').val())];//year, month, day starting values
+        var ending = [Number($('input[name=eYear]').val()), Number($('select[name=eMonth]').val()), Number($('input[name=eDay]').val())]//year, month, day ending values
+        animate(extCon, norSouth, dates, monthLoop, starting, ending);//animate
     });
+
+    $("#stopAnimation").click(function () {//Stop button
+        stop = true;//stop the animation
+        $("#customize :input").prop("disabled", false);//Reenable the form to allow the animation to be restarted
+    });
+
+    $("#pauseAnimation").click(function () {//Stop button
+        if (pause) {
+            pause = false;
+            $("#pauseAnimation").html("Pause Animation");
+        }
+        else {
+            pause = true;
+            $("#pauseAnimation").html("Resume Animation");
+        }
+    });
+
     $("#updateParams").click(async function () {
         var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
         $("#updateParams:input").prop("disabled", true);//Don't allow user to click to update multiple times too fast
@@ -82,13 +133,7 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
         }
     
         var i = 0;
-        var layers = await map.getLayers().getArray();
-        await layers.forEach((layer) => map.removeLayer(layer));//remove all layers, for some reason it needed to be run multiple times
-        await layers.forEach((layer) => map.removeLayer(layer));
-        await layers.forEach((layer) => map.removeLayer(layer));
-        await layers.forEach((layer) => map.removeLayer(layer));
-        await layers.forEach((layer) => map.removeLayer(layer));
-        await layers.forEach((layer) => map.removeLayer(layer));
+        removeLayers(map);
         await map.addLayer(new ol.layer.Image({//add loading layer
             source: new ol.source.ImageStatic({
                 url: imageURL,
@@ -109,71 +154,7 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
         map.removeLayer(map.getLayers().getArray()[0]);//Disable the loading layer
         map.getLayers().getArray()[0].setZIndex(100);//Set next layer to be on top
     });
-    map.addControl(zoomToExtentControl);//Add control to reset view
-    // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
-    map.addLayer(new ol.layer.Image({//add a loading layer for the first frame
-        source: new ol.source.ImageStatic({
-            url: imageURL,
-            projection: projection,
-            imageExtent: extent
-        })
-    }));
-    map.getLayers().getArray()[0].setZIndex(1000);//loading on top
-    displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
-    $(".ol-zoom-extent").find("button").html("");
-    await getFrames(false);
-    if (!stop) {
-        while (map.getLayers().getArray().length > 1) {//While there are unrendered layers remaining, loop through them
-            displayDates.splice(0, 1);//remove the date
-            $("#date").html(displayDates[0]);//update the date to current
-            map.removeLayer(map.getLayers().getArray()[0]);//remove current layer
-            map.getLayers().getArray()[0].setZIndex(100);//add the new layer
-            await sleep(2000 - Number($("input[name=speed]").val()));//sleep for the correct time
-        }
-    }
-    $("#customize :input").prop("disabled", false);//reenable the form when everything is done
-    async function getFrames(onlyLoad) {
-        if (onlyLoad) {
-            starting = [currentYear, currentMonth, currentDay];
-        }
-        await loadFrames(map, extent, projection, displayDates, onlyLoad, starting, ending, locationVal);
-        
-    }
 }
-
-$("document").ready(async function () {//When DOM is loaded
-    $('input:radio[name=ext-con]').val(['extent']);
-    $('input:radio[name=n-s]').val(['n']);
-    $('input:radio[name=dates]').val(['Daily']);
-    $('input[name=sYear]').val(1990);
-    $('input[name=eYear]').val(2018);
-    $('input[name=sDay]').val(1);
-    $('input[name=eDay]').val(28);
-    $("#animate").click(function () {//When animation button is clicked
-        stop = false;//Don't stop animation
-        var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
-        var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
-        var dates = $('input[name=dates]:checked').val();//Get value for the looping style
-        var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-        var starting = [Number($('input[name=sYear]').val()), Number($('select[name=sMonth]').val()), Number($('input[name=sDay]').val())];//year, month, day starting values
-        var ending = [Number($('input[name=eYear]').val()), Number($('select[name=eMonth]').val()), Number($('input[name=eDay]').val())]//year, month, day ending values
-        animate(extCon, norSouth, dates, monthLoop, starting, ending);//animate
-    });
-    $("#stopAnimation").click(function () {//Stop button
-        stop = true;//stop the animation
-        $("#customize :input").prop("disabled", false);//Reenable the form to allow the animation to be restarted
-    });
-    $("#pauseAnimation").click(function () {//Stop button
-        if (pause) {
-            pause = false;
-            $("#pauseAnimation").html("Pause Animation");
-        }
-        else {
-            pause = true;
-            $("#pauseAnimation").html("Resume Animation");
-        }
-    });
-});
 
 function sleep(ms) { //Sleep function for pauses between frames
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -277,3 +258,51 @@ async function loadFrames(map, extent, projection, displayDates, onlyLoad, start
         }
     }
 }
+
+function getProjection(extent) {
+    var projection = new ol.proj.Projection({//Map projection
+        code: 'local_image',
+        units: 'pixels',
+        extent: extent
+    });
+    return projection;
+}
+
+function getMap (projection, extent, fullZoom) {
+    var map = new ol.Map({//New map
+        target: 'map',//Div in which the map is displayed
+        view: new ol.View({
+            projection: projection,
+            center: ol.extent.getCenter(extent),//Start in the center of the image
+            zoom: fullZoom,//Good start for zoom,
+            minZoom: fullZoom,
+            extent: extent
+        }),
+        controls: ol.control.PanZoom
+
+    });
+    return map;
+}
+
+async function removeLayers (map) {
+    var layers = await map.getLayers().getArray();
+    await layers.forEach((layer) => map.removeLayer(layer));//remove all layers, for some reason it needed to be run multiple times
+    await layers.forEach((layer) => map.removeLayer(layer));
+    await layers.forEach((layer) => map.removeLayer(layer));
+    await layers.forEach((layer) => map.removeLayer(layer));
+    await layers.forEach((layer) => map.removeLayer(layer));
+    await layers.forEach((layer) => map.removeLayer(layer));
+}
+
+async function nextLoop (map, displayDates) {
+    while (map.getLayers().getArray().length > 1) {//While there are unrendered layers remaining, loop through them
+        displayDates.splice(0, 1);//remove the date
+        $("#date").html(displayDates[0]);//update the date to current
+        map.removeLayer(map.getLayers().getArray()[0]);//remove current layer
+        map.getLayers().getArray()[0].setZIndex(100);//add the new layer
+        await sleep(2000 - Number($("input[name=speed]").val()));//sleep for the correct time
+    }
+}
+$("document").ready(function() {
+    main();
+});
