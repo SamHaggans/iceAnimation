@@ -86,8 +86,8 @@ function main() {
         var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
         var dates = $('input[name=dates]:checked').val();//Get value for the looping style
         var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-        var starting = [Number($('input[name=sYear]').val()), Number($('select[name=sMonth]').val()), Number($('input[name=sDay]').val())];//year, month, day starting values
-        var ending = [Number($('input[name=eYear]').val()), Number($('select[name=eMonth]').val()), Number($('input[name=eDay]').val())]//year, month, day ending values
+        var starting = [parseInt($('input[name=sYear]').val()), parseInt($('select[name=sMonth]').val()), parseInt($('input[name=sDay]').val())];//year, month, day starting values
+        var ending = [parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val())]//year, month, day ending values
         animate(extCon, norSouth, dates, monthLoop, starting, ending);//animate
     });
 
@@ -114,7 +114,7 @@ function main() {
         extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
         dates = $('input[name=dates]:checked').val();//Get value for the looping style
         monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-        ending = [Number($('input[name=eYear]').val()), Number($('select[name=eMonth]').val()), Number($('input[name=eDay]').val())]//year, month, day ending values
+        ending = [parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val())]//year, month, day ending values
         if (norSouth == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
             var extent = [-76, -112, 228, 336];//Size of map
             $("#map").css("width", "340");
@@ -144,9 +144,9 @@ function main() {
     
         await map.getLayers().getArray()[0].setZIndex(10000);//add the new layer to top
         await sleep(1000);//sleep so that loading screen appears for long enough to not be confusing
-        currentYear = Number(displayDates[0].split(" ")[1].split("-")[0]);
-        currentMonth = Number(displayDates[0].split(" ")[1].split("-")[1]);
-        currentDay = Number(displayDates[0].split(" ")[1].split("-")[2]);
+        currentYear = parseInt(displayDates[0].split(" ")[1].split("-")[0]);
+        currentMonth = parseInt(displayDates[0].split(" ")[1].split("-")[1]);
+        currentDay = parseInt(displayDates[0].split(" ")[1].split("-")[2]);
         displayDates = [];//dates to be displayed
         await getFrames(true);
         pause = false;//unpause
@@ -230,7 +230,7 @@ async function loadFrame(map, extent, projection, year, month, day, displayDates
                     map.getLayers().getArray()[0].setZIndex(100);//set the next layer to be on top
                     displayDates.splice(0, 1);//remove the current date value
                     $("#date").html(displayDates[0]);//set the date to be the next day, what is displayed by the layer
-                    await sleep(2000 - Number($("input[name=speed]").val()));//sleep for the time specified by the slider bar
+                    await sleep(2000 - parseInt($("input[name=speed]").val()));//sleep for the time specified by the slider bar
                 }
             }
         }
@@ -300,7 +300,7 @@ async function nextLoop (map, displayDates) {
         $("#date").html(displayDates[0]);//update the date to current
         map.removeLayer(map.getLayers().getArray()[0]);//remove current layer
         map.getLayers().getArray()[0].setZIndex(100);//add the new layer
-        await sleep(2000 - Number($("input[name=speed]").val()));//sleep for the correct time
+        await sleep(2000 - parseInt($("input[name=speed]").val()));//sleep for the correct time
     }
 }
 $("document").ready(function() {
