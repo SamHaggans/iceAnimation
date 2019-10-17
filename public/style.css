@@ -1,0 +1,21 @@
+.map {
+    height: 500px;
+    width: 40%;
+    border-style: solid;
+    border-color: green;
+    border-width: 5px;
+    display:inline-block;
+    text-align:center;
+    vertical-align:middle;
+    line-height: 500px;
+    font-size:30px;
+}
+
+.config {
+    display:inline-block;
+    vertical-align: top;
+}
+
+.ol-zoom-extent button{ 
+    background-image: url("extentButton.png");
+}
