@@ -1,76 +1,10 @@
 var stop = false; //Global variable to stop the animation
 var pause = false;
 var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];//Days in each month
-
-async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//Main animation function
-    $("#pauseAnimation").html("Pause Animation");
-    
-    var displayDates = [];
-    var currentYear = 0;
-    var currentDay = 0;
-    var currentMonth = 0;
-    var monthVal = "daily";
-
-    if (dates == "Monthly" || dates == "SameMonth") {
-        monthVal = "monthly";
-    }
-
-    $("#customize :input").prop("disabled", true);//Disable form entering while animation is running
-    $("#map").html("");//Empty map when a new animation occurs
-    var imageURL = '';//Variable to hold the url to fetch from the server
-    if (norSouth == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
-        var extent = [300, 300, 301, 301.476];//Map size
-        //var extent = [0,0,0,0];
-        $("#map").css("width", "340");
-        $("#map").css("height", "502");
-        var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
-        var fullZoom = 1;
-        imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
-    }
-    else {//Information for southern hemisphere
-        var extent = [303, 302, 304, 303];//Map size
-        $("#map").css("width", "480");
-        $("#map").css("height", "504");
-        var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
-        var fullZoom = 1;
-        imageURL = "sLoad.jpg";
-    }
-
-    projection = getProjection(extent);
-    map = getMap(projection,extent,fullZoom);
-
-    var zoomToExtentControl = new ol.control.ZoomToExtent({
-        extent: extent,
-        size: [10, 10]
-    });
-
-    map.addControl(zoomToExtentControl);//Add control to reset view
-    
-    // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
-    map.addLayer(new ol.layer.Image({//add a loading layer for the first frame
-        source: new ol.source.ImageStatic({
-            url: imageURL,
-            projection: projection,
-            imageExtent: extent
-        })
-    }));
-    map.getLayers().getArray()[0].setZIndex(1000);//loading on top
-    displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
-    $(".ol-zoom-extent").find("button").html("");
-    await getFrames(false);
-    if (!stop) {
-        await nextLoop(map, displayDates);
-    }
-    $("#customize :input").prop("disabled", false);//reenable the form when everything is done
-    async function getFrames(onlyLoad) {
-        if (onlyLoad) {
-            starting = [currentYear, currentMonth, currentDay];
-        }
-        await loadFrames(map, extent, projection, displayDates, onlyLoad, starting, ending, locationVal);
-    }
-}
+var displayDates = [];
 
 function main() {
+    //Set default settings into the selectors
     $('input:radio[name=ext-con]').val(['extent']);
     $('input:radio[name=n-s]').val(['n']);
     $('input:radio[name=dates]').val(['Daily']);
@@ -79,15 +13,9 @@ function main() {
     $('input[name=sDay]').val(1);
     $('input[name=eDay]').val(28);
     
-    $("#animate").click(function () {//When animation button is clicked
-        console.log("here");
+    $("#animate").click(function () {//When animation button is clicked 
         stop = false;//Don't stop animation
-        var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
-        var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
-        var dates = $('input[name=dates]:checked').val();//Get value for the looping style
-        var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-        var starting = [parseInt($('input[name=sYear]').val()), parseInt($('select[name=sMonth]').val()), parseInt($('input[name=sDay]').val())];//year, month, day starting values
-        var ending = [parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val())]//year, month, day ending values
+        var [extCon, norSouth, dates, monthLoop, starting, ending] = getParams();
         animate(extCon, norSouth, dates, monthLoop, starting, ending);//animate
     });
 
@@ -108,31 +36,11 @@ function main() {
     });
 
     $("#updateParams").click(async function () {
-        var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
         $("#updateParams:input").prop("disabled", true);//Don't allow user to click to update multiple times too fast
         pause = true;//pause the frames
-        extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
-        dates = $('input[name=dates]:checked').val();//Get value for the looping style
-        monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-        ending = [parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val())]//year, month, day ending values
-        if (norSouth == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
-            var extent = [-76, -112, 228, 336];//Size of map
-            $("#map").css("width", "340");
-            $("#map").css("height", "502");
-            var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
-            var fullZoom = 1;
-            imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
-        }
-        else {//Information for southern hemisphere
-            var extent = [-183, -192, 547, 576];//Map size
-            $("#map").css("width", "480");
-            $("#map").css("height", "504");
-            var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
-            var fullZoom = 1;
-            imageURL = "sLoad.jpg";
-        }
-    
-        var i = 0;
+        var [extCon, norSouth, dates, monthLoop, starting, ending] = getParams();
+        var [extent, locationVal, fullZoom, imageURL] = getLocationParams(norSouth);
+
         removeLayers(map);
         await map.addLayer(new ol.layer.Image({//add loading layer
             source: new ol.source.ImageStatic({
@@ -153,7 +61,70 @@ function main() {
         $("#updateParams:input").prop("disabled", false);//Allow updating again
         map.removeLayer(map.getLayers().getArray()[0]);//Disable the loading layer
         map.getLayers().getArray()[0].setZIndex(100);//Set next layer to be on top
+        async function getFrames(onlyLoad) {
+            if (onlyLoad) {
+                starting = [currentYear, currentMonth, currentDay];
+            }
+            await loadFrames(map, extent, projection, displayDates, onlyLoad, starting, ending, locationVal);
+        }
+        
     });
+}
+
+async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//Main animation function
+    $("#pauseAnimation").html("Pause Animation");
+    
+    displayDates = [];
+    var currentYear = 0;
+    var currentDay = 0;
+    var currentMonth = 0;
+    var monthVal = "daily";
+
+    if (dates == "Monthly" || dates == "SameMonth") {
+        monthVal = "monthly";
+    }
+
+    $("#customize :input").prop("disabled", true);//Disable form entering while animation is running
+    $("#map").html("");//Empty map when a new animation occurs
+    var imageURL = '';//Variable to hold the url to fetch from the server
+    var [extent, locationVal, fullZoom, imageURL] = getLocationParams(norSouth);
+
+    projection = getProjection(extent);
+    map = getMap(projection,extent,fullZoom);
+    removeLayers(map);
+    var zoomToExtentControl = new ol.control.ZoomToExtent({
+        extent: extent,
+        size: [10, 10]
+    });
+
+    map.addControl(zoomToExtentControl);//Add control to reset view
+    // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
+    map.addLayer(new ol.layer.Image({//add a loading layer for the first frame
+        source: new ol.source.ImageStatic({
+            url: imageURL,
+            projection: projection,
+            imageExtent: extent
+        })
+    }));
+    map.getLayers().getArray()[0].setZIndex(1000);//loading on top
+    displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
+    
+    $(".ol-zoom-extent").find("button").html("");
+    await getFrames(false);
+    
+    if (!stop) {
+        await nextLoop(map, displayDates);
+    }
+
+    $("#customize :input").prop("disabled", false);//reenable the form when everything is done
+    async function getFrames(onlyLoad) {
+        if (onlyLoad) {
+            starting = [currentYear, currentMonth, currentDay];
+        }
+        await loadFrames(map, extent, projection, displayDates, onlyLoad, starting, ending, locationVal);
+        
+    }
+    
 }
 
 function sleep(ms) { //Sleep function for pauses between frames
@@ -303,6 +274,34 @@ async function nextLoop (map, displayDates) {
         await sleep(2000 - parseInt($("input[name=speed]").val()));//sleep for the correct time
     }
 }
-$("document").ready(function() {
-    main();
-});
+
+function getLocationParams(hemisphere) {
+    if (hemisphere == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
+        var extent = [300, 300, 301, 301.476];//Map size
+        //var extent = [0,0,0,0];
+        $("#map").css("width", "340");
+        $("#map").css("height", "502");
+        var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
+        var fullZoom = 1;
+        imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
+    }
+    else {//Information for southern hemisphere
+        var extent = [303, 302, 304, 303];//Map size
+        $("#map").css("width", "480");
+        $("#map").css("height", "504");
+        var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
+        var fullZoom = 1;
+        imageURL = "sLoad.jpg";
+    }
+    return [extent, locationVal, fullZoom, imageURL];
+}
+function getParams() {
+    var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
+    var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
+    var dates = $('input[name=dates]:checked').val();//Get value for the looping style
+    var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
+    var starting = [parseInt($('input[name=sYear]').val()), parseInt($('select[name=sMonth]').val()), parseInt($('input[name=sDay]').val())];//year, month, day starting values
+    var ending = [parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val())]//year, month, day ending values
+    return [extCon, norSouth, dates, monthLoop, starting, ending];
+}
+
