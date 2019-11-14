@@ -87,7 +87,7 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
     $("#customize :input").prop("disabled", true);//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
     var imageURL = '';//Variable to hold the url to fetch from the server
-    var [extent, locationVal, fullZoom, imageURL] = getLocationParams(norSouth);
+    var [extent, locationVal, width, height, srs, fullZoom, imageURL] = getLocationParams(norSouth);
 
     projection = getProjection(extent);
     map = getMap(projection,extent,fullZoom);
@@ -99,14 +99,33 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
 
     map.addControl(zoomToExtentControl);//Add control to reset view
     // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
-    map.addLayer(new ol.layer.Image({//add a loading layer for the first frame
-        source: new ol.source.ImageStatic({
-            url: imageURL,
-            projection: projection,
-            imageExtent: extent
+    var yearStr = 2018;
+    var monthStr = 1;
+    var dayStr = 2;
+    let wmsParams = {
+        LAYERS: "NSIDC:g02135_" + extCon + "_raster_daily_" + norSouth,
+        SRS: srs,
+        BBOX: locationVal,
+        WIDTH: width,
+        HEIGHT: height,
+        TILED: true,
+        format:"image/png",
+        TIME: yearStr + "-" + monthStr + "-" + dayStr
+    };
+    console.log(wmsParams);
+    console.log("here");
+    var layer = new ol.layer.Image({
+        source: new ol.source.ImageWMS({
+            url: 'https://nsidc.org/api/mapservices/NSIDC/gwc/service/wms',
+            params: wmsParams,
+            serverType: 'geoserver'
         })
-    }));
+    });
+    console.log(layer);
+    map.addLayer(layer);
+    
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
+    await sleep(199999);
     displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
     
     $(".ol-zoom-extent").find("button").html("");
@@ -281,7 +300,11 @@ function getLocationParams(hemisphere) {
         //var extent = [0,0,0,0];
         $("#map").css("width", "340");
         $("#map").css("height", "502");
-        var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
+        var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0";
+        var width = "304";
+        var height = "448";
+        var srs = "EPSG:3411";//Location for request url
+        //var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
         var fullZoom = 1;
         imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
     }
@@ -289,11 +312,14 @@ function getLocationParams(hemisphere) {
         var extent = [303, 302, 304, 303];//Map size
         $("#map").css("width", "480");
         $("#map").css("height", "504");
-        var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0&width=730&height=768&srs=EPSG:3412";//Location for request url
+        var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0";
+        var width = "730";
+        var height = "768";
+        var srs = "EPSG:3412";//Location for request url
         var fullZoom = 1;
         imageURL = "sLoad.jpg";
     }
-    return [extent, locationVal, fullZoom, imageURL];
+    return [extent, locationVal, width, height, srs, fullZoom, imageURL];
 }
 function getParams() {
     var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
