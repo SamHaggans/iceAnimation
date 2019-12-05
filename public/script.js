@@ -1,7 +1,6 @@
 var stop = false; //Global variable to stop the animation
 var pause = false;
 var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];//Days in each month
-var displayDates = [];
 
 function main() {
     //Set default settings into the selectors
@@ -50,8 +49,7 @@ function main() {
         var [yearStr, monthStr, dayStr] = getDateStrings(starting);
         map.addLayer(createLayer(norSouth, extCon, dayStr, monthStr, yearStr));
         map.getLayers().getArray()[0].setZIndex(1000);//loading on top
-        displayDates = [];//dates to be displayed
-        await loadFrames(map, extent, projection, displayDates, starting, ending, locationVal);
+        await loadFrames(map, extent, projection, starting, ending, locationVal);
         pause = false;//unpause
         $("#updateParams:input").prop("disabled", false);//Allow updating again  
     });
@@ -59,16 +57,6 @@ function main() {
 
 async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//Main animation function
     $("#pauseAnimation").html("Pause Animation");
-    
-    displayDates = [];
-    var currentYear = 0;
-    var currentDay = 0;
-    var currentMonth = 0;
-    var monthVal = "daily";
-
-    if (dates == "Monthly" || dates == "SameMonth") {
-        monthVal = "monthly";
-    }
 
     $("#customize :input").prop("disabled", true);//Disable form entering while animation is running
     $("#map").html("");//Empty map when a new animation occurs
@@ -87,10 +75,9 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
 
     map.addControl(zoomToExtentControl);//Add control to reset view
     // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
-    displayDates.push("placeholder");//Placeholder in the dates array, also gets deleted by the program for the first run
     
     $(".ol-zoom-extent").find("button").html("");
-    await loadFrames(map, extent, projection, displayDates, starting, ending, locationVal);
+    await loadFrames(map, extent, projection, starting, ending, locationVal);
     
 
     $("#customize :input").prop("disabled", false);//reenable the form when everything is done
@@ -132,7 +119,7 @@ function getDay(year,month,starting,ending, dates) {
     return [dayStart, dayEnd];
 }
 
-async function loadFrames(map, extent, projection, displayDates, starting, ending, locationVal) {
+async function loadFrames(map, extent, projection, starting, ending, locationVal) {
     var dates = $('input[name=dates]:checked').val();//Get value for the looping style
     var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
     var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
@@ -221,6 +208,7 @@ function createLayer(norSouth, extCon, dayStr, monthStr, yearStr) {
     var layer = new ol.layer.Image({source});
     return layer;
 }
+
 function getMap (projection, extent, fullZoom) {
     var map = new ol.Map({//New map
         target: 'map',//Div in which the map is displayed
@@ -244,16 +232,6 @@ async function removeLayers (map) {
     await layers.forEach((layer) => map.removeLayer(layer));
     await layers.forEach((layer) => map.removeLayer(layer));
     await layers.forEach((layer) => map.removeLayer(layer));
-}
-
-async function nextLoop (map, displayDates) {
-    while (map.getLayers().getArray().length > 1) {//While there are unrendered layers remaining, loop through them
-        displayDates.splice(0, 1);//remove the date
-        $("#date").html(displayDates[0]);//update the date to current
-        map.removeLayer(map.getLayers().getArray()[0]);//remove current layer
-        map.getLayers().getArray()[0].setZIndex(100);//add the new layer
-        await sleep(2000 - parseInt($("input[name=speed]").val()));//sleep for the correct time
-    }
 }
 
 function getLocationParams(hemisphere) {
@@ -283,6 +261,7 @@ function getLocationParams(hemisphere) {
     }
     return [extent, locationVal, width, height, srs, fullZoom, imageURL];
 }
+
 function getParams() {
     var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
     var norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
