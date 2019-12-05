@@ -49,7 +49,8 @@ function main() {
         var [yearStr, monthStr, dayStr] = getDateStrings(starting);
         map.addLayer(createLayer(norSouth, extCon, dayStr, monthStr, yearStr));
         map.getLayers().getArray()[0].setZIndex(1000);//loading on top
-        await loadFrames(map, extent, projection, starting, ending, locationVal);
+        
+        await animateFrames(map, extent, projection, starting, ending, locationVal);
         pause = false;//unpause
         $("#updateParams:input").prop("disabled", false);//Allow updating again  
     });
@@ -77,7 +78,7 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
     // map.on('moveend', restrictCenter);//When map is moved, restrict the center's location
     
     $(".ol-zoom-extent").find("button").html("");
-    await loadFrames(map, extent, projection, starting, ending, locationVal);
+    await animateFrames(map, extent, projection, starting, ending, locationVal);
     
 
     $("#customize :input").prop("disabled", false);//reenable the form when everything is done
@@ -119,7 +120,7 @@ function getDay(year,month,starting,ending, dates) {
     return [dayStart, dayEnd];
 }
 
-async function loadFrames(map, extent, projection, starting, ending, locationVal) {
+async function animateFrames(map, extent, projection, starting, ending, locationVal) {
     var dates = $('input[name=dates]:checked').val();//Get value for the looping style
     var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
     var extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
