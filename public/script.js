@@ -26,7 +26,7 @@ function main() {
     $("#pauseAnimation").click(function () {//Stop button
         if (pause) {
             pause = false;
-            $("#customize :input").prop("disabled", true);//Reenable the form to allow the animation to be restarted
+            $("#customize :input").prop("disabled", true);//Disable form
             $("#pauseAnimation").html("Pause Animation");
         }
         else {
@@ -49,9 +49,10 @@ function main() {
         var [yearStr, monthStr, dayStr] = getDateStrings(starting);
         map.addLayer(createLayer(norSouth, extCon, dayStr, monthStr, yearStr));
         map.getLayers().getArray()[0].setZIndex(1000);//loading on top
-        
+
         await animateFrames(map, extent, projection, starting, ending, locationVal);
         pause = false;//unpause
+        $("#customize :input").prop("disabled", true);//Disable form
         $("#updateParams:input").prop("disabled", false);//Allow updating again  
     });
 }
