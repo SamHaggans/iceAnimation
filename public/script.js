@@ -1,8 +1,9 @@
-var stop = false; //Global variable to stop the animation
-var pause = false;
+var STOP = false; //Global variable to stop the animation
+var PAUSE = false;
 var monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];//Days in each month
-
-function main() {
+var CONSTANTS;
+async function main() {
+    CONSTANTS = await readJSON("constants.json");
     //Set default settings into the selectors
     $('input:radio[name=ext-con]').val(['extent']);
     $('input:radio[name=n-s]').val(['n']);
@@ -13,24 +14,24 @@ function main() {
     $('input[name=eDay]').val(28);
     
     $("#animate").click(function () {//When animation button is clicked 
-        stop = false;//Don't stop animation
+        STOP = false;//Don't stop animation
         var [extCon, norSouth, dates, monthLoop, starting, ending] = getParams();
         animate(extCon, norSouth, dates, monthLoop, starting, ending);//animate
     });
 
     $("#stopAnimation").click(function () {//Stop button
-        stop = true;//stop the animation
+        STOP = true;//stop the animation
         $("#customize :input").prop("disabled", false);//Reenable the form to allow the animation to be restarted
     });
 
     $("#pauseAnimation").click(function () {//Stop button
-        if (pause) {
-            pause = false;
+        if (PAUSE) {
+            PAUSE = false;
             $("#customize :input").prop("disabled", true);//Disable form
             $("#pauseAnimation").html("Pause Animation");
         }
         else {
-            pause = true;
+            PAUSE = true;
             $("#customize :input").prop("disabled", false);//Reenable the form to allow the animation to be restarted
             $("#pauseAnimation").html("Resume Animation");
         }
@@ -38,20 +39,20 @@ function main() {
 
     $("#updateParams").click(async function () {
         $("#updateParams:input").prop("disabled", true);//Don't allow user to click to update multiple times too fast
-        pause = true;//pause the frames
+        PAUSE = true;//pause the frames
         var [extCon, norSouth, dates, monthLoop, starting, ending] = getParams();
         var [extent, locationVal, fullZoom, imageURL] = getLocationParams(norSouth);
         $("#map").html("");//Empty map when a new animation occurs
         map = null;
-    
-        projection = getProjection(extent);
+        console.log(norSouth);
+        projection = await getProjection(extent, norSouth);
         map = getMap(projection,extent,fullZoom);
         var [yearStr, monthStr, dayStr] = getDateStrings(starting);
         map.addLayer(createLayer(norSouth, extCon, dayStr, monthStr, yearStr));
         map.getLayers().getArray()[0].setZIndex(1000);//loading on top
 
         await animateFrames(map, extent, projection, starting, ending, locationVal);
-        pause = false;//unpause
+        PAUSE = false;//unpause
         $("#customize :input").prop("disabled", true);//Disable form
         $("#updateParams:input").prop("disabled", false);//Allow updating again  
     });
@@ -120,7 +121,6 @@ function getDay(year,month,starting,ending, dates) {
     }
     return [dayStart, dayEnd];
 }
-
 async function animateFrames(map, extent, projection, starting, ending, locationVal) {
     var dates = $('input[name=dates]:checked').val();//Get value for the looping style
     var monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
@@ -135,14 +135,13 @@ async function animateFrames(map, extent, projection, starting, ending, location
             var dayStart = dayVals[0];
             var dayEnd = dayVals[1];
             for (day = dayStart; day <= dayEnd; day++) {//loop days
-                if (!stop){
-                    while (pause) {
+                if (!STOP){
+                    while (PAUSE) {
                         await sleep(50);
                     }
                     
                         //TODO: LayerLoad event before updating date string
                         await updateWMSLayerParams(map.getLayers().getArray()[0], {TIME: getDateString([year, month, day])});
-                        console.log("here");
                         $("#date").html(getDateString([year, month, day]));//set the date to be the next day, what is displayed by the layer
                         await sleep(2000 - parseInt($("input[name=speed]").val()));//sleep for the time specified by the slider bar
                     
@@ -181,12 +180,21 @@ function getDateStrings(year, month, day) {
     return [yearStr, monthStr, dayStr];
 }
 
-function getProjection(extent) {
-    var projection = new ol.proj.Projection({//Map projection
-        code: "EPSG:3411",
-        units: 'meters',
-        extent: extent
-    });
+async function getProjection(extent, norSouth) {
+    if (norSouth == "n") {
+        var projection = new ol.proj.Projection({//Map projection
+            code: CONSTANTS.north.code,
+            units: 'meters',
+            extent: extent
+        });
+    }
+    else {
+        var projection = new ol.proj.Projection({//Map projection
+            code: CONSTANTS.south.code,
+            units: 'meters',
+            extent: extent
+        });
+    }
     return projection;
 }
 
@@ -210,7 +218,6 @@ function createLayer(norSouth, extCon, dayStr, monthStr, yearStr) {
     var layer = new ol.layer.Image({source});
     return layer;
 }
-
 function getMap (projection, extent, fullZoom) {
     var map = new ol.Map({//New map
         target: 'map',//Div in which the map is displayed
@@ -238,26 +245,27 @@ async function removeLayers (map) {
 
 function getLocationParams(hemisphere) {
     if (hemisphere == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
-        var extent = [-3850000.0,-5350000.0,3750000.0,5850000.0];//Map size
+        var extent = CONSTANTS.north.extent;//Map size
         //var extent = [0,0,0,0];
-        $("#map").css("width", "340");
-        $("#map").css("height", "502");
-        var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0";
-        var width = "304";
-        var height = "448";
-        var srs = "EPSG:3411";//Location for request url
+        $("#map").css("width", CONSTANTS.north.css.width);
+        $("#map").css("height", CONSTANTS.north.css.height);
+        var locationVal = CONSTANTS.north.locationVal;
+        var width = CONSTANTS.north.width;
+        var height = CONSTANTS.north.height;
+        var srs = CONSTANTS.north.srs;//Location for request url
         //var locationVal = "-3850000.0,-5350000.0,3750000.0,5850000.0&width=304&height=448&srs=EPSG:3411";//Location data for request url
         var fullZoom = 1;
         imageURL = "nLoad.jpg";//Placeholder image to add the first frame, as there needs to be one frame that is deleted before any displays happen
     }
     else {//Information for southern hemisphere
-        var extent = [-3950000.0,-3950000.0,3950000.0,4350000.0];//Map size
-        $("#map").css("width", "480");
-        $("#map").css("height", "504");
-        var locationVal = "-3950000.0,-3950000.0,3950000.0,4350000.0";
-        var width = "730";
-        var height = "768";
-        var srs = "EPSG:3412";//Location for request url
+        var extent = CONSTANTS.south.extent;//Map size
+        //var extent = [0,0,0,0];
+        $("#map").css("width", CONSTANTS.south.css.width);
+        $("#map").css("height", CONSTANTS.south.css.height);
+        var locationVal = CONSTANTS.south.locationVal;
+        var width = CONSTANTS.south.width;
+        var height = CONSTANTS.south.height;
+        var srs = CONSTANTS.south.srs;
         var fullZoom = 1;
         imageURL = "sLoad.jpg";
     }
@@ -274,6 +282,19 @@ function getParams() {
     return [extCon, norSouth, dates, monthLoop, starting, ending];
 }
 
+function readJSON(filename) {   
+    return new Promise(function(resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.overrideMimeType("application/json");
+        request.open('GET', filename, true);
+        request.onreadystatechange = function () {
+            if (request.readyState == 4 && request.status == "200") {
+                resolve(JSON.parse(request.responseText));
+            }
+        }
+        request.send(null);
+    });
+}
 
 function updateWMSLayerParams (layer, params) {
     const source = layer.getSource();
