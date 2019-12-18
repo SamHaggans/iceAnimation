@@ -66,7 +66,7 @@ async function animate(extCon, norSouth, dates, monthLoop, starting, ending) {//
     var imageURL = '';//Variable to hold the url to fetch from the server
     var [extent, locationVal, width, height, srs, fullZoom, imageURL] = getLocationParams(norSouth);
 
-    projection = getProjection(extent);
+    projection = await getProjection(extent, norSouth);
     map = getMap(projection,extent,fullZoom);
     var [yearStr, monthStr, dayStr] = getDateStrings(starting);
     map.addLayer(createLayer(norSouth, extCon, dayStr, monthStr, yearStr));
@@ -183,14 +183,14 @@ function getDateStrings(year, month, day) {
 async function getProjection(extent, norSouth) {
     if (norSouth == "n") {
         var projection = new ol.proj.Projection({//Map projection
-            code: CONSTANTS.north.code,
+            code: CONSTANTS.north.srs,
             units: 'meters',
             extent: extent
         });
     }
     else {
         var projection = new ol.proj.Projection({//Map projection
-            code: CONSTANTS.south.code,
+            code: CONSTANTS.south.srs,
             units: 'meters',
             extent: extent
         });
