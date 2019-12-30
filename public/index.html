@@ -16,7 +16,7 @@
   <body>
     <h2>Sea Ice Animation</h2>
     <h3 id = "date"></h3>
-    <div id="map" class="map">Click "Animate" to Animate Sea Ice</div>
+    <div id="map" class="map">Loading......</div>
     <div class = "config">
     <form id = "customize">
     <input type="radio" value="extent" name="ext-con">Extent
@@ -78,17 +78,13 @@
           </select> 
            Ending Day (1-28): <input type="number" name="eDay" min="1" max="28">
           <br>
-          <button id = "animate" type="button">Animate</button>
+          <button id = "animate" type="button">Start Animation</button>
+          <button id = "updateParams" type="button">Update Parameters</button>
           
           
     </form>
-    <button id = "updateParams" type="button">Update Parameters</button>
     <br>Speed:<br>
     Slowest <input type="range" name="speed" min="0" max="1900"> Fastest
-    <br>
-    <button id = "stopAnimation" type="button">Stop Animation</button>
-    <br>
-    <button id = "pauseAnimation" type="button">Pause Animation</button>
   </div>
   </body>
 </html>
