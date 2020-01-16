@@ -13,3 +13,6 @@ To install the dependencies listed in `package.json`, run `npm install` inside t
 
 ### Steps to Run the Application
 To run the application, run `npm start` or `node server.js` inside the project directory. This will open the project on `localhost:3003` (which can be changed if needed inside `server.js`), and going to that page on a web browser will show the application.
+
+### Restart in Case of a Crash
+The application runs on an express server (`server.js`) which shouldn't ever crash due to the simplicity of it. However, there might be an issue with `script.js` for some reason. This should be able to be fixed by a simple reload of the page, but if it doesn't, stopping and restarting `server.js` should solve any issues.
