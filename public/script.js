@@ -3,21 +3,9 @@ var CONSTANTS;
 var STATE = {
     stop: true,
     rate: 100,
-    current: {
-        day: 1,
-        month: 1,
-        year: 1990
-    },
-    start: {
-        day: 1,
-        month: 1,
-        year: 1990
-    },
-    end: {
-        day: 28,
-        month: 12,
-        year: 2018
-    },
+    current: new Date(1990, 1, 1),
+    start: new Date(1990, 1, 1),
+    end: new Date(2019, 12, 30),
     extCon: "extent",
     norSouth: "n",
     dateLoopStyle: "daily",
