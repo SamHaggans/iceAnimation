@@ -1,13 +1,15 @@
 # Sea Ice Animation Project
-This site uses OpenLayers to load images from NSIDC's Geoserver of Sea Ice data. 
-The site currently uses an expressjs server to load the page, but otherwise it is just the data in /public.
-The main logic behind the project is in /public/script.js, and the page with the map is /public/index.html.
+This webapp animates sea ice from NSIDC's geoserver of sea ice data. The webapp takes in some configuration information, like the starting and end dates and whether or not extent or concentration of sea ice is requested, and uses this to animate through the requested dates to view the changes in sea ice.
 
-# Information about loading layers
-Because OpenLayers is not designed to be actively loading layers frequently, which an animation needs, zooming or panning 
-when loading layers would cause the layers to fail to load and have the map turn blank.
-To avoid this, the program pre-loads 30 layers into the map. This means that for the first 30 frames, they are added
-as quickly as possible but not displayed in the map. For later frames, the program displays the frame that is 30 frames ahead of the "current" frame, where the current frame is the one being loaded by the program. This means that OpenLayers does not have to deal with loading the frames at the same time as zooming or panning, which stops the issues with blank
-maps. 
-However, because of this, there are 30 frames left over after all dates have been cycled through. This is why, at the end of the program, the remaining frames are displayed in a while loop until all frames have been shown.
-Still, the dates are also displayed in a similar way to the frames, so the displayed date is always displayed with the correct frame, not 30 layers off.
+# Design
+The site currently uses a simple express server defined in `server.js` to render in the `public/index.html` file. The main logic for the animation is found in `public/script.js`, which is loaded in by the html file.
+
+# Steps to Build/Start Application
+### Prerequisites
+This application runs on NodeJS and NPM, so those must both be installed before running the application.
+
+### Build Steps
+To install the dependencies listed in `package.json`, run `npm install` inside the project directory. This will install the dependencies like OpenLayers and JQuery. 
+
+### Steps to Run the Application
+To run the application, run `npm start` or `node server.js` inside the project directory. This will open the project on `localhost:3003` (which can be changed if needed inside `server.js`), and going to that page on a web browser will show the application.
