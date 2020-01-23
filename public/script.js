@@ -1,4 +1,3 @@
-var STOP = false; //Global variable to stop the animation
 var CONSTANTS;
 var STATE = {
     stop: true,
@@ -47,8 +46,8 @@ async function init(){
     $("#map").html("");//Empty map when a new animation occurs
 
     
-    projection = await getProjection();
-    map = await getMap(projection);
+    projection = getProjection();
+    map = getMap(projection);
 
     map.addLayer(createLayer());
     await updateState();
@@ -71,11 +70,7 @@ async function init(){
 
 async function animationLoop(map){
     while (true) {
-        if (STATE.stop) {
-            await sleep(50);
-        }
-        else {
-            console.log("loop");
+        if (!STATE.stop) {
             nextDate();
             var wmsParams = {
                 LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
@@ -88,6 +83,9 @@ async function animationLoop(map){
             };
             await updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
             await sleep(STATE.rate);
+        }
+        else {
+            await sleep(50);
         }
     }
 }
@@ -145,21 +143,12 @@ function getDateString(dateArray) {
     return `${yearStr}-${monthStr}-${dayStr}`;
 }
 
-async function getProjection() {
-    if (STATE.norSouth == "n") {
-        var projection = new ol.proj.Projection({//Map projection
-            code: CONSTANTS.north.srs,
-            units: 'meters',
-            extent: CONSTANTS.north.extent
-        });
-    }
-    else {
-        var projection = new ol.proj.Projection({//Map projection
-            code: CONSTANTS.south.srs,
-            units: 'meters',
-            extent: CONSTANTS.south.extent
-        });
-    }
+function getProjection() {
+    var projection = new ol.proj.Projection({//Map projection
+        code: CONSTANTS[STATE.norSouth].srs,
+        units: 'meters',
+        extent: CONSTANTS[STATE.norSouth].extent
+    });
     return projection;
 }
 
@@ -200,26 +189,14 @@ function getMap(projection) {
 }
 
 function getLocationParams() {
-    if (STATE.norSouth == "n") {//Northern hemisphere values, including the size of the map and the information for the server request
-        var extent = CONSTANTS.north.extent;//Map size
-        //var extent = [0,0,0,0];
-        $("#map").css("width", CONSTANTS.north.css.width);
-        $("#map").css("height", CONSTANTS.north.css.height);
-        var locationVal = CONSTANTS.north.locationVal;
-        var width = CONSTANTS.north.width;
-        var height = CONSTANTS.north.height;
-        var srs = CONSTANTS.north.srs;//Location for request url
-    }
-    else {//Information for southern hemisphere
-        var extent = CONSTANTS.south.extent;//Map size
-        //var extent = [0,0,0,0];
-        $("#map").css("width", CONSTANTS.south.css.width);
-        $("#map").css("height", CONSTANTS.south.css.height);
-        var locationVal = CONSTANTS.south.locationVal;
-        var width = CONSTANTS.south.width;
-        var height = CONSTANTS.south.height;
-        var srs = CONSTANTS.south.srs;
-    }
+    var extent = CONSTANTS[STATE.norSouth].extent;//Map size
+    //var extent = [0,0,0,0];
+    $("#map").css("width",CONSTANTS[STATE.norSouth].css.width);
+    $("#map").css("height", CONSTANTS[STATE.norSouth].css.height);
+    var locationVal = CONSTANTS[STATE.norSouth].locationVal;
+    var width = CONSTANTS[STATE.norSouth].width;
+    var height = CONSTANTS[STATE.norSouth].height;
+    var srs = CONSTANTS[STATE.norSouth].srs;//Location for request url
     return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
