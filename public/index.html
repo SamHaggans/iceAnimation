@@ -16,7 +16,7 @@
   <body>
     <h2>Sea Ice Animation</h2>
     <h3 id = "date"></h3>
-    <div id="map" class="map">Click "Animate" to Animate Sea Ice</div>
+    <div id="map" class="map">Loading......</div>
     <div class = "config">
     <form id = "customize">
     <input type="radio" value="extent" name="ext-con">Extent
@@ -27,18 +27,18 @@
         <input type="radio" value="Daily" name="dates">Every Day
         <input type="radio" value="Monthly" name="dates">Every Month
         <input type="radio" value="SameMonth" name="dates">Same Month Through Years:  <select name="monthsLoop">
-                                                                                        <option value="1">January</option>
-                                                                                        <option value="2">February</option>
-                                                                                        <option value="3">March</option>
-                                                                                        <option value="4">April</option>
-                                                                                        <option value="5">May</option>
-                                                                                        <option value="6">June</option>
-                                                                                        <option value="7">July</option>
-                                                                                        <option value="8">August</option>
-                                                                                        <option value="9">September</option>
-                                                                                        <option value="10">October</option>
-                                                                                        <option value="11">November</option>
-                                                                                        <option value="12">December</option>
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
                                                                                       </select> 
         <br>
         
@@ -46,49 +46,45 @@
             <input type="radio" value="s" name="n-s">Antarctic
             <br>
          Starting Year (1979-2018): <input type="number" name="sYear" min="1979" max="2018"> Starting Month: <select name="sMonth">
-                                                                                              <option value="1">January</option>
-                                                                                              <option value="2">February</option>
-                                                                                              <option value="3">March</option>
-                                                                                              <option value="4">April</option>
-                                                                                              <option value="5">May</option>
-                                                                                              <option value="6">June</option>
-                                                                                              <option value="7">July</option>
-                                                                                              <option value="8">August</option>
-                                                                                              <option value="9">September</option>
-                                                                                              <option value="10">October</option>
-                                                                                              <option value="11">November</option>
-                                                                                              <option value="12">December</option>
+                                                                                              <option value="0">January</option>
+                                                                                              <option value="1">February</option>
+                                                                                              <option value="2">March</option>
+                                                                                              <option value="3">April</option>
+                                                                                              <option value="4">May</option>
+                                                                                              <option value="5">June</option>
+                                                                                              <option value="6">July</option>
+                                                                                              <option value="7">August</option>
+                                                                                              <option value="8">September</option>
+                                                                                              <option value="9">October</option>
+                                                                                              <option value="10">November</option>
+                                                                                              <option value="11">December</option>
                                                                                             </select> 
            Starting Day (1-28): <input type="number" name="sDay" min="1" max="28">
           
           <br>
            Ending Year (1979-2018): <input type="number" name="eYear" min="1979" max="2018"> Ending Month: <select name="eMonth">
-            <option value="1">January</option>
-            <option value="2">February</option>
-            <option value="3">March</option>
-            <option value="4">April</option>
-            <option value="5">May</option>
-            <option value="6">June</option>
-            <option value="7">July</option>
-            <option value="8">August</option>
-            <option value="9">September</option>
-            <option value="10">October</option>
-            <option value="11">November</option>
-            <option value="12">December</option>
+                                                                                              <option value="0">January</option>
+                                                                                              <option value="1">February</option>
+                                                                                              <option value="2">March</option>
+                                                                                              <option value="3">April</option>
+                                                                                              <option value="4">May</option>
+                                                                                              <option value="5">June</option>
+                                                                                              <option value="6">July</option>
+                                                                                              <option value="7">August</option>
+                                                                                              <option value="8">September</option>
+                                                                                              <option value="9">October</option>
+                                                                                              <option value="10">November</option>
+                                                                                              <option value="11">December</option>
           </select> 
            Ending Day (1-28): <input type="number" name="eDay" min="1" max="28">
           <br>
-          <button id = "animate" type="button">Animate</button>
+          <button id = "animate" type="button">Start Animation</button>
+          <button id = "updateParams" type="button">Update Parameters</button>
           
           
     </form>
-    <button id = "updateParams" type="button">Update Parameters</button>
     <br>Speed:<br>
     Slowest <input type="range" name="speed" min="0" max="1900"> Fastest
-    <br>
-    <button id = "stopAnimation" type="button">Stop Animation</button>
-    <br>
-    <button id = "pauseAnimation" type="button">Pause Animation</button>
   </div>
   </body>
 </html>
