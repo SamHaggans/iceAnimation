@@ -1,5 +1,16 @@
-var CONSTANTS;
-var STATE = {
+import $ from "jquery";
+import 'ol/ol.css';
+import Map from 'ol/Map';
+import View from "ol/View";
+import olControl from "ol/control";
+import * as olProj from "ol/proj";
+import * as olSource from "ol/source";
+import * as olExtent from "ol/extent";
+import * as olLayer from "ol/layer";
+import * as moment from 'moment';
+
+window.CONSTANTS;
+window.STATE = {
     stop: true,
     rate: 100,
     current: new Date(1990, 0, 1),
@@ -9,33 +20,33 @@ var STATE = {
     norSouth: "n",
     dateLoopStyle: "daily",
     monthLoop: 0
-
 }
-var map;
 
 async function main() {
-    CONSTANTS = await readJSON("constants.json");
+    window.CONSTANTS = await readJSON("./public/constants.json");
+    console.log(window.CONSTANTS);
     //Set default settings into the selectors and some other starting values
-    init();
+    var map;
+    init(map);
     
     $("#animate").click(function () {//When animation button is clicked 
-        if (STATE.stop) {
-            STATE.stop = false;//Start animation
+        if (window.STATE.stop) {
+            window.STATE.stop = false;//Start animation
             $("#animate").html("Stop Animation");
         }
         else {
-            STATE.stop = true;
+            window.STATE.stop = true;
         $("#animate").html("Start Animation");
         }
     });
 
 
     $("#updateParams").click(async function () {
-        updateState();
+        updateSTATE(map);
     });
 }
 
-async function init(){
+async function init(map){
     $('input:radio[name=ext-con]').val(['extent']);//Default values
     $('input:radio[name=n-s]').val(['n']);
     $('input:radio[name=dates]').val(['Daily']);
@@ -46,14 +57,14 @@ async function init(){
     $("#map").html("");//Empty map when a new animation occurs
 
     
-    projection = getProjection();
+    var projection = getProjection();
     map = getMap(projection);
 
     map.addLayer(createLayer());
-    await updateState();
-    STATE.current = STATE.start;
+    await updateSTATE(map);
+    window.STATE.current = window.STATE.start;
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
-    var zoomToExtentControl = new ol.control.ZoomToExtent({
+    var zoomToExtentControl = new olControl.ZoomToExtent({
         extent: getLocationParams().extent,
         size: [10, 10]
     });
@@ -61,68 +72,68 @@ async function init(){
 
     
 
-    STATE.stop = true;
+    window.STATE.stop = true;
     $("#pauseAnimation").html("Start Animation");
-    $("#date").html(getDateString([STATE.current.getFullYear(), STATE.current.getMonth()+1, STATE.current.getDate()]));
+    $("#date").html(getDateString([window.STATE.current.getFullYear(), window.STATE.current.getMonth()+1, window.STATE.current.getDate()]));
     animationLoop(map);
 }
 
 
 async function animationLoop(map){
     while (true) {
-        if (!STATE.stop) {
+        if (!window.STATE.stop) {
             nextDate();
             var wmsParams = {
-                LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+                LAYERS: "NSIDC:g02135_" + window.STATE.extCon + "_raster_daily_" + window.STATE.norSouth,
                 SRS: getLocationParams().srs,
                 BBOX: getLocationParams().locationVal,
                 TILED: false,
                 format:"image/png",
-                TIME: STATE.current.getFullYear() + "-" + STATE.current.getMonth()+1 + "-" + STATE.current.getDate(),
-                STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
+                TIME: window.STATE.current.getFullYear() + "-" + window.STATE.current.getMonth()+1 + "-" + window.STATE.current.getDate(),
+                STYLES: "NSIDC:g02135_" + window.STATE.extCon + "_raster_basemap"
             };
             await updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
-            await sleep(STATE.rate);
+            await sleep(window.STATE.rate);
         }
         else {
-            await sleep(50);
+            await sleep(0);
         }
     }
 }
 
 function nextDate(){
-    if (STATE.dateLoopStyle == "Monthly") {
-        if (STATE.current.month < 11) {
-            STATE.current = new Date(STATE.current.getFullYear(), STATE.current.getMonth()+1, 1);
+    if (window.STATE.dateLoopStyle == "Monthly") {
+        if (window.STATE.current.month < 11) {
+            window.STATE.current = new Date(window.STATE.current.getFullYear(), window.STATE.current.getMonth()+1, 1);
         }
-        else if (STATE.current.month = 11) {
-            STATE.current = new Date(STATE.current.getFullYear()+1, 0, 1);
+        else if (window.STATE.current.month == 11) {
+            window.STATE.current = new Date(window.STATE.current.getFullYear()+1, 0, 1);
         }
     }
-    else if (STATE.dateLoopStyle == "SameMonth") {
-        STATE.current = new Date(STATE.current.getFullYear()+1, STATE.monthLoop, 1);
+    else if (window.STATE.dateLoopStyle == "SameMonth") {
+        window.STATE.current = new Date(window.STATE.current.getFullYear()+1, window.STATE.monthLoop, 1);
     }
     else {
-        STATE.current.setDate(STATE.current.getDate()+1);
+        window.STATE.current.setDate(window.STATE.current.getDate()+1);
     }
 }
 
-function updateState() {
-    STATE.extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
-    STATE.norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
-    STATE.dateLoopStyle = $('input[name=dates]:checked').val();//Get value for the looping style
-    STATE.monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-    STATE.start = new Date(parseInt($('input[name=sYear]').val()), parseInt($('select[name=sMonth]').val()), parseInt($('input[name=sDay]').val()));
-    STATE.end = new Date(parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val()));
+function updateSTATE(map) {
+    window.STATE.extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
+    window.STATE.norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
+    window.STATE.dateLoopStyle = $('input[name=dates]:checked').val();//Get value for the looping style
+    window.STATE.monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
+    window.STATE.start = new Date(parseInt($('input[name=sYear]').val()), parseInt($('select[name=sMonth]').val()), parseInt($('input[name=sDay]').val()));
+    window.STATE.end = new Date(parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val()));
 
     var wmsParams = {
-        LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+        LAYERS: "NSIDC:g02135_" + window.STATE.extCon + "_raster_daily_" + window.STATE.norSouth,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
         format:"image/png",
-        TIME: STATE.current.getFullYear() + "-" + STATE.current.getMonth()+1 + "-" + STATE.current.getDate(),
-        STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
+        TIME: window.STATE.current.getFullYear() + "-" + window.STATE.current.getMonth()+1 + "-" + window.STATE.current.getDate(),
+        STYLES: "NSIDC:g02135_" + window.STATE.extCon + "_raster_basemap"
     };
     updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
 }
@@ -144,59 +155,59 @@ function getDateString(dateArray) {
 }
 
 function getProjection() {
-    var projection = new ol.proj.Projection({//Map projection
-        code: CONSTANTS[STATE.norSouth].srs,
+    var projection = new olProj.Projection({//Map projection
+        code: window.CONSTANTS[window.STATE.norSouth].srs,
         units: 'meters',
-        extent: CONSTANTS[STATE.norSouth].extent
+        extent: window.CONSTANTS[window.STATE.norSouth].extent
     });
     return projection;
 }
 
 function createLayer() {
     var wmsParams = {
-        LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+        LAYERS: "NSIDC:g02135_" + window.STATE.extCon + "_raster_daily_" + window.STATE.norSouth,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
         format:"image/png",
-        TIME: STATE.current.year + "-" + STATE.current.month + "-" + STATE.current.day,
-        STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
+        TIME: window.STATE.current.year + "-" + window.STATE.current.month + "-" + window.STATE.current.day,
+        STYLES: "NSIDC:g02135_" + window.STATE.extCon + "_raster_basemap"
     };
-    var source = new ol.source.ImageWMS({
+    var source = new olSource.ImageWMS({
         url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
         params: wmsParams,
         serverType: 'geoserver'
     });
     
-    var layer = new ol.layer.Image({source});
+    var layer = new olLayer.Image({source});
     return layer;
 }
 
 function getMap(projection) {
     var extent = getLocationParams().extent;
-    var map = new ol.Map({//New map
+    var map = new Map({//New map
         target: 'map',//Div in which the map is displayed
-        view: new ol.View({
+        view: new View({
             projection: projection,
-            center: ol.extent.getCenter(extent),//Start in the center of the image
+            center: olExtent.getCenter(extent),//Start in the center of the image
             zoom: 1,
             minZoom: 1,
             extent: extent
         }),
-        controls: ol.control.PanZoom
+        controls: olControl.PanZoom
     });
     return map;
 }
 
 function getLocationParams() {
-    var extent = CONSTANTS[STATE.norSouth].extent;//Map size
+    var extent = window.CONSTANTS[window.STATE.norSouth].extent;//Map size
     //var extent = [0,0,0,0];
-    $("#map").css("width",CONSTANTS[STATE.norSouth].css.width);
-    $("#map").css("height", CONSTANTS[STATE.norSouth].css.height);
-    var locationVal = CONSTANTS[STATE.norSouth].locationVal;
-    var width = CONSTANTS[STATE.norSouth].width;
-    var height = CONSTANTS[STATE.norSouth].height;
-    var srs = CONSTANTS[STATE.norSouth].srs;//Location for request url
+    $("#map").css("width",window.CONSTANTS[window.STATE.norSouth].css.width);
+    $("#map").css("height", window.CONSTANTS[window.STATE.norSouth].css.height);
+    var locationVal = window.CONSTANTS[window.STATE.norSouth].locationVal;
+    var width = window.CONSTANTS[window.STATE.norSouth].width;
+    var height = window.CONSTANTS[window.STATE.norSouth].height;
+    var srs = window.CONSTANTS[window.STATE.norSouth].srs;//Location for request url
     return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
@@ -206,7 +217,7 @@ function updateWMSLayerParams(layer, params) {
         source.updateParams(params);
         source.refresh();
         map.once('rendercomplete', function(event) {
-            $("#date").html(getDateString([STATE.current.getFullYear(), STATE.current.getMonth()+1, STATE.current.getDate()]));//Wait for map to be ready to change the date tag
+            $("#date").html(getDateString([window.STATE.current.getFullYear(), window.STATE.current.getMonth()+1, window.STATE.current.getDate()]));//Wait for map to be ready to change the date tag
             resolve();
             
         });
@@ -220,7 +231,7 @@ function readJSON(filename) {
         request.overrideMimeType("application/json");
         request.open('GET', filename, true);
         request.onreadystatechange = function () {
-            if (request.readyState == 4 && request.status == "200") {
+            if (request.readystate == 4 && request.status == "200") {
                 resolve(JSON.parse(request.responseText));
             }
         }
@@ -231,3 +242,10 @@ function readJSON(filename) {
 function sleep(ms) { //Sleep function for pauses between frames
     return new Promise(resolve => setTimeout(resolve, ms));
 }
+
+async function resolvePromise() {
+    return new Promise(resolve => setTimeout(resolve, 0));
+}
+
+
+main();
