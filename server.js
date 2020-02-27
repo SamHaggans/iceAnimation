@@ -1,7 +1,7 @@
 var express = require("express");
 var server = express();
 var port = process.env.PORT || 3003;
-server.use(express.static('public'));
+server.use(express.static('build'));
 
 var server = server.listen(port, function(){
     var port = server.address().port;
