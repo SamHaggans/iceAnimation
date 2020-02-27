@@ -2,7 +2,7 @@ import $ from "jquery";
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from "ol/View";
-import olControl from "ol/control";
+import * as olControl from 'ol/control';
 import * as olProj from "ol/proj";
 import * as olSource from "ol/source";
 import * as olExtent from "ol/extent";
@@ -194,7 +194,7 @@ function getMap(projection) {
             minZoom: 1,
             extent: extent
         }),
-        controls: olControl.PanZoom
+        controls: olControl.Zoom
     });
     return map;
 }
