@@ -9,6 +9,8 @@ import * as olExtent from "ol/extent";
 import * as olLayer from "ol/layer";
 import * as moment from 'moment';
 
+import "./style.css";
+
 window.CONSTANTS;
 window.STATE = {
     stop: true,
