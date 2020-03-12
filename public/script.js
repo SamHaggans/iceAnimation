@@ -10,6 +10,7 @@ import * as olLayer from "ol/layer";
 import * as moment from 'moment';
 
 import "./style.css";
+import { CONSTANTS } from "./constants.js";
 
 window.CONSTANTS;
 window.STATE = {
@@ -25,7 +26,8 @@ window.STATE = {
 }
 
 async function main() {
-    window.CONSTANTS = await readJSON("./public/constants.json");
+    window.CONSTANTS = CONSTANTS;
+
     console.log(window.CONSTANTS);
     //Set default settings into the selectors and some other starting values
     var map;
