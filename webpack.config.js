@@ -5,6 +5,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const outputDirectory = 'build';
 
 module.exports = {
+    devtool: 'eval-source-map',
     entry: ['babel-polyfill', './public/script.js'],
     output: {
         path: path.join(__dirname, outputDirectory),
