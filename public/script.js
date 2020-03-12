@@ -1,15 +1,36 @@
-import $ from "jquery";
+var $ = require("jquery");
 import 'ol/ol.css';
+var ol = require('ol');
 import Map from 'ol/Map';
-import View from "ol/View";
-import olControl from "ol/control";
-import * as olProj from "ol/proj";
-import * as olSource from "ol/source";
-import * as olExtent from "ol/extent";
-import * as olLayer from "ol/layer";
-import * as moment from 'moment';
+import View  from "ol/View";
+var olControl = require("ol/control");
+var olProj = require("ol/proj");
+var olSource = require("ol/source");
+var olExtent = require("ol/extent");
+var olLayer = require("ol/layer");
+var olProj = require("ol/proj");
 
-window.CONSTANTS;
+var moment = require("moment");
+
+window.CONSTANTS= {
+    "n": {
+        "extent": [-3850000.0,-5350000.0,3750000.0,5850000.0],
+        "locationVal": "-3850000.0,-5350000.0,3750000.0,5850000.0",
+        "css": {"width":340, "height":502},
+        "width":304,
+        "height":448,
+        "srs":"EPSG:3411"
+    },
+    "s": {
+        "extent": [-3950000.0,-3950000.0,3950000.0,4350000.0],
+        "locationVal": "-3950000.0,-3950000.0,3950000.0,4350000.0",
+        "css": {"width":480, "height":504},
+        "width":730,
+        "height":768,
+        "srs":"EPSG:3412"
+    }
+}
+
 window.STATE = {
     stop: true,
     rate: 100,
@@ -23,7 +44,6 @@ window.STATE = {
 }
 
 async function main() {
-    window.CONSTANTS = await readJSON("./public/constants.json");
     console.log(window.CONSTANTS);
     //Set default settings into the selectors and some other starting values
     var map;
@@ -47,6 +67,7 @@ async function main() {
 }
 
 async function init(map){
+    
     $('input:radio[name=ext-con]').val(['extent']);//Default values
     $('input:radio[name=n-s]').val(['n']);
     $('input:radio[name=dates]').val(['Daily']);
@@ -216,11 +237,7 @@ function updateWMSLayerParams(layer, params) {
         const source = layer.getSource();
         source.updateParams(params);
         source.refresh();
-        map.once('rendercomplete', function(event) {
-            $("#date").html(getDateString([window.STATE.current.getFullYear(), window.STATE.current.getMonth()+1, window.STATE.current.getDate()]));//Wait for map to be ready to change the date tag
-            resolve();
-            
-        });
+        $("#date").html(getDateString([window.STATE.current.getFullYear(), window.STATE.current.getMonth()+1, window.STATE.current.getDate()]));//Wait for map to be ready to change the date tag
     });
     
 };
