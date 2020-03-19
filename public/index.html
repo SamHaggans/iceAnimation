@@ -46,38 +46,9 @@
             <input type="radio" value="n" name="n-s">Arctic
             <input type="radio" value="s" name="n-s">Antarctic
             <br>
-         Starting Year (1979-2018): <input type="number" name="sYear" min="1979" max="2018"> Starting Month: <select name="sMonth">
-                                                                                              <option value="0">January</option>
-                                                                                              <option value="1">February</option>
-                                                                                              <option value="2">March</option>
-                                                                                              <option value="3">April</option>
-                                                                                              <option value="4">May</option>
-                                                                                              <option value="5">June</option>
-                                                                                              <option value="6">July</option>
-                                                                                              <option value="7">August</option>
-                                                                                              <option value="8">September</option>
-                                                                                              <option value="9">October</option>
-                                                                                              <option value="10">November</option>
-                                                                                              <option value="11">December</option>
-                                                                                            </select> 
-           Starting Day (1-28): <input type="number" name="sDay" min="1" max="28">
-          
-          <br>
-           Ending Year (1979-2018): <input type="number" name="eYear" min="1979" max="2018"> Ending Month: <select name="eMonth">
-                                                                                              <option value="0">January</option>
-                                                                                              <option value="1">February</option>
-                                                                                              <option value="2">March</option>
-                                                                                              <option value="3">April</option>
-                                                                                              <option value="4">May</option>
-                                                                                              <option value="5">June</option>
-                                                                                              <option value="6">July</option>
-                                                                                              <option value="7">August</option>
-                                                                                              <option value="8">September</option>
-                                                                                              <option value="9">October</option>
-                                                                                              <option value="10">November</option>
-                                                                                              <option value="11">December</option>
-          </select> 
-           Ending Day (1-28): <input type="number" name="eDay" min="1" max="28">
+            Starting Date (1979-2018): <input type = "date" name = "sDate">
+            <br>
+            Ending Date (1979-2018): <input type = "date" name = "eDate">
           <br>
           <button id = "animate" type="button">Start Animation</button>
           <button id = "updateParams" type="button">Update Parameters</button>

@@ -38,10 +38,8 @@ async function init(){
     $('input:radio[name=ext-con]').val(['extent']);//Default values
     $('input:radio[name=n-s]').val(['n']);
     $('input:radio[name=dates]').val(['Daily']);
-    $('input[name=sYear]').val(1990);
-    $('input[name=eYear]').val(2018);
-    $('input[name=sDay]').val(1);
-    $('input[name=eDay]').val(1);
+    document.querySelector('input[name="sDate"]').value = "1990-01-01";
+    document.querySelector('input[name="eDate"]').value = "2018-01-01";
     $("#map").html("");//Empty map when a new animation occurs
 
     
@@ -50,8 +48,7 @@ async function init(){
 
     map.addLayer(createLayer());
     await updateState();
-    var newStart = moment().year(STATE.start.year()).month(STATE.start.month()).day(STATE.start.day())
-    STATE.current = newStart;
+    STATE.current = moment(STATE.start);
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
     var zoomToExtentControl = new ol.control.ZoomToExtent({
         extent: getLocationParams().extent,
@@ -101,8 +98,7 @@ function nextDate(){
         STATE.current.add(1, "d")
     }
     if (STATE.current.isAfter(STATE.end)) {
-        var newStart = moment().year(STATE.start.year()).month(STATE.start.month()).day(STATE.start.day())
-        STATE.current = newStart;
+        STATE.current= moment(STATE.start);
     }
 }
 
@@ -111,9 +107,9 @@ function updateState() {
     STATE.norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
     STATE.dateLoopStyle = $('input[name=dates]:checked').val();//Get value for the looping style
     STATE.monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-    STATE.start = moment().year(parseInt($('input[name=sYear]').val())).month(parseInt($('select[name=sMonth]').val())).day(parseInt($('input[name=sDay]').val()));
-    STATE.end = moment().year(parseInt($('input[name=eYear]').val())).month(parseInt($('select[name=eMonth]').val())).day(parseInt($('input[name=eDay]').val()));
-    
+    STATE.start = moment(document.querySelector('input[name="sDate"]').value)
+    STATE.end = moment(document.querySelector('input[name="eDate"]').value)
+    STATE.current = moment(STATE.start);
     var wmsParams = {
         LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
         SRS: getLocationParams().srs,
