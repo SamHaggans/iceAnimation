@@ -2,9 +2,9 @@ var CONSTANTS;
 var STATE = {
     stop: true,
     rate: 100,
-    current: new Date(1990, 0, 1),
-    start: new Date(1990, 0, 1),
-    end: new Date(2018, 11, 28),
+    current: moment().year(1990).month(0).day(1),
+    start: moment().year(1990).month(0).day(1),
+    end: moment().year(2018).month(11).day(31),
     extCon: "extent",
     norSouth: "n",
     dateLoopStyle: "daily",
@@ -12,7 +12,6 @@ var STATE = {
 
 }
 var map;
-
 async function main() {
     CONSTANTS = await readJSON("constants.json");
     //Set default settings into the selectors and some other starting values
@@ -39,10 +38,8 @@ async function init(){
     $('input:radio[name=ext-con]').val(['extent']);//Default values
     $('input:radio[name=n-s]').val(['n']);
     $('input:radio[name=dates]').val(['Daily']);
-    $('input[name=sYear]').val(1990);
-    $('input[name=eYear]').val(2018);
-    $('input[name=sDay]').val(1);
-    $('input[name=eDay]').val(28);
+    document.querySelector('input[name="sDate"]').value = "1990-01-01";
+    document.querySelector('input[name="eDate"]').value = "2018-01-01";
     $("#map").html("");//Empty map when a new animation occurs
 
     
@@ -51,7 +48,7 @@ async function init(){
 
     map.addLayer(createLayer());
     await updateState();
-    STATE.current = STATE.start;
+    STATE.current = moment(STATE.start);
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
     var zoomToExtentControl = new ol.control.ZoomToExtent({
         extent: getLocationParams().extent,
@@ -63,7 +60,7 @@ async function init(){
 
     STATE.stop = true;
     $("#pauseAnimation").html("Start Animation");
-    $("#date").html(getDateString([STATE.current.getFullYear(), STATE.current.getMonth()+1, STATE.current.getDate()]));
+    $("#date").html(STATE.current.format("YYYY-MM-DD"));
     animationLoop(map);
 }
 
@@ -78,7 +75,7 @@ async function animationLoop(map){
                 BBOX: getLocationParams().locationVal,
                 TILED: false,
                 format:"image/png",
-                TIME: STATE.current.getFullYear() + "-" + STATE.current.getMonth()+1 + "-" + STATE.current.getDate(),
+                TIME: STATE.current.format("YYYY-MM-DD"),
                 STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
             };
             await updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
@@ -92,18 +89,16 @@ async function animationLoop(map){
 
 function nextDate(){
     if (STATE.dateLoopStyle == "Monthly") {
-        if (STATE.current.month < 11) {
-            STATE.current = new Date(STATE.current.getFullYear(), STATE.current.getMonth()+1, 1);
-        }
-        else if (STATE.current.month = 11) {
-            STATE.current = new Date(STATE.current.getFullYear()+1, 0, 1);
-        }
+        STATE.current.add(1, "M")
     }
     else if (STATE.dateLoopStyle == "SameMonth") {
-        STATE.current = new Date(STATE.current.getFullYear()+1, STATE.monthLoop, 1);
+        STATE.current.add(1, "y")
     }
     else {
-        STATE.current.setDate(STATE.current.getDate()+1);
+        STATE.current.add(1, "d")
+    }
+    if (STATE.current.isAfter(STATE.end)) {
+        STATE.current= moment(STATE.start);
     }
 }
 
@@ -112,35 +107,19 @@ function updateState() {
     STATE.norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
     STATE.dateLoopStyle = $('input[name=dates]:checked').val();//Get value for the looping style
     STATE.monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
-    STATE.start = new Date(parseInt($('input[name=sYear]').val()), parseInt($('select[name=sMonth]').val()), parseInt($('input[name=sDay]').val()));
-    STATE.end = new Date(parseInt($('input[name=eYear]').val()), parseInt($('select[name=eMonth]').val()), parseInt($('input[name=eDay]').val()));
-
+    STATE.start = moment(document.querySelector('input[name="sDate"]').value)
+    STATE.end = moment(document.querySelector('input[name="eDate"]').value)
+    STATE.current = moment(STATE.start);
     var wmsParams = {
         LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
         format:"image/png",
-        TIME: STATE.current.getFullYear() + "-" + STATE.current.getMonth()+1 + "-" + STATE.current.getDate(),
+        TIME: STATE.current.format("YYYY-MM-DD"),
         STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
     };
     updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
-}
-
-function getDateString(dateArray) {
-    var year = dateArray[0];
-    var month = dateArray[1];
-    var day = dateArray[2];
-    var monthStr = "" + month;//create the string for month, ensuring it is 2 digits
-    if (month < 10) {
-        monthStr = "0" + month;
-    }
-    var dayStr = "" + day;//string for the day, ensuring 2 digits
-    if (day < 10) {
-        dayStr = "0" + day;
-    }
-    var yearStr = "" + year;//String for year
-    return `${yearStr}-${monthStr}-${dayStr}`;
 }
 
 function getProjection() {
@@ -159,7 +138,7 @@ function createLayer() {
         BBOX: getLocationParams().locationVal,
         TILED: false,
         format:"image/png",
-        TIME: STATE.current.year + "-" + STATE.current.month + "-" + STATE.current.day,
+        TIME: STATE.current.format("YYYY-MM-DD"),
         STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
     };
     var source = new ol.source.ImageWMS({
@@ -206,7 +185,7 @@ function updateWMSLayerParams(layer, params) {
         source.updateParams(params);
         source.refresh();
         map.once('rendercomplete', function(event) {
-            $("#date").html(getDateString([STATE.current.getFullYear(), STATE.current.getMonth()+1, STATE.current.getDate()]));//Wait for map to be ready to change the date tag
+            $("#date").html(STATE.current.format("YYYY-MM-DD"),);//Wait for map to be ready to change the date tag
             resolve();
             
         });
