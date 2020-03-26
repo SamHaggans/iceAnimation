@@ -9,7 +9,6 @@ var STATE = {
     norSouth: "n",
     dateLoopStyle: "daily",
     monthLoop: 0
-
 }
 var map;
 async function main() {
@@ -45,9 +44,9 @@ async function init(){
     
     projection = getProjection();
     map = getMap(projection);
-
     map.addLayer(createLayer());
     await updateState();
+
     STATE.current = moment(STATE.start);
     map.getLayers().getArray()[0].setZIndex(1000);//loading on top
     var zoomToExtentControl = new ol.control.ZoomToExtent({
@@ -61,11 +60,11 @@ async function init(){
     STATE.stop = true;
     $("#pauseAnimation").html("Start Animation");
     $("#date").html(STATE.current.format("YYYY-MM-DD"));
-    animationLoop(map);
+    animationLoop();
 }
 
 
-async function animationLoop(map){
+async function animationLoop(){
     while (true) {
         if (!STATE.stop) {
             nextDate();
@@ -93,6 +92,7 @@ function nextDate(){
     }
     else if (STATE.dateLoopStyle == "SameMonth") {
         STATE.current.add(1, "y")
+        STATE.current.month(STATE.monthLoop)
     }
     else {
         STATE.current.add(1, "d")
@@ -119,6 +119,10 @@ function updateState() {
         TIME: STATE.current.format("YYYY-MM-DD"),
         STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
     };
+    $("#map").html("");//Empty map when a new animation occurs
+    projection = getProjection();
+    map = getMap(projection);
+    map.addLayer(createLayer());
     updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
 }
 
