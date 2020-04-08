@@ -26,11 +26,6 @@ async function main() {
         $("#animate").html("Start Animation");
         }
     });
-
-
-    $("#updateParams").click(async function () {
-        updateState();
-    });
 }
 
 async function init(){
@@ -68,6 +63,7 @@ async function animationLoop(){
     while (true) {
         if (!STATE.stop) {
             nextDate();
+            [map, projection] = await getState(map, projection);
             var wmsParams = {
                 LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
                 SRS: getLocationParams().srs,
@@ -87,6 +83,33 @@ async function animationLoop(){
     }
 }
 
+function getState(map, projection) {
+    var oldHemisphere = STATE.norSouth;
+    STATE.extCon = $('input[name=ext-con]:checked').val();//Get value for extent or concentration
+    STATE.norSouth = $('input[name=n-s]:checked').val();//Get value for North or South
+    STATE.dateLoopStyle = $('input[name=dates]:checked').val();//Get value for the looping style
+    STATE.monthLoop = $('select[name=monthsLoop]').val();//Month to be repeated if that option is chosen
+    STATE.start = moment(document.querySelector('input[name="sDate"]').value)
+    STATE.end = moment(document.querySelector('input[name="eDate"]').value)
+    if (oldHemisphere != STATE.norSouth) {
+        
+        var wmsParams = {
+            LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+            SRS: getLocationParams().srs,
+            BBOX: getLocationParams().locationVal,
+            TILED: false,
+            format:"image/png",
+            TIME: STATE.current.format("YYYY-MM-DD"),
+            STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
+        };
+        $("#map").html("");//Empty map when a new animation occurs
+        projection = getProjection();
+        map = getMap(projection);
+        map.addLayer(createLayer());
+        updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
+    }
+    return [map, projection];
+}
 function nextDate(){
     if (STATE.dateLoopStyle == "Monthly") {
         STATE.current.add(1, "M")
