@@ -77,8 +77,9 @@ async function animationLoop(){
                 TIME: STATE.current.format("YYYY-MM-DD"),
                 STYLES: "NSIDC:g02135_" + STATE.extCon + "_raster_basemap"
             };
+            STATE.rate = 2000 - $("#speedSlider").val();
             await updateWMSLayerParams(map.getLayers().getArray()[0],wmsParams);
-            await sleep(STATE.rate);
+            await sleep(STATE.rate);      
         }
         else {
             await sleep(50);
