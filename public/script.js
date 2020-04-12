@@ -4,7 +4,7 @@ var STATE = {
     rate: 100,
     current: moment().year(1990).month(0).day(1),
     start: moment().year(1990).month(0).day(1),
-    end: moment().year(2018).month(11).day(31),
+    end: moment().year(2020).month(11).day(31),
     extCon: "extent",
     norSouth: "n",
     dateLoopStyle: "daily",
@@ -31,9 +31,9 @@ async function main() {
 async function init(){
     $('input:radio[name=ext-con]').val(['extent']);//Default values
     $('input:radio[name=n-s]').val(['n']);
-    $('input:radio[name=dates]').val(['Daily']);
+    $('input:radio[name=dates]').val(['daily']);
     document.querySelector('input[name="sDate"]').value = "1990-01-01";
-    document.querySelector('input[name="eDate"]').value = "2018-01-01";
+    document.querySelector('input[name="eDate"]').value = "2020-01-01";
     $("#map").html("");//Empty map when a new animation occurs
 
     
@@ -64,8 +64,12 @@ async function animationLoop(){
         if (!STATE.stop) {
             nextDate();
             [map, projection] = await getState(map, projection);
+            let sourceType = "monthly";
+            if (STATE.dateLoopStyle == "daily") {
+                sourceType = "daily";
+            }
             var wmsParams = {
-                LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+                LAYERS: "NSIDC:g02135_" + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
                 SRS: getLocationParams().srs,
                 BBOX: getLocationParams().locationVal,
                 TILED: false,
@@ -92,9 +96,12 @@ function getState(map, projection) {
     STATE.start = moment(document.querySelector('input[name="sDate"]').value)
     STATE.end = moment(document.querySelector('input[name="eDate"]').value)
     if (oldHemisphere != STATE.norSouth) {
-        
+        let sourceType = "monthly";
+        if (STATE.dateLoopStyle == "daily") {
+            sourceType = "daily";
+        }
         var wmsParams = {
-            LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+            LAYERS: "NSIDC:g02135_" + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
             SRS: getLocationParams().srs,
             BBOX: getLocationParams().locationVal,
             TILED: false,
@@ -111,12 +118,14 @@ function getState(map, projection) {
     return [map, projection];
 }
 function nextDate(){
-    if (STATE.dateLoopStyle == "Monthly") {
-        STATE.current.add(1, "M")
+    if (STATE.dateLoopStyle == "monthly") {
+        STATE.current.add(1, "M");
+        STATE.current.set({"date": 1});
     }
-    else if (STATE.dateLoopStyle == "SameMonth") {
+    else if (STATE.dateLoopStyle == "samemonth") {
         STATE.current.add(1, "y")
         STATE.current.month(STATE.monthLoop)
+        STATE.current.set({"date": 1});
     }
     else {
         STATE.current.add(1, "d")
@@ -134,8 +143,13 @@ function updateState() {
     STATE.start = moment(document.querySelector('input[name="sDate"]').value)
     STATE.end = moment(document.querySelector('input[name="eDate"]').value)
     STATE.current = moment(STATE.start);
+    console.log(STATE.dateLoopStyle);
+    let sourceType = "monthly";
+    if (STATE.dateLoopStyle == "daily") {
+        sourceType = "daily";
+    }
     var wmsParams = {
-        LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+        LAYERS: "NSIDC:g02135_" + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
@@ -153,15 +167,18 @@ function updateState() {
 function getProjection() {
     var projection = new ol.proj.Projection({//Map projection
         code: CONSTANTS[STATE.norSouth].srs,
-        units: 'meters',
         extent: CONSTANTS[STATE.norSouth].extent
     });
     return projection;
 }
 
 function createLayer() {
+    let sourceType = "monthly";
+    if (STATE.dateLoopStyle == "daily") {
+        sourceType = "daily";
+    }
     var wmsParams = {
-        LAYERS: "NSIDC:g02135_" + STATE.extCon + "_raster_daily_" + STATE.norSouth,
+        LAYERS: "NSIDC:g02135_" + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
@@ -215,7 +232,6 @@ function updateWMSLayerParams(layer, params) {
         map.once('rendercomplete', function(event) {
             $("#date").html(STATE.current.format("YYYY-MM-DD"),);//Wait for map to be ready to change the date tag
             resolve();
-            
         });
     });
     
