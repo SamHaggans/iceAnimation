@@ -35,7 +35,9 @@ async function init(){
     document.querySelector('input[name="sDate"]').value = "1990-01-01";
     document.querySelector('input[name="eDate"]').value = "2020-01-01";
     $("#map").html("");//Empty map when a new animation occurs
-
+    var timeNow = new moment();
+    $("#startingText").html(`Starting Date (1979-${timeNow.year()}):`)
+    $("#endingText").html(`Ending Date (1979-${timeNow.year()}):`)
     
     projection = getProjection();
     map = getMap(projection);
