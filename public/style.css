@@ -19,3 +19,34 @@
 .ol-zoom-extent button{ 
     background-image: url("extentButton.png");
 }
+
+.button {
+    height: 40px;
+    width: 40px;
+    border: 2px solid blue;
+    display: inline-block;
+    background-size:100% 100%;
+    cursor: pointer;
+}
+.firstFrame {
+    background-image: url("first.png");
+}
+.prevFrame {
+    background-image: url("prev.png");
+}
+.play {
+    background-image: url("play.png");
+}
+.pause {
+    background-image: url("pause.png");
+}
+.nextFrame {
+    background-image: url("next.png");
+}
+.lastFrame {
+    background-image: url("last.png");
+}
+
+.hidden {
+    display: none;
+}
