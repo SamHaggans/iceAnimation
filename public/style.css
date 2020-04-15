@@ -19,3 +19,7 @@
 .ol-zoom-extent button{ 
     background-image: url("extentButton.png");
 }
+
+.hidden {
+    display: none;
+}

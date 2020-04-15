@@ -258,6 +258,7 @@ function getLocationParams() {
  * @return {promise} - A promise of updating the layer
  */
 function updateWMSLayerParams(layer, params) {
+  toggleLegend();
   return new Promise(function(resolve, reject) {
     const source = layer.getSource();
     source.updateParams(params);
@@ -296,4 +297,15 @@ function readJSON(filename) {
  */
 function sleep(ms) { // Sleep function for pauses between frames
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+/** Method to set the visibility of the legend
+ * @param {string} extCon - Sets the extent or concentration setting
+ */
+function toggleLegend() {
+  if (STATE.extCon == 'extent') {
+    $('#legend').addClass('hidden');
+  }
+  if (STATE.extCon == 'concentration') {
+    $('#legend').removeClass('hidden');
+  }
 }
