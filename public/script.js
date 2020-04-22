@@ -8,7 +8,6 @@ const STATE = {
   extCon: 'extent',
   norSouth: 'n',
   dateLoopStyle: 'daily',
-  monthLoop: 0,
 };
 let map;
 /** Main function run to start animation */
@@ -102,8 +101,6 @@ function getState(map, projection) {
   // Get value for North or South
   STATE.dateLoopStyle = $('input[name=dates]:checked').val();
   // Get value for the looping style
-  STATE.monthLoop = $('select[name=monthsLoop]').val();
-  // Month to be repeated if that option is chosen
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   if (oldHemisphere != STATE.norSouth) {
@@ -134,10 +131,6 @@ function nextDate() {
   if (STATE.dateLoopStyle == 'monthly') {
     STATE.current.add(1, 'M');
     STATE.current.set({'date': 1});
-  } else if (STATE.dateLoopStyle == 'samemonth') {
-    STATE.current.add(1, 'y');
-    STATE.current.month(STATE.monthLoop);
-    STATE.current.set({'date': 1});
   } else {
     STATE.current.add(1, 'd');
   }
@@ -153,8 +146,6 @@ function updateState() {
   // Get value for North or South
   STATE.dateLoopStyle = $('input[name=dates]:checked').val();
   // Get value for the looping style
-  STATE.monthLoop = $('select[name=monthsLoop]').val();
-  // Month to be repeated if that option is chosen
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   STATE.current = moment(STATE.start);
