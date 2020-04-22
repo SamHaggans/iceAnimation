@@ -66,19 +66,7 @@ async function animationLoop() {
     if (!STATE.stop) {
       nextDate();
       [map, projection] = await getState(map, projection);
-      let sourceType = 'monthly';
-      if (STATE.dateLoopStyle == 'daily') {
-        sourceType = 'daily';
-      }
-      const wmsParams = {
-        LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-        SRS: getLocationParams().srs,
-        BBOX: getLocationParams().locationVal,
-        TILED: false,
-        format: 'image/png',
-        TIME: STATE.current.format('YYYY-MM-DD'),
-        STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-      };
+      const wmsParams = getWMSParams();
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
       await sleep(STATE.rate);
@@ -104,19 +92,7 @@ function getState(map, projection) {
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   if (oldHemisphere != STATE.norSouth) {
-    let sourceType = 'monthly';
-    if (STATE.dateLoopStyle == 'daily') {
-      sourceType = 'daily';
-    }
-    const wmsParams = {
-      LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-      SRS: getLocationParams().srs,
-      BBOX: getLocationParams().locationVal,
-      TILED: false,
-      format: 'image/png',
-      TIME: STATE.current.format('YYYY-MM-DD'),
-      STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-    };
+    const wmsParams = getWMSParams();
     $('#map').html('');// Empty map when a new animation occurs
     projection = getProjection();
     map = getMap(projection);
@@ -149,20 +125,7 @@ function updateState() {
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   STATE.current = moment(STATE.start);
-  console.log(STATE.dateLoopStyle);
-  let sourceType = 'monthly';
-  if (STATE.dateLoopStyle == 'daily') {
-    sourceType = 'daily';
-  }
-  const wmsParams = {
-    LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-  };
+  const wmsParams = getWMSParams();
   $('#map').html('');// Empty map when a new animation occurs
   projection = getProjection();
   map = getMap(projection);
@@ -185,19 +148,7 @@ function getProjection() {
  * @return {layer} layer
  */
 function createLayer() {
-  let sourceType = 'monthly';
-  if (STATE.dateLoopStyle == 'daily') {
-    sourceType = 'daily';
-  }
-  const wmsParams = {
-    LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-  };
+  const wmsParams = getWMSParams();
   const source = new ol.source.ImageWMS({
     url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
     params: wmsParams,
@@ -289,6 +240,26 @@ function readJSON(filename) {
 function sleep(ms) { // Sleep function for pauses between frames
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/** Method to set the wms parameters
+ * @return {object} wmsParameters
+ */
+function getWMSParams() {
+  let sourceType = 'monthly';
+  if (STATE.dateLoopStyle == 'daily') {
+    sourceType = 'daily';
+  }
+  return {
+    LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
+    SRS: getLocationParams().srs,
+    BBOX: getLocationParams().locationVal,
+    TILED: false,
+    format: 'image/png',
+    TIME: STATE.current.format('YYYY-MM-DD'),
+    STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
+  };
+}
+
 /** Method to set the visibility of the legend
  * @param {string} extCon - Sets the extent or concentration setting
  */
