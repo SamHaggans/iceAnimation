@@ -17,7 +17,14 @@
   <body>
     <h2>Sea Ice Animation</h2>
     <h3 id = "date"></h3>
+    <div class = "button firstFrame" id = "firstFrame"></div>
+    <div class = "button prevFrame" id = "prevFrame"></div>
+    <div class = "button play" id = "playButton"></div>
+    <div class = "button nextFrame" id = "nextFrame"></div>
+    <div class = "button lastFrame" id = "lastFrame"></div>
+    <br>
     <div id="map" class="map">Loading......</div>
+    
     <div class = "config">
     <form id = "customize">
     <input type="radio" value="extent" name="ext-con">Extent
@@ -25,9 +32,9 @@
     <br>
     
         
-        <input type="radio" value="Daily" name="dates">Every Day
-        <input type="radio" value="Monthly" name="dates">Every Month
-        <input type="radio" value="SameMonth" name="dates">Same Month Through Years:  <select name="monthsLoop">
+        <input type="radio" value="daily" name="dates">Every Day
+        <input type="radio" value="monthly" name="dates">Every Month
+        <input type="radio" value="samemonth" name="dates">Same Month Through Years:  <select name="monthsLoop">
             <option value="0">January</option>
             <option value="1">February</option>
             <option value="2">March</option>
@@ -46,17 +53,14 @@
             <input type="radio" value="n" name="n-s">Arctic
             <input type="radio" value="s" name="n-s">Antarctic
             <br>
-            Starting Date (1979-2018): <input type = "date" name = "sDate">
+            <span id = "startingText"></span> <input type = "date" name = "sDate">
             <br>
-            Ending Date (1979-2018): <input type = "date" name = "eDate">
-          <br>
-          <button id = "animate" type="button">Start Animation</button>
-          <button id = "updateParams" type="button">Update Parameters</button>
-          
+            <span id = "endingText"></span><input type = "date" name = "eDate">
+            
           
     </form>
     <br>Speed:<br>
-    Slowest <input type="range" name="speed" min="0" max="1900"> Fastest
+    Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
   </div>
   </body>
 </html>
