@@ -170,8 +170,8 @@ function getMap(projection) {
     view: new ol.View({
       projection: projection,
       center: ol.extent.getCenter(extent), // Start in the center of the image
-      zoom: 1,
-      minZoom: 1,
+      zoom: 0,
+      minZoom: 0,
       extent: extent,
     }),
     controls: ol.control.PanZoom,
