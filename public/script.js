@@ -2,13 +2,25 @@ let CONSTANTS;
 const STATE = {
   stop: true,
   rate: 100,
-  current: moment().year(1990).month(0).day(1),
-  start: moment().year(1990).month(0).day(1),
-  end: moment().year(2020).month(11).day(31),
+  current: moment(),
+  start: moment(),
+  end: moment(),
   extCon: 'extent',
   norSouth: 'n',
   dateLoopStyle: 'daily',
 };
+
+const DEFAULTS = {
+  daily: {
+    start: moment().year(1978).month(9).day(25),
+    end: moment().subtract(2, 'days'),
+  },
+  monthly: {
+    start: moment().year(1978).month(10).startOf('month'),
+    end: moment().subtract(1, 'months').subtract(2, 'days').startOf('month'),
+  },
+};
+
 let map;
 /** Main function run to start animation */
 async function main() {
@@ -31,12 +43,12 @@ async function init() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
-  document.querySelector('input[name="sDate"]').value = '1990-01-01';
-  document.querySelector('input[name="eDate"]').value = '2020-01-01';
+  document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.dateLoopStyle].start.format('YYYY-MM-DD');
+  document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.dateLoopStyle].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
   const timeNow = new moment();
-  $('#startingText').html(`Starting Date (1979-${timeNow.year()}):`);
-  $('#endingText').html(`Ending Date (1979-${timeNow.year()}):`);
+  $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
+  $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
 
   projection = getProjection();
   map = getMap(projection);
@@ -83,6 +95,7 @@ async function animationLoop() {
 */
 function getState(map, projection) {
   const oldHemisphere = STATE.norSouth;
+  const oldMode = STATE.dateLoopStyle;
   STATE.extCon = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
   STATE.norSouth = $('input[name=n-s]:checked').val();
@@ -98,6 +111,13 @@ function getState(map, projection) {
     map = getMap(projection);
     map.addLayer(createLayer());
     updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+  }
+  if (oldMode != STATE.dateLoopStyle) {
+    document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.dateLoopStyle].start.format('YYYY-MM-DD');
+    document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.dateLoopStyle].end.format('YYYY-MM-DD');
+    STATE.start = moment(document.querySelector('input[name="sDate"]').value);
+    STATE.current = moment(STATE.start);
+    STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
   return [map, projection];
 }
