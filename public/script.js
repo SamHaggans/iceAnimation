@@ -113,6 +113,9 @@ function nextDate() {
   if (STATE.current.isAfter(STATE.end)) {
     STATE.current= moment(STATE.start);
   }
+  if (STATE.current.isBefore(STATE.start)) {
+    STATE.current= moment(STATE.start);
+  }
 }
 /** Method to update the state of the loop*/
 function updateState() {
