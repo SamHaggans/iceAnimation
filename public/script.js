@@ -22,8 +22,19 @@ const DEFAULTS = {
 };
 
 let map;
+const validDates = [];
 /** Main function run to start animation */
 async function main() {
+  await fetch('https://nsidc.org/api/mapservices/NSIDC/wms?service=wms&version=1.1.1&request=GetCapabilities').then(function(response) {
+    return response.text();
+  }).then(function(text) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(text, 'text/xml');
+    const extents = xmlDoc.getElementsByTagName('Extent');
+    for (i = 0; i <= 7; i++) {
+      validDates.push(extents[i].childNodes[0].nodeValue.split(','));
+    }
+  });
   CONSTANTS = await readJSON('constants.json');
   // Set default settings into the selectors and some other starting values
   init();
@@ -46,7 +57,7 @@ async function init() {
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.dateLoopStyle].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.dateLoopStyle].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
-  const timeNow = new moment();
+  const timeNow = moment();
   $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
   $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
 
@@ -136,6 +147,20 @@ function nextDate() {
   if (STATE.current.isBefore(STATE.start)) {
     STATE.current= moment(STATE.start);
   }
+  let indexVal = 0;
+  if (STATE.extCon == 'concentration') {
+    indexVal += 4;
+  }
+  if (STATE.dateLoopeStyle == 'monthly') {
+    indexVal += 2;
+  }
+  if (STATE.norSouth == 's') {
+    indexVal +=1;
+  }
+  if (!(validDates[indexVal].includes(STATE.current.utc().startOf('day').toISOString()))) {
+    nextDate();
+  }
+  
 }
 /** Method to update the state of the loop*/
 function updateState() {
