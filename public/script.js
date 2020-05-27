@@ -25,17 +25,16 @@ let map;
 const validDates = [];
 /** Main function run to start animation */
 async function main() {
-  await fetch('https://nsidc.org/api/mapservices/NSIDC/wms?service=wms&version=1.1.1&request=GetCapabilities').then(function(response) {
-    return response.text();
-  }).then(function(text) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, 'text/xml');
-    const extents = xmlDoc.getElementsByTagName('Extent');
-    for (i = 0; i <= 7; i++) {
-      validDates.push(extents[i].childNodes[0].nodeValue.split(','));
-    }
-  });
   CONSTANTS = await readJSON('constants.json');
+  const gcr = CONSTANTS.getCapabilities;
+  const getCapabilities = await runXMLHTTPRequest(`${gcr.server}?service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
+  const extents = xmlDoc.getElementsByTagName('Extent');
+  for (i = 0; i <= 7; i++) {
+    validDates.push(extents[i].childNodes[0].nodeValue.split(','));
+  }
+
   // Set default settings into the selectors and some other starting values
   init();
 
@@ -269,6 +268,23 @@ function readJSON(filename) {
     request.onreadystatechange = function() {
       if (request.readyState == 4 && request.status == '200') {
         resolve(JSON.parse(request.responseText));
+      }
+    };
+    request.send(null);
+  });
+}
+
+/** Method to read a json file
+ * @param {string} url - Request url
+ * @return {string} - The returned information
+*/
+function runXMLHTTPRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == '200') {
+        resolve(request.responseText);
       }
     };
     request.send(null);
