@@ -2,14 +2,25 @@ let CONSTANTS;
 const STATE = {
   stop: true,
   rate: 100,
-  current: moment().year(1990).month(0).day(1),
-  start: moment().year(1990).month(0).day(1),
-  end: moment().year(2020).month(11).day(31),
-  extCon: 'extent',
-  norSouth: 'n',
-  dateLoopStyle: 'daily',
-  monthLoop: 0,
+  current: moment(),
+  start: moment(),
+  end: moment(),
+  dataType: 'extent',
+  hemi: 'n',
+  temporality: 'daily',
 };
+
+const DEFAULTS = {
+  daily: {
+    start: moment().year(1978).month(9).day(25),
+    end: moment().subtract(2, 'days'),
+  },
+  monthly: {
+    start: moment().year(1978).month(10).startOf('month'),
+    end: moment().subtract(1, 'months').subtract(2, 'days').startOf('month'),
+  },
+};
+
 let map;
 /** Main function run to start animation */
 async function main() {
@@ -45,12 +56,14 @@ async function init() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
-  document.querySelector('input[name="sDate"]').value = '1990-01-01';
-  document.querySelector('input[name="eDate"]').value = '2020-01-01';
+  document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
+  document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
+
   const timeNow = moment();
-  $('#startingText').html(`Starting Date (1979-${timeNow.year()}):`);
-  $('#endingText').html(`Ending Date (1979-${timeNow.year()}):`);
+  $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
+  $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
+
 
   projection = getProjection();
   map = getMap(projection);
@@ -128,19 +141,7 @@ async function animationLoop() {
     if (!STATE.stop) {
       nextDate();
       [map, projection] = await getState(map, projection);
-      let sourceType = 'monthly';
-      if (STATE.dateLoopStyle == 'daily') {
-        sourceType = 'daily';
-      }
-      const wmsParams = {
-        LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-        SRS: getLocationParams().srs,
-        BBOX: getLocationParams().locationVal,
-        TILED: false,
-        format: 'image/png',
-        TIME: STATE.current.format('YYYY-MM-DD'),
-        STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-      };
+      const wmsParams = getWMSParams();
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
       await sleep(STATE.rate);
@@ -150,59 +151,52 @@ async function animationLoop() {
   }
 }
 
-/** Method to update the state of the loop
+/** Method to get the state of the loop
  * @return {array} - An array containing the map and projection objects
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
 */
 function getState(map, projection) {
-  const oldHemisphere = STATE.norSouth;
-  STATE.extCon = $('input[name=ext-con]:checked').val();
+  const oldHemisphere = STATE.hemi;
+  const oldMode = STATE.temporality;
+  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
-  STATE.norSouth = $('input[name=n-s]:checked').val();
+  STATE.hemi = $('input[name=n-s]:checked').val();
   // Get value for North or South
-  STATE.dateLoopStyle = $('input[name=dates]:checked').val();
+  STATE.temporality = $('input[name=dates]:checked').val();
   // Get value for the looping style
-  STATE.monthLoop = $('select[name=monthsLoop]').val();
-  // Month to be repeated if that option is chosen
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-  if (oldHemisphere != STATE.norSouth) {
-    let sourceType = 'monthly';
-    if (STATE.dateLoopStyle == 'daily') {
-      sourceType = 'daily';
-    }
-    const wmsParams = {
-      LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-      SRS: getLocationParams().srs,
-      BBOX: getLocationParams().locationVal,
-      TILED: false,
-      format: 'image/png',
-      TIME: STATE.current.format('YYYY-MM-DD'),
-      STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-    };
+  if (oldHemisphere != STATE.hemi) {
+    const wmsParams = getWMSParams();
     $('#map').html('');// Empty map when a new animation occurs
     projection = getProjection();
     map = getMap(projection);
     map.addLayer(createLayer());
     updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
   }
+  if (oldMode != STATE.temporality) {
+    document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
+    document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
+    STATE.start = moment(document.querySelector('input[name="sDate"]').value);
+    STATE.current = moment(STATE.start);
+    STATE.end = moment(document.querySelector('input[name="eDate"]').value);
+  }
   return [map, projection];
 }
 
 /** Method to go to the next date for the animation*/
 function nextDate() {
-  if (STATE.dateLoopStyle == 'monthly') {
+  if (STATE.temporality == 'monthly') {
     STATE.current.add(1, 'M');
-    STATE.current.set({'date': 1});
-  } else if (STATE.dateLoopStyle == 'samemonth') {
-    STATE.current.add(1, 'y');
-    STATE.current.month(STATE.monthLoop);
     STATE.current.set({'date': 1});
   } else {
     STATE.current.add(1, 'd');
   }
   if (STATE.current.isAfter(STATE.end)) {
+    STATE.current= moment(STATE.start);
+  }
+  if (STATE.current.isBefore(STATE.start)) {
     STATE.current= moment(STATE.start);
   }
 }
@@ -226,31 +220,16 @@ function previousDate() {
 
 /** Method to update the state of the loop*/
 function updateState() {
-  STATE.extCon = $('input[name=ext-con]:checked').val();
+  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
-  STATE.norSouth = $('input[name=n-s]:checked').val();
+  STATE.hemi = $('input[name=n-s]:checked').val();
   // Get value for North or South
-  STATE.dateLoopStyle = $('input[name=dates]:checked').val();
+  STATE.temporality = $('input[name=dates]:checked').val();
   // Get value for the looping style
-  STATE.monthLoop = $('select[name=monthsLoop]').val();
-  // Month to be repeated if that option is chosen
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   STATE.current = moment(STATE.start);
-  console.log(STATE.dateLoopStyle);
-  let sourceType = 'monthly';
-  if (STATE.dateLoopStyle == 'daily') {
-    sourceType = 'daily';
-  }
-  const wmsParams = {
-    LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-  };
+  const wmsParams = getWMSParams();
   $('#map').html('');// Empty map when a new animation occurs
   projection = getProjection();
   map = getMap(projection);
@@ -263,8 +242,8 @@ function updateState() {
  */
 function getProjection() {
   const projection = new ol.proj.Projection({// Map projection
-    code: CONSTANTS[STATE.norSouth].srs,
-    extent: CONSTANTS[STATE.norSouth].extent,
+    code: CONSTANTS[STATE.hemi].srs,
+    extent: CONSTANTS[STATE.hemi].extent,
   });
   return projection;
 }
@@ -273,19 +252,7 @@ function getProjection() {
  * @return {layer} layer
  */
 function createLayer() {
-  let sourceType = 'monthly';
-  if (STATE.dateLoopStyle == 'daily') {
-    sourceType = 'daily';
-  }
-  const wmsParams = {
-    LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
-  };
+  const wmsParams = getWMSParams();
   const source = new ol.source.ImageWMS({
     url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
     params: wmsParams,
@@ -307,8 +274,8 @@ function getMap(projection) {
     view: new ol.View({
       projection: projection,
       center: ol.extent.getCenter(extent), // Start in the center of the image
-      zoom: 1,
-      minZoom: 1,
+      zoom: 0,
+      minZoom: 0,
       extent: extent,
     }),
     controls: ol.control.PanZoom,
@@ -320,14 +287,14 @@ function getMap(projection) {
  * @return {object} The parameters
  */
 function getLocationParams() {
-  const extent = CONSTANTS[STATE.norSouth].extent;// Map size
+  const extent = CONSTANTS[STATE.hemi].extent;// Map size
   // var extent = [0,0,0,0];
-  $('#map').css('width', CONSTANTS[STATE.norSouth].css.width);
-  $('#map').css('height', CONSTANTS[STATE.norSouth].css.height);
-  const locationVal = CONSTANTS[STATE.norSouth].locationVal;
-  const width = CONSTANTS[STATE.norSouth].width;
-  const height = CONSTANTS[STATE.norSouth].height;
-  const srs = CONSTANTS[STATE.norSouth].srs;// Location for request url
+  $('#map').css('width', CONSTANTS[STATE.hemi].css.width);
+  $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
+  const locationVal = CONSTANTS[STATE.hemi].locationVal;
+  const width = CONSTANTS[STATE.hemi].width;
+  const height = CONSTANTS[STATE.hemi].height;
+  const srs = CONSTANTS[STATE.hemi].srs;// Location for request url
   return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
@@ -337,6 +304,7 @@ function getLocationParams() {
  * @return {promise} - A promise of updating the layer
  */
 function updateWMSLayerParams(layer, params) {
+  toggleLegend();
   return new Promise(function(resolve, reject) {
     const source = layer.getSource();
     source.updateParams(params);
@@ -375,4 +343,35 @@ function readJSON(filename) {
  */
 function sleep(ms) { // Sleep function for pauses between frames
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Method to set the wms parameters
+ * @return {object} wmsParameters
+ */
+function getWMSParams() {
+  let sourceType = 'monthly';
+  if (STATE.temporality == 'daily') {
+    sourceType = 'daily';
+  }
+  return {
+    LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
+    SRS: getLocationParams().srs,
+    BBOX: getLocationParams().locationVal,
+    TILED: false,
+    format: 'image/png',
+    TIME: STATE.current.format('YYYY-MM-DD'),
+    STYLES: 'NSIDC:g02135_' + STATE.dataType + '_raster_basemap',
+  };
+}
+
+/** Method to set the visibility of the legend
+ * @param {string} dataType - Sets the extent or concentration setting
+ */
+function toggleLegend() {
+  if (STATE.dataType == 'extent') {
+    $('#legend').addClass('hidden');
+  }
+  if (STATE.dataType == 'concentration') {
+    $('#legend').removeClass('hidden');
+  }
 }
