@@ -5,9 +5,9 @@ const STATE = {
   current: moment(),
   start: moment(),
   end: moment(),
-  extCon: 'extent',
-  norSouth: 'n',
-  dateLoopStyle: 'daily',
+  dataType: 'extent',
+  hemi: 'n',
+  temporality: 'daily',
 };
 
 const DEFAULTS = {
@@ -43,8 +43,8 @@ async function init() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
-  document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.dateLoopStyle].start.format('YYYY-MM-DD');
-  document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.dateLoopStyle].end.format('YYYY-MM-DD');
+  document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
+  document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
   const timeNow = new moment();
   $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
@@ -94,17 +94,17 @@ async function animationLoop() {
  * @param {projection} projection - The projection to be used
 */
 function getState(map, projection) {
-  const oldHemisphere = STATE.norSouth;
-  const oldMode = STATE.dateLoopStyle;
-  STATE.extCon = $('input[name=ext-con]:checked').val();
+  const oldHemisphere = STATE.hemi;
+  const oldMode = STATE.temporality;
+  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
-  STATE.norSouth = $('input[name=n-s]:checked').val();
+  STATE.hemi = $('input[name=n-s]:checked').val();
   // Get value for North or South
-  STATE.dateLoopStyle = $('input[name=dates]:checked').val();
+  STATE.temporality = $('input[name=dates]:checked').val();
   // Get value for the looping style
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-  if (oldHemisphere != STATE.norSouth) {
+  if (oldHemisphere != STATE.hemi) {
     const wmsParams = getWMSParams();
     $('#map').html('');// Empty map when a new animation occurs
     projection = getProjection();
@@ -112,9 +112,9 @@ function getState(map, projection) {
     map.addLayer(createLayer());
     updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
   }
-  if (oldMode != STATE.dateLoopStyle) {
-    document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.dateLoopStyle].start.format('YYYY-MM-DD');
-    document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.dateLoopStyle].end.format('YYYY-MM-DD');
+  if (oldMode != STATE.temporality) {
+    document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
+    document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
     STATE.start = moment(document.querySelector('input[name="sDate"]').value);
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
@@ -124,7 +124,7 @@ function getState(map, projection) {
 
 /** Method to go to the next date for the animation*/
 function nextDate() {
-  if (STATE.dateLoopStyle == 'monthly') {
+  if (STATE.temporality == 'monthly') {
     STATE.current.add(1, 'M');
     STATE.current.set({'date': 1});
   } else {
@@ -139,11 +139,11 @@ function nextDate() {
 }
 /** Method to update the state of the loop*/
 function updateState() {
-  STATE.extCon = $('input[name=ext-con]:checked').val();
+  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
-  STATE.norSouth = $('input[name=n-s]:checked').val();
+  STATE.hemi = $('input[name=n-s]:checked').val();
   // Get value for North or South
-  STATE.dateLoopStyle = $('input[name=dates]:checked').val();
+  STATE.temporality = $('input[name=dates]:checked').val();
   // Get value for the looping style
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
@@ -161,8 +161,8 @@ function updateState() {
  */
 function getProjection() {
   const projection = new ol.proj.Projection({// Map projection
-    code: CONSTANTS[STATE.norSouth].srs,
-    extent: CONSTANTS[STATE.norSouth].extent,
+    code: CONSTANTS[STATE.hemi].srs,
+    extent: CONSTANTS[STATE.hemi].extent,
   });
   return projection;
 }
@@ -206,14 +206,14 @@ function getMap(projection) {
  * @return {object} The parameters
  */
 function getLocationParams() {
-  const extent = CONSTANTS[STATE.norSouth].extent;// Map size
+  const extent = CONSTANTS[STATE.hemi].extent;// Map size
   // var extent = [0,0,0,0];
-  $('#map').css('width', CONSTANTS[STATE.norSouth].css.width);
-  $('#map').css('height', CONSTANTS[STATE.norSouth].css.height);
-  const locationVal = CONSTANTS[STATE.norSouth].locationVal;
-  const width = CONSTANTS[STATE.norSouth].width;
-  const height = CONSTANTS[STATE.norSouth].height;
-  const srs = CONSTANTS[STATE.norSouth].srs;// Location for request url
+  $('#map').css('width', CONSTANTS[STATE.hemi].css.width);
+  $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
+  const locationVal = CONSTANTS[STATE.hemi].locationVal;
+  const width = CONSTANTS[STATE.hemi].width;
+  const height = CONSTANTS[STATE.hemi].height;
+  const srs = CONSTANTS[STATE.hemi].srs;// Location for request url
   return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
@@ -269,28 +269,28 @@ function sleep(ms) { // Sleep function for pauses between frames
  */
 function getWMSParams() {
   let sourceType = 'monthly';
-  if (STATE.dateLoopStyle == 'daily') {
+  if (STATE.temporality == 'daily') {
     sourceType = 'daily';
   }
   return {
-    LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
+    LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
     SRS: getLocationParams().srs,
     BBOX: getLocationParams().locationVal,
     TILED: false,
     format: 'image/png',
     TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
+    STYLES: 'NSIDC:g02135_' + STATE.dataType + '_raster_basemap',
   };
 }
 
 /** Method to set the visibility of the legend
- * @param {string} extCon - Sets the extent or concentration setting
+ * @param {string} dataType - Sets the extent or concentration setting
  */
 function toggleLegend() {
-  if (STATE.extCon == 'extent') {
+  if (STATE.dataType == 'extent') {
     $('#legend').addClass('hidden');
   }
-  if (STATE.extCon == 'concentration') {
+  if (STATE.dataType == 'concentration') {
     $('#legend').removeClass('hidden');
   }
 }
