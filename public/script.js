@@ -8,6 +8,7 @@ const STATE = {
   extCon: 'extent',
   norSouth: 'n',
   dateLoopStyle: 'daily',
+  validDates: {},
 };
 
 const DEFAULTS = {
@@ -30,9 +31,14 @@ async function main() {
   const getCapabilities = await runXMLHTTPRequest(`${gcr.server}?service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
-  const extents = xmlDoc.getElementsByTagName('Extent');
-  for (i = 0; i <= 7; i++) {
-    validDates.push(extents[i].childNodes[0].nodeValue.split(','));
+  const layers = xmlDoc.getElementsByTagName('Layer'); // Get layer tags in GetCapabilities XML
+  for (i = 0; i < layers.length; i++) { // Loop through all layer tags
+    try {
+      let extentArr = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');// Find the first (only) extent tag
+      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = extentArr;// Add the extents to the state object
+    } catch (error) {
+      // Layer without extent tag, which means it is not relevant
+    }
   }
 
   // Set default settings into the selectors and some other starting values
@@ -349,15 +355,8 @@ function setMapText(text) {
  * @return {booleab} - Valid date or not
 */
 function validDate() {
-  let indexVal = 0;
-  if (STATE.extCon == 'concentration') {
-    indexVal += 4;
-  }
-  if (STATE.dateLoopeStyle == 'monthly') {
-    indexVal += 2;
-  }
-  if (STATE.norSouth == 's') {
-    indexVal +=1;
-  }
-  return (validDates[indexVal].includes(STATE.current.utc().startOf('day').toISOString()));
+  // Get the key (layername) for searching the valid layers object
+  let objectKey = `g02135_${STATE.extCon}_raster_${STATE.dateLoopStyle}_${STATE.norSouth}`;
+  // Return whether or not the current date is in the queried layer
+  return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
 }
