@@ -1,6 +1,6 @@
 .map {
     height: 500px;
-    width: 40%;
+    width: 100%;
     border-style: solid;
     border-color: green;
     border-width: 5px;
@@ -10,6 +10,7 @@
     line-height: 500px;
     font-size:30px;
     background-color: black;
+    position: relative;
 }
 
 .config {
@@ -23,4 +24,19 @@
 
 .hidden {
     display: none;
+}
+
+#mapAlert {
+    z-index: 100;
+    font-size: 50px;
+    color: rgb(46, 92, 241);
+    position: absolute;
+    left: 175px;
+    top: 300px;
+}
+
+#mapContainer {
+    display: inline-block;
+    width: 500px;
+    margin-right: 10px;
 }

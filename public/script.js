@@ -12,7 +12,7 @@ const STATE = {
 
 const DEFAULTS = {
   daily: {
-    start: moment().year(1978).month(9).day(25),
+    start: moment().year(1978).month(9).date(26),
     end: moment().subtract(2, 'days'),
   },
   monthly: {
@@ -78,6 +78,7 @@ async function init() {
   STATE.stop = true;
   $('#pauseAnimation').html('Start Animation');
   $('#date').html(STATE.current.format('YYYY-MM-DD'));
+  clearMapText();
   animationLoop();
 }
 
@@ -92,6 +93,11 @@ async function animationLoop() {
       const wmsParams = getWMSParams();
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+      if (!validDate()) {
+        setMapText('No Data');
+      } else {
+        clearMapText();
+      }
       await sleep(STATE.rate);
     } else {
       await sleep(50);
@@ -147,20 +153,6 @@ function nextDate() {
   if (STATE.current.isBefore(STATE.start)) {
     STATE.current= moment(STATE.start);
   }
-  let indexVal = 0;
-  if (STATE.extCon == 'concentration') {
-    indexVal += 4;
-  }
-  if (STATE.dateLoopeStyle == 'monthly') {
-    indexVal += 2;
-  }
-  if (STATE.norSouth == 's') {
-    indexVal +=1;
-  }
-  if (!(validDates[indexVal].includes(STATE.current.utc().startOf('day').toISOString()))) {
-    nextDate();
-  }
-  
 }
 /** Method to update the state of the loop*/
 function updateState() {
@@ -235,6 +227,10 @@ function getLocationParams() {
   // var extent = [0,0,0,0];
   $('#map').css('width', CONSTANTS[STATE.norSouth].css.width);
   $('#map').css('height', CONSTANTS[STATE.norSouth].css.height);
+  $('#mapContainer').css('width', CONSTANTS[STATE.norSouth].css.width);
+  $('#mapContainer').css('height', CONSTANTS[STATE.norSouth].css.height);
+  $('#mapAlert').css('left', CONSTANTS[STATE.norSouth].css.width*0.30);
+  $('#mapAlert').css('top', CONSTANTS[STATE.norSouth].css.height*0.7);
   const locationVal = CONSTANTS[STATE.norSouth].locationVal;
   const width = CONSTANTS[STATE.norSouth].width;
   const height = CONSTANTS[STATE.norSouth].height;
@@ -318,4 +314,34 @@ function toggleLegend() {
   if (STATE.extCon == 'concentration') {
     $('#legend').removeClass('hidden');
   }
+}
+
+
+/** Method to clear the text covering the map */
+function clearMapText() {
+  $('#mapAlert').html('');
+}
+
+/** Method to set the text covering the map 
+ * @param {string} text - Text to put over map
+*/
+function setMapText(text) {
+  $('#mapAlert').html(text);
+}
+
+/** Method to set the text covering the map 
+ * @return {booleab} - Valid date or not
+*/
+function validDate() {
+  let indexVal = 0;
+  if (STATE.extCon == 'concentration') {
+    indexVal += 4;
+  }
+  if (STATE.dateLoopeStyle == 'monthly') {
+    indexVal += 2;
+  }
+  if (STATE.norSouth == 's') {
+    indexVal +=1;
+  }
+  return (validDates[indexVal].includes(STATE.current.utc().startOf('day').toISOString()));
 }
