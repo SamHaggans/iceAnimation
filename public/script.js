@@ -34,7 +34,7 @@ async function main() {
   const layers = xmlDoc.getElementsByTagName('Layer'); // Get layer tags in GetCapabilities XML
   for (i = 0; i < layers.length; i++) { // Loop through all layer tags
     try {
-      let extentArr = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');// Find the first (only) extent tag
+      const extentArr = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');// Find the first (only) extent tag
       validDates[layers[i].getElementsByTagName('Name')[0].textContent] = extentArr;// Add the extents to the state object
     } catch (error) {
       // Layer without extent tag, which means it is not relevant
@@ -344,19 +344,19 @@ function clearMapText() {
   $('#mapAlert').html('');
 }
 
-/** Method to set the text covering the map 
+/** Method to set the text covering the map
  * @param {string} text - Text to put over map
 */
 function setMapText(text) {
   $('#mapAlert').html(text);
 }
 
-/** Method to set the text covering the map 
+/** Method to set the text covering the map
  * @return {booleab} - Valid date or not
 */
 function validDate() {
   // Get the key (layername) for searching the valid layers object
-  let objectKey = `g02135_${STATE.extCon}_raster_${STATE.dateLoopStyle}_${STATE.norSouth}`;
+  const objectKey = `g02135_${STATE.extCon}_raster_${STATE.dateLoopStyle}_${STATE.norSouth}`;
   // Return whether or not the current date is in the queried layer
   return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
 }
