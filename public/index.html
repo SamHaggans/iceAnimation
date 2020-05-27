@@ -17,7 +17,14 @@
   <body>
     <h2>Sea Ice Animation</h2>
     <h3 id = "date"></h3>
+    <div class = "button firstFrame" id = "firstFrame"></div>
+    <div class = "button prevFrame" id = "prevFrame"></div>
+    <div class = "button play" id = "playButton"></div>
+    <div class = "button nextFrame" id = "nextFrame"></div>
+    <div class = "button lastFrame" id = "lastFrame"></div>
+    <br>
     <div id="map" class="map">Loading......</div>
+    
     <div class = "config">
     <form id = "customize">
     <input type="radio" value="extent" name="ext-con">Extent
@@ -35,9 +42,9 @@
             <label for = "sDate" id = "startingText"></label><input id = "sDate" type = "date" name = "sDate">
             <br>
             <label for = "eDate" id = "endingText"></label><input id = "eDate" type = "date" name = "eDate">
-          <br>
-          <button id = "animate" type="button">Start Animation</button>
-          
+        <br>
+        <button id = "animate" type="button">Start Animation</button>
+
           
     </form>
     <br>Speed:<br>

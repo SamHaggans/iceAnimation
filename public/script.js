@@ -27,17 +27,30 @@ async function main() {
   CONSTANTS = await readJSON('constants.json');
   // Set default settings into the selectors and some other starting values
   init();
-
-  $('#animate').click(function() {// When animation button is clicked
-    if (STATE.stop) {
-      STATE.stop = false;// Start animation
-      $('#animate').html('Stop Animation');
-    } else {
-      STATE.stop = true;
-      $('#animate').html('Start Animation');
-    }
-  });
 }
+/** Method to load the wms with the current params 
+ * @return {array} - An array containing the map and projection objects
+ * @param {map} map - The map to be used
+ * @param {projection} projection - The projection to be used
+*/
+async function loadWMS(map, projection) {
+    [map, projection] = await getState(map, projection);
+      let sourceType = 'monthly';
+      if (STATE.dateLoopStyle == 'daily') {
+        sourceType = 'daily';
+      }
+      const wmsParams = {
+        LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
+        SRS: getLocationParams().srs,
+        BBOX: getLocationParams().locationVal,
+        TILED: false,
+        format: 'image/png',
+        TIME: STATE.current.format('YYYY-MM-DD'),
+        STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
+      };
+      await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+}
+
 /** Initiaties the input values and the map */
 async function init() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
@@ -46,9 +59,11 @@ async function init() {
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
-  const timeNow = new moment();
+
+  const timeNow = moment();
   $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
   $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
+
 
   projection = getProjection();
   map = getMap(projection);
@@ -67,6 +82,54 @@ async function init() {
   STATE.stop = true;
   $('#pauseAnimation').html('Start Animation');
   $('#date').html(STATE.current.format('YYYY-MM-DD'));
+  $('#playButton').click(function() {// When animation button is clicked
+    if (STATE.stop) {
+      STATE.stop = false;// Start animation
+      $('#playButton').addClass('pause');
+      $('#playButton').removeClass('play');
+    } else {
+      STATE.stop = true;
+      $('#playButton').addClass('play');
+      $('#playButton').removeClass('pause');
+    }
+  });
+  $('#prevFrame').click(function() {// When animation button is clicked
+    console.log("ping");
+    if (!STATE.stop) {
+        STATE.stop = true;
+        $('#playButton').addClass('play');
+        $('#playButton').removeClass('pause');
+    }
+    previousDate();
+    loadWMS(map, projection);
+  });
+  $('#nextFrame').click(function() {// When animation button is clicked
+    if (!STATE.stop) {
+        STATE.stop = true;
+        $('#playButton').addClass('play');
+        $('#playButton').removeClass('pause');
+    }
+     nextDate();
+    loadWMS(map, projection);
+  });
+  $('#firstFrame').click(function() {// When animation button is clicked
+    if (!STATE.stop) {
+        STATE.stop = true;
+        $('#playButton').addClass('play');
+        $('#playButton').removeClass('pause');
+    }
+    STATE.current = moment(STATE.start);
+    loadWMS(map, projection);
+  });
+  $('#lastFrame').click(async function() {// When animation button is clicked
+    if (!STATE.stop) {
+        STATE.stop = true;
+        $('#playButton').addClass('play');
+        $('#playButton').removeClass('pause');
+    }
+    STATE.current = moment(STATE.end);
+    loadWMS(map, projection);
+  });
   animationLoop();
 }
 
@@ -137,6 +200,24 @@ function nextDate() {
     STATE.current= moment(STATE.start);
   }
 }
+
+/** Method to go to the previous date for the animation*/
+function previousDate() {
+  if (STATE.dateLoopStyle == 'monthly') {
+    STATE.current.subtract(1, 'M');
+    STATE.current.set({'date': 1});
+  } else if (STATE.dateLoopStyle == 'samemonth') {
+    STATE.current.subtract(1, 'y');
+    STATE.current.month(STATE.monthLoop);
+    STATE.current.set({'date': 1});
+  } else {
+    STATE.current.subtract(1, 'd');
+  }
+  if (STATE.current.isBefore(STATE.start)) {
+    STATE.current = moment(STATE.end);
+  }
+}
+
 /** Method to update the state of the loop*/
 function updateState() {
   STATE.dataType = $('input[name=ext-con]:checked').val();
