@@ -88,7 +88,7 @@ async function animationLoop() {
   }
 }
 
-/** Method to update the state of the loop
+/** Method to get the state of the loop
  * @return {array} - An array containing the map and projection objects
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
