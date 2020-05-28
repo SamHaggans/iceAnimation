@@ -34,8 +34,8 @@ async function main() {
   const layers = xmlDoc.getElementsByTagName('Layer'); // Get layer tags in GetCapabilities XML
   for (i = 0; i < layers.length; i++) { // Loop through all layer tags
     try {
-      const extentArr = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');// Find the first (only) extent tag
-      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = extentArr;// Add the extents to the state object
+      const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');// Find the first (only) extent (dates) tag
+      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;// Add the extents to the state object
     } catch (error) {
       // Layer without extent tag, which means it is not relevant
     }
