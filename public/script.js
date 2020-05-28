@@ -31,11 +31,14 @@ async function main() {
   const getCapabilities = await runXMLHTTPRequest(`${gcr.server}?service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
-  const layers = xmlDoc.getElementsByTagName('Layer'); // Get layer tags in GetCapabilities XML
+  // Get layer tags in GetCapabilities XML
+  const layers = xmlDoc.getElementsByTagName('Layer'); 
   for (i = 0; i < layers.length; i++) { // Loop through all layer tags
     try {
-      const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');// Find the first (only) extent (dates) tag
-      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;// Add the extents to the state object
+      // Find the first (only) extent (dates) tag
+      const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');
+      // Add the extents to the state object
+      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;
     } catch (error) {
       // Layer without extent tag, which means it is not relevant
     }
@@ -75,7 +78,7 @@ async function init() {
   map.getLayers().getArray()[0].setZIndex(1000);// loading on top
   const zoomToExtentControl = new ol.control.ZoomToExtent({
     extent: getLocationParams().extent,
-    size: [10, 10],
+    size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
 
