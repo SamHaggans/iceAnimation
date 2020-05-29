@@ -9,7 +9,6 @@ const STATE = {
   hemi: 'n',
   temporality: 'daily',
   validDates: {},
-
 };
 
 const DEFAULTS = {
@@ -29,7 +28,7 @@ const validDates = [];
 async function main() {
   CONSTANTS = await readJSON('constants.json');
   const gcr = CONSTANTS.getCapabilities;
-  const getCapabilities = await runXMLHTTPRequest(`${gcr.server}?service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
+  const getCapabilities = await runXMLHTTPRequest(`${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
   // Get layer tags in GetCapabilities XML
@@ -56,17 +55,17 @@ async function main() {
 async function loadWMS(map, projection) {
     [map, projection] = await getState(map, projection);
       let sourceType = 'monthly';
-      if (STATE.dateLoopStyle == 'daily') {
+      if (STATE.temporality == 'daily') {
         sourceType = 'daily';
       }
       const wmsParams = {
-        LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
+        LAYERS: 'NSIDC:g02135_' + STATE.dataType+ `_raster_${sourceType}_` + STATE.hemi,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
         format: 'image/png',
         TIME: STATE.current.format('YYYY-MM-DD'),
-        STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
+        STYLES: 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap',
       };
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
@@ -232,10 +231,10 @@ function nextDate() {
 
 /** Method to go to the previous date for the animation*/
 function previousDate() {
-  if (STATE.dateLoopStyle == 'monthly') {
+  if (STATE.temporality == 'monthly') {
     STATE.current.subtract(1, 'M');
     STATE.current.set({'date': 1});
-  } else if (STATE.dateLoopStyle == 'samemonth') {
+  } else if (STATE.temporality == 'samemonth') {
     STATE.current.subtract(1, 'y');
     STATE.current.month(STATE.monthLoop);
     STATE.current.set({'date': 1});
@@ -446,7 +445,7 @@ function setMapText(text) {
 */
 function validDate() {
   // Get the key (layername) for searching the valid layers object
-  const objectKey = `g02135_${STATE.extCon}_raster_${STATE.dateLoopStyle}_${STATE.norSouth}`;
+  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
   return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
 }
