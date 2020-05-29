@@ -8,11 +8,12 @@ const STATE = {
   dataType: 'extent',
   hemi: 'n',
   temporality: 'daily',
+  validDates: {},
 };
 
 const DEFAULTS = {
   daily: {
-    start: moment().year(1978).month(9).day(25),
+    start: moment().year(1978).month(9).date(26),
     end: moment().subtract(2, 'days'),
   },
   monthly: {
@@ -22,9 +23,27 @@ const DEFAULTS = {
 };
 
 let map;
+const validDates = [];
 /** Main function run to start animation */
 async function main() {
   CONSTANTS = await readJSON('constants.json');
+  const gcr = CONSTANTS.getCapabilities;
+  const getCapabilities = await runXMLHTTPRequest(`${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
+  // Get layer tags in GetCapabilities XML
+  const layers = xmlDoc.getElementsByTagName('Layer'); 
+  for (i = 0; i < layers.length; i++) { // Loop through all layer tags
+    try {
+      // Find the first (only) extent (dates) tag
+      const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');
+      // Add the extents to the state object
+      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;
+    } catch (error) {
+      // Layer without extent tag, which means it is not relevant
+    }
+  }
+
   // Set default settings into the selectors and some other starting values
   init();
 }
@@ -36,17 +55,17 @@ async function main() {
 async function loadWMS(map, projection) {
     [map, projection] = await getState(map, projection);
       let sourceType = 'monthly';
-      if (STATE.dateLoopStyle == 'daily') {
+      if (STATE.temporality == 'daily') {
         sourceType = 'daily';
       }
       const wmsParams = {
-        LAYERS: 'NSIDC:g02135_' + STATE.extCon + `_raster_${sourceType}_` + STATE.norSouth,
+        LAYERS: 'NSIDC:g02135_' + STATE.dataType+ `_raster_${sourceType}_` + STATE.hemi,
         SRS: getLocationParams().srs,
         BBOX: getLocationParams().locationVal,
         TILED: false,
         format: 'image/png',
         TIME: STATE.current.format('YYYY-MM-DD'),
-        STYLES: 'NSIDC:g02135_' + STATE.extCon + '_raster_basemap',
+        STYLES: 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap',
       };
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
@@ -74,7 +93,7 @@ async function init() {
   map.getLayers().getArray()[0].setZIndex(1000);// loading on top
   const zoomToExtentControl = new ol.control.ZoomToExtent({
     extent: getLocationParams().extent,
-    size: [10, 10],
+    size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
 
@@ -82,6 +101,9 @@ async function init() {
   STATE.stop = true;
   $('#pauseAnimation').html('Start Animation');
   $('#date').html(STATE.current.format('YYYY-MM-DD'));
+
+  clearMapText();
+
   $('#playButton').click(function() {// When animation button is clicked
     if (STATE.stop) {
       STATE.stop = false;// Start animation
@@ -130,6 +152,7 @@ async function init() {
     STATE.current = moment(STATE.end);
     loadWMS(map, projection);
   });
+
   animationLoop();
 }
 
@@ -144,6 +167,11 @@ async function animationLoop() {
       const wmsParams = getWMSParams();
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+      if (!validDate()) {
+        setMapText('No Data');
+      } else {
+        clearMapText();
+      }
       await sleep(STATE.rate);
     } else {
       await sleep(50);
@@ -203,10 +231,10 @@ function nextDate() {
 
 /** Method to go to the previous date for the animation*/
 function previousDate() {
-  if (STATE.dateLoopStyle == 'monthly') {
+  if (STATE.temporality == 'monthly') {
     STATE.current.subtract(1, 'M');
     STATE.current.set({'date': 1});
-  } else if (STATE.dateLoopStyle == 'samemonth') {
+  } else if (STATE.temporality == 'samemonth') {
     STATE.current.subtract(1, 'y');
     STATE.current.month(STATE.monthLoop);
     STATE.current.set({'date': 1});
@@ -289,12 +317,18 @@ function getMap(projection) {
 function getLocationParams() {
   const extent = CONSTANTS[STATE.hemi].extent;// Map size
   // var extent = [0,0,0,0];
+  
   $('#map').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
+  $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
+  $('#mapContainer').css('height', CONSTANTS[STATE.hemi].css.height);
+  $('#mapAlert').css('left', CONSTANTS[STATE.hemi].css.width*0.30);
+  $('#mapAlert').css('top', CONSTANTS[STATE.hemi].css.height*0.7);
   const locationVal = CONSTANTS[STATE.hemi].locationVal;
   const width = CONSTANTS[STATE.hemi].width;
   const height = CONSTANTS[STATE.hemi].height;
   const srs = CONSTANTS[STATE.hemi].srs;// Location for request url
+
   return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
@@ -329,6 +363,23 @@ function readJSON(filename) {
     request.onreadystatechange = function() {
       if (request.readyState == 4 && request.status == '200') {
         resolve(JSON.parse(request.responseText));
+      }
+    };
+    request.send(null);
+  });
+}
+
+/** Method to read a json file
+ * @param {string} url - Request url
+ * @return {string} - The returned information
+*/
+function runXMLHTTPRequest(url) {
+  return new Promise(function(resolve, reject) {
+    const request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.onreadystatechange = function() {
+      if (request.readyState == 4 && request.status == '200') {
+        resolve(request.responseText);
       }
     };
     request.send(null);
@@ -374,4 +425,27 @@ function toggleLegend() {
   if (STATE.dataType == 'concentration') {
     $('#legend').removeClass('hidden');
   }
+}
+
+
+/** Method to clear the text covering the map */
+function clearMapText() {
+  $('#mapAlert').html('');
+}
+
+/** Method to set the text covering the map
+ * @param {string} text - Text to put over map
+*/
+function setMapText(text) {
+  $('#mapAlert').html(text);
+}
+
+/** Method to set the text covering the map
+ * @return {booleab} - Valid date or not
+*/
+function validDate() {
+  // Get the key (layername) for searching the valid layers object
+  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
+  // Return whether or not the current date is in the queried layer
+  return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
 }

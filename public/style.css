@@ -1,6 +1,6 @@
 .map {
-    height: 500px;
-    width: 40%;
+    height: 502px;
+    width: 100%;
     border-style: solid;
     border-color: green;
     border-width: 5px;
@@ -10,6 +10,7 @@
     line-height: 500px;
     font-size:30px;
     background-color: black;
+    position: relative;
 }
 
 .config {
@@ -52,3 +53,45 @@
 .hidden {
     display: none;
 }
+
+
+#mapAlert {
+    z-index: 100;
+    font-size: 50px;
+    color: rgb(46, 92, 241);
+    position: absolute;
+    left: 100px;
+    top: 300px;
+}
+
+#mapContainer {
+    display: inline-block;
+    width: 340px;
+    margin-right: 10px;
+}
+
+.ol-zoom {
+    width: 25px;
+    height: 50px;
+}
+
+.ol-zoom-extent {
+    width: 25px;
+    height: 25px;
+    top: 2.643em;
+}
+
+.ol-zoom-in, .ol-zoom-out {
+    width: 23px !important;
+    height: 23px !important;
+    font-size: 0.85em !important;
+}
+
+
+.ol-zoom-extent button {
+    width: 23px;
+    height: 23px;
+    font-size: 0.57em;
+    background-size: cover;
+}
+
