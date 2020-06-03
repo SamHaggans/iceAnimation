@@ -19,7 +19,7 @@
 }
 
 .ol-zoom-extent button{ 
-    background-image: url("extentButton.png");
+    background-image: url("assets/extentButton.png");
 }
 
 
@@ -32,22 +32,22 @@
     cursor: pointer;
 }
 .firstFrame {
-    background-image: url("first.png");
+    background-image: url("assets/first.png");
 }
 .prevFrame {
-    background-image: url("prev.png");
+    background-image: url("assets/prev.png");
 }
 .play {
-    background-image: url("play.png");
+    background-image: url("assets/play.png");
 }
 .pause {
-    background-image: url("pause.png");
+    background-image: url("assets/pause.png");
 }
 .nextFrame {
-    background-image: url("next.png");
+    background-image: url("assets/next.png");
 }
 .lastFrame {
-    background-image: url("last.png");
+    background-image: url("assets/last.png");
 }
 
 .hidden {
@@ -95,3 +95,7 @@
     background-size: cover;
 }
 
+#legend {
+    margin-top: 10px;
+    margin-left: -15px;
+}

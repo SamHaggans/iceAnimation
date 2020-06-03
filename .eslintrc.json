@@ -1,9 +1,10 @@
 {
     "extends": "google",
     "parserOptions": {
-        "ecmaVersion": 10
+        "ecmaVersion": 10,
+        "sourceType": "module"
     },
     "rules": {
         "max-len": ["error", { "code": 120 }]
-      }
+    }
 }
