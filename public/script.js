@@ -25,14 +25,15 @@ const DEFAULTS = {
 let map;
 const validDates = [];
 /** Main function run to start animation */
-async function main() {
+async function main() { // eslint-disable-line no-unused-vars
   CONSTANTS = await readJSON('constants.json');
   const gcr = CONSTANTS.getCapabilities;
-  const getCapabilities = await runXMLHTTPRequest(`${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`);
+  const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
+  const getCapabilities = await runXMLHTTPRequest(requestHTTP);
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
   // Get layer tags in GetCapabilities XML
-  const layers = xmlDoc.getElementsByTagName('Layer'); 
+  const layers = xmlDoc.getElementsByTagName('Layer');
   for (i = 0; i < layers.length; i++) { // Loop through all layer tags
     try {
       // Find the first (only) extent (dates) tag
@@ -47,27 +48,27 @@ async function main() {
   // Set default settings into the selectors and some other starting values
   init();
 }
-/** Method to load the wms with the current params 
+/** Method to load the wms with the current params
  * @return {array} - An array containing the map and projection objects
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
 */
 async function loadWMS(map, projection) {
-    [map, projection] = await getState(map, projection);
-      let sourceType = 'monthly';
-      if (STATE.temporality == 'daily') {
-        sourceType = 'daily';
-      }
-      const wmsParams = {
-        LAYERS: 'NSIDC:g02135_' + STATE.dataType+ `_raster_${sourceType}_` + STATE.hemi,
-        SRS: getLocationParams().srs,
-        BBOX: getLocationParams().locationVal,
-        TILED: false,
-        format: 'image/png',
-        TIME: STATE.current.format('YYYY-MM-DD'),
-        STYLES: 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap',
-      };
-      await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+  [map, projection] = await getState(map, projection);
+  let sourceType = 'monthly';
+  if (STATE.temporality == 'daily') {
+    sourceType = 'daily';
+  }
+  const wmsParams = {
+    LAYERS: 'NSIDC:g02135_' + STATE.dataType+ `_raster_${sourceType}_` + STATE.hemi,
+    SRS: getLocationParams().srs,
+    BBOX: getLocationParams().locationVal,
+    TILED: false,
+    format: 'image/png',
+    TIME: STATE.current.format('YYYY-MM-DD'),
+    STYLES: 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap',
+  };
+  await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
 
 /** Initiaties the input values and the map */
@@ -101,8 +102,7 @@ async function init() {
   STATE.stop = true;
   $('#pauseAnimation').html('Start Animation');
   $('#date').html(STATE.current.format('YYYY-MM-DD'));
-
-  clearMapText();
+  $('#mapAlert').html('');
 
   $('#playButton').click(function() {// When animation button is clicked
     if (STATE.stop) {
@@ -116,38 +116,37 @@ async function init() {
     }
   });
   $('#prevFrame').click(function() {// When animation button is clicked
-    console.log("ping");
     if (!STATE.stop) {
-        STATE.stop = true;
-        $('#playButton').addClass('play');
-        $('#playButton').removeClass('pause');
+      STATE.stop = true;
+      $('#playButton').addClass('play');
+      $('#playButton').removeClass('pause');
     }
     previousDate();
     loadWMS(map, projection);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
-        STATE.stop = true;
-        $('#playButton').addClass('play');
-        $('#playButton').removeClass('pause');
+      STATE.stop = true;
+      $('#playButton').addClass('play');
+      $('#playButton').removeClass('pause');
     }
-     nextDate();
+    nextDate();
     loadWMS(map, projection);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
-        STATE.stop = true;
-        $('#playButton').addClass('play');
-        $('#playButton').removeClass('pause');
+      STATE.stop = true;
+      $('#playButton').addClass('play');
+      $('#playButton').removeClass('pause');
     }
     STATE.current = moment(STATE.start);
     loadWMS(map, projection);
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     if (!STATE.stop) {
-        STATE.stop = true;
-        $('#playButton').addClass('play');
-        $('#playButton').removeClass('pause');
+      STATE.stop = true;
+      $('#playButton').addClass('play');
+      $('#playButton').removeClass('pause');
     }
     STATE.current = moment(STATE.end);
     loadWMS(map, projection);
@@ -168,9 +167,9 @@ async function animationLoop() {
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
       if (!validDate()) {
-        setMapText('No Data');
+        setNoDataOverlay('No Data');
       } else {
-        clearMapText();
+        clearMapOverlay();
       }
       await sleep(STATE.rate);
     } else {
@@ -317,7 +316,7 @@ function getMap(projection) {
 function getLocationParams() {
   const extent = CONSTANTS[STATE.hemi].extent;// Map size
   // var extent = [0,0,0,0];
-  
+
   $('#map').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
   $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
@@ -429,15 +428,23 @@ function toggleLegend() {
 
 
 /** Method to clear the text covering the map */
-function clearMapText() {
-  $('#mapAlert').html('');
+function clearMapOverlay() {
+  map.removeLayer(map.getLayers().getArray()[1]);
 }
 
 /** Method to set the text covering the map
  * @param {string} text - Text to put over map
 */
-function setMapText(text) {
-  $('#mapAlert').html(text);
+function setNoDataOverlay(text) {
+  const source = new ol.source.ImageStatic({
+    url: `${STATE.hemi}_nodata.png`,
+    serverType: 'geoserver',
+    projection: map.getView().getProjection(),
+    imageExtent: CONSTANTS[STATE.hemi].extent,
+  });
+
+  const layer = new ol.layer.Image({source});
+  map.addLayer(layer);
 }
 
 /** Method to set the text covering the map
