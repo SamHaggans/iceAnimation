@@ -95,7 +95,13 @@
     background-size: cover;
 }
 
-#legend {
-    margin-top: 10px;
+#legendContainer {
+    width: 100px;
+    margin-top: 20px;
     margin-left: -15px;
+}
+
+#legend {
+    display: block;
+    margin: auto;
 }

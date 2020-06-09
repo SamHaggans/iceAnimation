@@ -66,7 +66,7 @@ async function loadWMS(map, projection) {
     TILED: false,
     format: 'image/png',
     TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap',
+    STYLES: ['NSIDC:g02135_' + STATE.dataType+ '_raster_basemap'],
   };
   await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
@@ -94,6 +94,7 @@ async function init() {
     size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
+  $('.ol-zoom-extent button').html('');
   await updateState();
 
   STATE.current = moment(STATE.start);
@@ -208,6 +209,7 @@ function getState(map, projection) {
       size: [5, 5],
     });
     map.addControl(zoomToExtentControl);// Add control to reset view
+    $('.ol-zoom-extent button').html('');
     updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
   }
   if (oldMode != STATE.temporality) {
@@ -273,6 +275,7 @@ function updateState() {
     size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
+  $('.ol-zoom-extent button').html('');
   map.addLayer(createLayer());
   updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
@@ -334,6 +337,7 @@ function getLocationParams() {
   $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
   $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#mapContainer').css('height', CONSTANTS[STATE.hemi].css.height);
+  $('#legendContainer').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#mapAlert').css('left', CONSTANTS[STATE.hemi].css.width*0.30);
   $('#mapAlert').css('top', CONSTANTS[STATE.hemi].css.height*0.7);
   const locationVal = CONSTANTS[STATE.hemi].locationVal;
@@ -432,10 +436,10 @@ function getWMSParams() {
  */
 function toggleLegend() {
   if (STATE.dataType == 'extent') {
-    $('#legend').addClass('hidden');
+    $('#legend').attr('src', 'extent_legend.png');
   }
   if (STATE.dataType == 'concentration') {
-    $('#legend').removeClass('hidden');
+    $('#legend').attr('src', 'concentration_legend.png');
   }
 }
 
