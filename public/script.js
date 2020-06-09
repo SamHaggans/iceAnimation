@@ -154,11 +154,6 @@ async function animationLoop() {
       const wmsParams = getWMSParams();
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
-      if (!validDate()) {
-        setNoDataOverlay('No Data');
-      } else {
-        clearMapOverlay();
-      }
       await sleep(STATE.rate);
     } else {
       [map, projection] = await getState(map, projection);
@@ -223,6 +218,9 @@ function nextDate() {
   }
   if (STATE.current.isBefore(STATE.start)) {
     STATE.current= moment(STATE.start);
+  }
+  if (!validDate()) {
+    nextDate();
   }
 }
 
