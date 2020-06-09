@@ -88,16 +88,15 @@ async function init() {
   projection = getProjection();
   map = getMap(projection);
   map.addLayer(createLayer());
-  await updateState();
 
-  STATE.current = moment(STATE.start);
-  map.getLayers().getArray()[0].setZIndex(1000);// loading on top
   const zoomToExtentControl = new ol.control.ZoomToExtent({
     extent: getLocationParams().extent,
     size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
+  await updateState();
 
+  STATE.current = moment(STATE.start);
 
   STATE.stop = true;
   $('#pauseAnimation').html('Start Animation');
@@ -173,6 +172,10 @@ async function animationLoop() {
       }
       await sleep(STATE.rate);
     } else {
+      [map, projection] = await getState(map, projection);
+      const wmsParams = getWMSParams();
+      STATE.rate = 2000 - $('#speedSlider').val();
+      await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
       await sleep(50);
     }
   }
@@ -200,6 +203,11 @@ function getState(map, projection) {
     projection = getProjection();
     map = getMap(projection);
     map.addLayer(createLayer());
+    const zoomToExtentControl = new ol.control.ZoomToExtent({
+      extent: getLocationParams().extent,
+      size: [5, 5],
+    });
+    map.addControl(zoomToExtentControl);// Add control to reset view
     updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
   }
   if (oldMode != STATE.temporality) {
@@ -260,6 +268,11 @@ function updateState() {
   $('#map').html('');// Empty map when a new animation occurs
   projection = getProjection();
   map = getMap(projection);
+  const zoomToExtentControl = new ol.control.ZoomToExtent({
+    extent: getLocationParams().extent,
+    size: [5, 5],
+  });
+  map.addControl(zoomToExtentControl);// Add control to reset view
   map.addLayer(createLayer());
   updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
@@ -410,7 +423,7 @@ function getWMSParams() {
     TILED: false,
     format: 'image/png',
     TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.dataType + '_raster_basemap',
+    STYLES: ['NSIDC:g02135_' + STATE.dataType + '_raster_basemap'],
   };
 }
 

@@ -95,3 +95,7 @@
     background-size: cover;
 }
 
+#legend {
+    margin-top: 10px;
+    margin-left: -15px;
+}
