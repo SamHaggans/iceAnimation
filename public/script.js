@@ -55,19 +55,7 @@ async function main() { // eslint-disable-line no-unused-vars
 */
 async function loadWMS(map, projection) {
   [map, projection] = await getState(map, projection);
-  let sourceType = 'monthly';
-  if (STATE.temporality == 'daily') {
-    sourceType = 'daily';
-  }
-  const wmsParams = {
-    LAYERS: 'NSIDC:g02135_' + STATE.dataType+ `_raster_${sourceType}_` + STATE.hemi,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: ['NSIDC:g02135_' + STATE.dataType+ '_raster_basemap'],
-  };
+  const wmsParams = getWMSParams();
   await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
 
@@ -420,6 +408,9 @@ function getWMSParams() {
   if (STATE.temporality == 'daily') {
     sourceType = 'daily';
   }
+  const basemap = 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap';
+  const withMissing = 'NSIDC:g02135_' + STATE.dataType+ '_raster_with_missing';
+
   return {
     LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
     SRS: getLocationParams().srs,
@@ -427,7 +418,7 @@ function getWMSParams() {
     TILED: false,
     format: 'image/png',
     TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: ['NSIDC:g02135_' + STATE.dataType + '_raster_basemap'],
+    STYLES: [basemap, withMissing],
   };
 }
 
