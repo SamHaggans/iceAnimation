@@ -21,16 +21,26 @@
 .ol-zoom-extent button{ 
     background-image: url("extentButton.png");
 }
+#date {
+    position: absolute;
+    right: 0px;
+    z-index: 10000000;
+    background-color: rgba(0,60,136,.7);
+    border-radius: 3px;
+    padding: 3px;
+    color: #ffffff;
 
-
-.button {
-    height: 40px;
-    width: 40px;
-    border: 2px solid blue;
+}
+.playheadButton {
+    margin-right: 3px;
+    padding: 4px;
     display: inline-block;
     background-size:100% 100%;
+    background-color: rgb(36, 149, 255);
     cursor: pointer;
+    border-radius: 5px;
 }
+
 .firstFrame {
     background-image: url("first.png");
 }
@@ -68,6 +78,8 @@
     display: inline-block;
     width: 340px;
     margin-right: 10px;
+    position: relative;
+    margin-top: 10px;
 }
 
 .ol-zoom {

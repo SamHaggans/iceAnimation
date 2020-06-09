@@ -95,19 +95,19 @@ async function init() {
   $('#playButton').click(function() {// When animation button is clicked
     if (STATE.stop) {
       STATE.stop = false;// Start animation
-      $('#playButton').addClass('pause');
-      $('#playButton').removeClass('play');
+      $('#playButton').addClass('fa-pause');
+      $('#playButton').removeClass('fa-play');
     } else {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
   });
   $('#prevFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     previousDate();
     loadWMS(map, projection);
@@ -115,8 +115,8 @@ async function init() {
   $('#nextFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     nextDate();
     loadWMS(map, projection);
@@ -124,8 +124,8 @@ async function init() {
   $('#firstFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     STATE.current = moment(STATE.start);
     loadWMS(map, projection);
@@ -133,8 +133,8 @@ async function init() {
   $('#lastFrame').click(async function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     STATE.current = moment(STATE.end);
     loadWMS(map, projection);
@@ -238,6 +238,9 @@ function previousDate() {
   }
   if (STATE.current.isBefore(STATE.start)) {
     STATE.current = moment(STATE.end);
+  }
+  if (!validDate()) {
+    previousDate();
   }
 }
 
