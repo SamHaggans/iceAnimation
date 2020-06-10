@@ -389,7 +389,11 @@ function updateWMSLayerParams(layer, params) {
     source.updateParams(params);
     source.refresh();
     map.once('rendercomplete', function(event) {
-      $('#date').html(STATE.current.format('YYYY-MM-DD'));
+      if (STATE.temporality == 'daily') {
+        $('#date').html(STATE.current.format('YYYY-MM-DD'));
+      } else {
+        $('#date').html(STATE.current.format('YYYY-MM'));
+      }
       // Wait for map to be ready to change the date tag
       resolve();
     });
