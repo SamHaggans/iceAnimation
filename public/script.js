@@ -8,6 +8,7 @@ const STATE = {
   dataType: 'extent',
   hemi: 'n',
   temporality: 'daily',
+  yearLoop: false,
   validDates: {},
 };
 
@@ -64,6 +65,7 @@ async function init() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
+  $('#yearLoop').prop('checked', false);
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
@@ -173,12 +175,14 @@ async function animationLoop() {
 function getState(map, projection) {
   const oldHemisphere = STATE.hemi;
   const oldMode = STATE.temporality;
-  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
-  STATE.hemi = $('input[name=n-s]:checked').val();
+  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for North or South
-  STATE.temporality = $('input[name=dates]:checked').val();
+  STATE.hemi = $('input[name=n-s]:checked').val();
   // Get value for the looping style
+  STATE.temporality = $('input[name=dates]:checked').val();
+  // Get the value for the yearLoop option
+  STATE.yearLoop = $('#yearLoop').is(':checked');
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   if (oldHemisphere != STATE.hemi) {
@@ -208,16 +212,39 @@ function getState(map, projection) {
 /** Method to go to the next date for the animation*/
 function nextDate() {
   if (STATE.temporality == 'monthly') {
-    STATE.current.add(1, 'M');
+    if (STATE.yearLoop) {
+      STATE.current.add(1, 'y');
+    } else {
+      STATE.current.add(1, 'M');
+    }
     STATE.current.set({'date': 1});
   } else {
-    STATE.current.add(1, 'd');
+    if (STATE.yearLoop) {
+      STATE.current.add(1, 'y');
+    } else {
+      STATE.current.add(1, 'd');
+    }
   }
-  if (STATE.current.isAfter(STATE.end)) {
-    STATE.current= moment(STATE.start);
-  }
-  if (STATE.current.isBefore(STATE.start)) {
-    STATE.current= moment(STATE.start);
+  if (!STATE.yearLoop) {
+    if (STATE.current.isAfter(STATE.end)) {
+      STATE.current = moment(STATE.start);
+    }
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current = moment(STATE.start);
+    }
+  } else {
+    if (STATE.current.isAfter(STATE.end)) {
+      STATE.current.set({'year': STATE.start.year()});
+      while (STATE.current.isBefore(STATE.start)) {
+        STATE.current.add(1, 'y');
+      }
+    }
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current.set({'year': STATE.start.year()});
+      while (STATE.current.isBefore(STATE.start)) {
+        STATE.current.add(1, 'y');
+      }
+    }
   }
   if (!validDate()) {
     nextDate();
@@ -227,17 +254,30 @@ function nextDate() {
 /** Method to go to the previous date for the animation*/
 function previousDate() {
   if (STATE.temporality == 'monthly') {
-    STATE.current.subtract(1, 'M');
-    STATE.current.set({'date': 1});
-  } else if (STATE.temporality == 'samemonth') {
-    STATE.current.subtract(1, 'y');
-    STATE.current.month(STATE.monthLoop);
+    if (STATE.yearLoop) {
+      STATE.current.subtract(1, 'y');
+    } else {
+      STATE.current.subtract(1, 'M');
+    }
     STATE.current.set({'date': 1});
   } else {
-    STATE.current.subtract(1, 'd');
+    if (STATE.yearLoop) {
+      STATE.current.subtract(1, 'y');
+    } else {
+      STATE.current.subtract(1, 'd');
+    }
   }
-  if (STATE.current.isBefore(STATE.start)) {
-    STATE.current = moment(STATE.end);
+  if (!STATE.yearLoop) {
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current = moment(STATE.end);
+    }
+  } else {
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current.set({'year': STATE.end.year()});
+      while (STATE.current.isAfter(STATE.end)) {
+        STATE.current.subtract(1, 'y');
+      }
+    }
   }
   if (!validDate()) {
     previousDate();
