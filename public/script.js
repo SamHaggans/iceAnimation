@@ -454,7 +454,6 @@ function getWMSParams() {
     sourceType = 'daily';
   }
   const basemap = 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap';
-  const withMissing = 'NSIDC:g02135_' + STATE.dataType+ '_raster_with_missing';
 
   return {
     LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
@@ -463,7 +462,7 @@ function getWMSParams() {
     TILED: false,
     format: 'image/png',
     TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: [basemap, withMissing],
+    STYLES: [basemap],
   };
 }
 
