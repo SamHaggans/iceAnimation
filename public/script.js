@@ -8,6 +8,7 @@ const STATE = {
   dataType: 'extent',
   hemi: 'n',
   temporality: 'daily',
+  yearLoop: false,
   validDates: {},
 };
 
@@ -55,19 +56,7 @@ async function main() { // eslint-disable-line no-unused-vars
 */
 async function loadWMS(map, projection) {
   [map, projection] = await getState(map, projection);
-  let sourceType = 'monthly';
-  if (STATE.temporality == 'daily') {
-    sourceType = 'daily';
-  }
-  const wmsParams = {
-    LAYERS: 'NSIDC:g02135_' + STATE.dataType+ `_raster_${sourceType}_` + STATE.hemi,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap',
-  };
+  const wmsParams = getWMSParams();
   await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
 
@@ -76,6 +65,7 @@ async function init() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
+  $('#yearLoop').prop('checked', false);
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
   $('#map').html('');// Empty map when a new animation occurs
@@ -88,16 +78,16 @@ async function init() {
   projection = getProjection();
   map = getMap(projection);
   map.addLayer(createLayer());
-  await updateState();
 
-  STATE.current = moment(STATE.start);
-  map.getLayers().getArray()[0].setZIndex(1000);// loading on top
   const zoomToExtentControl = new ol.control.ZoomToExtent({
     extent: getLocationParams().extent,
     size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
+  $('.ol-zoom-extent button').html('');
+  await updateState();
 
+  STATE.current = moment(STATE.start);
 
   STATE.stop = true;
   $('#pauseAnimation').html('Start Animation');
@@ -107,19 +97,19 @@ async function init() {
   $('#playButton').click(function() {// When animation button is clicked
     if (STATE.stop) {
       STATE.stop = false;// Start animation
-      $('#playButton').addClass('pause');
-      $('#playButton').removeClass('play');
+      $('#playButton').addClass('fa-pause');
+      $('#playButton').removeClass('fa-play');
     } else {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
   });
   $('#prevFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     previousDate();
     loadWMS(map, projection);
@@ -127,8 +117,8 @@ async function init() {
   $('#nextFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     nextDate();
     loadWMS(map, projection);
@@ -136,8 +126,8 @@ async function init() {
   $('#firstFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     STATE.current = moment(STATE.start);
     loadWMS(map, projection);
@@ -145,8 +135,8 @@ async function init() {
   $('#lastFrame').click(async function() {// When animation button is clicked
     if (!STATE.stop) {
       STATE.stop = true;
-      $('#playButton').addClass('play');
-      $('#playButton').removeClass('pause');
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
     }
     STATE.current = moment(STATE.end);
     loadWMS(map, projection);
@@ -166,13 +156,12 @@ async function animationLoop() {
       const wmsParams = getWMSParams();
       STATE.rate = 2000 - $('#speedSlider').val();
       await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
-      if (!validDate()) {
-        setNoDataOverlay('No Data');
-      } else {
-        clearMapOverlay();
-      }
       await sleep(STATE.rate);
     } else {
+      [map, projection] = await getState(map, projection);
+      const wmsParams = getWMSParams();
+      STATE.rate = 2000 - $('#speedSlider').val();
+      await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
       await sleep(50);
     }
   }
@@ -186,12 +175,14 @@ async function animationLoop() {
 function getState(map, projection) {
   const oldHemisphere = STATE.hemi;
   const oldMode = STATE.temporality;
-  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for extent or concentration
-  STATE.hemi = $('input[name=n-s]:checked').val();
+  STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for North or South
-  STATE.temporality = $('input[name=dates]:checked').val();
+  STATE.hemi = $('input[name=n-s]:checked').val();
   // Get value for the looping style
+  STATE.temporality = $('input[name=dates]:checked').val();
+  // Get the value for the yearLoop option
+  STATE.yearLoop = $('#yearLoop').is(':checked');
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   if (oldHemisphere != STATE.hemi) {
@@ -200,6 +191,12 @@ function getState(map, projection) {
     projection = getProjection();
     map = getMap(projection);
     map.addLayer(createLayer());
+    const zoomToExtentControl = new ol.control.ZoomToExtent({
+      extent: getLocationParams().extent,
+      size: [5, 5],
+    });
+    map.addControl(zoomToExtentControl);// Add control to reset view
+    $('.ol-zoom-extent button').html('');
     updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
   }
   if (oldMode != STATE.temporality) {
@@ -215,33 +212,75 @@ function getState(map, projection) {
 /** Method to go to the next date for the animation*/
 function nextDate() {
   if (STATE.temporality == 'monthly') {
-    STATE.current.add(1, 'M');
+    if (STATE.yearLoop) {
+      STATE.current.add(1, 'y');
+    } else {
+      STATE.current.add(1, 'M');
+    }
     STATE.current.set({'date': 1});
   } else {
-    STATE.current.add(1, 'd');
+    if (STATE.yearLoop) {
+      STATE.current.add(1, 'y');
+    } else {
+      STATE.current.add(1, 'd');
+    }
   }
-  if (STATE.current.isAfter(STATE.end)) {
-    STATE.current= moment(STATE.start);
+  if (!STATE.yearLoop) {
+    if (STATE.current.isAfter(STATE.end)) {
+      STATE.current = moment(STATE.start);
+    }
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current = moment(STATE.start);
+    }
+  } else {
+    if (STATE.current.isAfter(STATE.end)) {
+      STATE.current.set({'year': STATE.start.year()});
+      while (STATE.current.isBefore(STATE.start)) {
+        STATE.current.add(1, 'y');
+      }
+    }
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current.set({'year': STATE.start.year()});
+      while (STATE.current.isBefore(STATE.start)) {
+        STATE.current.add(1, 'y');
+      }
+    }
   }
-  if (STATE.current.isBefore(STATE.start)) {
-    STATE.current= moment(STATE.start);
+  if (!validDate()) {
+    nextDate();
   }
 }
 
 /** Method to go to the previous date for the animation*/
 function previousDate() {
   if (STATE.temporality == 'monthly') {
-    STATE.current.subtract(1, 'M');
-    STATE.current.set({'date': 1});
-  } else if (STATE.temporality == 'samemonth') {
-    STATE.current.subtract(1, 'y');
-    STATE.current.month(STATE.monthLoop);
+    if (STATE.yearLoop) {
+      STATE.current.subtract(1, 'y');
+    } else {
+      STATE.current.subtract(1, 'M');
+    }
     STATE.current.set({'date': 1});
   } else {
-    STATE.current.subtract(1, 'd');
+    if (STATE.yearLoop) {
+      STATE.current.subtract(1, 'y');
+    } else {
+      STATE.current.subtract(1, 'd');
+    }
   }
-  if (STATE.current.isBefore(STATE.start)) {
-    STATE.current = moment(STATE.end);
+  if (!STATE.yearLoop) {
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current = moment(STATE.end);
+    }
+  } else {
+    if (STATE.current.isBefore(STATE.start)) {
+      STATE.current.set({'year': STATE.end.year()});
+      while (STATE.current.isAfter(STATE.end)) {
+        STATE.current.subtract(1, 'y');
+      }
+    }
+  }
+  if (!validDate()) {
+    previousDate();
   }
 }
 
@@ -260,6 +299,12 @@ function updateState() {
   $('#map').html('');// Empty map when a new animation occurs
   projection = getProjection();
   map = getMap(projection);
+  const zoomToExtentControl = new ol.control.ZoomToExtent({
+    extent: getLocationParams().extent,
+    size: [5, 5],
+  });
+  map.addControl(zoomToExtentControl);// Add control to reset view
+  $('.ol-zoom-extent button').html('');
   map.addLayer(createLayer());
   updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
 }
@@ -321,6 +366,7 @@ function getLocationParams() {
   $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
   $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#mapContainer').css('height', CONSTANTS[STATE.hemi].css.height);
+  $('#legendContainer').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#mapAlert').css('left', CONSTANTS[STATE.hemi].css.width*0.30);
   $('#mapAlert').css('top', CONSTANTS[STATE.hemi].css.height*0.7);
   const locationVal = CONSTANTS[STATE.hemi].locationVal;
@@ -343,7 +389,11 @@ function updateWMSLayerParams(layer, params) {
     source.updateParams(params);
     source.refresh();
     map.once('rendercomplete', function(event) {
-      $('#date').html(STATE.current.format('YYYY-MM-DD'));
+      if (STATE.temporality == 'daily') {
+        $('#date').html(STATE.current.format('YYYY-MM-DD'));
+      } else {
+        $('#date').html(STATE.current.format('YYYY-MM'));
+      }
       // Wait for map to be ready to change the date tag
       resolve();
     });
@@ -403,6 +453,8 @@ function getWMSParams() {
   if (STATE.temporality == 'daily') {
     sourceType = 'daily';
   }
+  const basemap = 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap';
+
   return {
     LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
     SRS: getLocationParams().srs,
@@ -410,7 +462,7 @@ function getWMSParams() {
     TILED: false,
     format: 'image/png',
     TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: 'NSIDC:g02135_' + STATE.dataType + '_raster_basemap',
+    STYLES: [basemap],
   };
 }
 
@@ -419,10 +471,10 @@ function getWMSParams() {
  */
 function toggleLegend() {
   if (STATE.dataType == 'extent') {
-    $('#legend').addClass('hidden');
+    $('#legend').attr('src', 'extent_legend.png');
   }
   if (STATE.dataType == 'concentration') {
-    $('#legend').removeClass('hidden');
+    $('#legend').attr('src', 'concentration_legend.png');
   }
 }
 

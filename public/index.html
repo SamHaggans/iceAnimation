@@ -6,6 +6,7 @@
     <script src="https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v6.3.1/build/ol.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="https://use.fontawesome.com/f31bd6d608.js"></script>    
     <script src = "script.js"></script>
     <script>
         $("document").ready(async function () {//When DOM is loaded
@@ -16,14 +17,15 @@
   </head>
   <body>
     <h2>Sea Ice Animation</h2>
-    <h3 id = "date"></h3>
-    <div class = "button firstFrame" id = "firstFrame"></div>
-    <div class = "button prevFrame" id = "prevFrame"></div>
-    <div class = "button play" id = "playButton"></div>
-    <div class = "button nextFrame" id = "nextFrame"></div>
-    <div class = "button lastFrame" id = "lastFrame"></div>
+    
+    <div class = "playheadButton fa fa-3x fa-fast-backward"  id = "firstFrame"></div>
+    <div class = "playheadButton fa fa-3x fa-step-backward" id = "prevFrame"></div>
+    <div class = "playheadButton fa fa-3x fa-play" id = "playButton"></div>
+    <div class = "playheadButton fa fa-3x fa-step-forward" id = "nextFrame"></div>
+    <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
     <br>
     <div id = "mapContainer">
+        <h3 id = "date"></h3>
         <div id = "mapAlert">Loading...</div>
         <div id="map" class="map"></div>
     </div>
@@ -41,7 +43,8 @@
         <input type="radio" value="daily" name="dates">Daily
         <input type="radio" value="monthly" name="dates">Monthly
         <br>
-        
+        <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
+        <br>
             <input type="radio" value="n" name="n-s">Arctic
             <input type="radio" value="s" name="n-s">Antarctic
             <br>
@@ -55,6 +58,9 @@
     <br>Speed:<br>
     Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
   </div><br>
-  <img id = "legend" class = "hidden" src = "concentration_legend.png">
+  <div id = "legendContainer">
+    <img id = "legend">
+  </div>
+  
   </body>
 </html>
