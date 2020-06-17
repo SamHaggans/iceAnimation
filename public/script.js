@@ -146,6 +146,8 @@ async function init() {
     $('#missing-data-message').fadeToggle(300);
   });
 
+  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
+
   animationLoop();
 }
 
@@ -210,6 +212,8 @@ function getState(map, projection) {
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
+  console.log(340 + CONSTANTS[STATE.hemi].css.width);
+  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
   return [map, projection];
 }
 
@@ -311,6 +315,7 @@ function updateState() {
   $('.ol-zoom-extent button').html('');
   map.addLayer(createLayer());
   updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
 }
 
 /** Method to create a projection for a map
