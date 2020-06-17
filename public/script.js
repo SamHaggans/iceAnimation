@@ -483,15 +483,15 @@ function toggleLegend() {
 }
 
 
-/** Method to clear the text covering the map */
-function clearMapOverlay() {
+/** Method to clear the text covering the map (currently unused) */
+function clearMapOverlay() {// eslint-disable-line no-unused-vars
   map.removeLayer(map.getLayers().getArray()[1]);
 }
 
-/** Method to set the text covering the map
+/** Method to set the text covering the map (currently unused)
  * @param {string} text - Text to put over map
 */
-function setNoDataOverlay(text) {
+function setNoDataOverlay(text) {// eslint-disable-line no-unused-vars
   const source = new ol.source.ImageStatic({
     url: `${STATE.hemi}_nodata.png`,
     serverType: 'geoserver',
