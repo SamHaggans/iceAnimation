@@ -142,6 +142,10 @@ async function init() {
     loadWMS(map, projection);
   });
 
+  $('#info-hover').hover(function() {
+    $('#missing-data-message').fadeToggle(300);
+  });
+
   animationLoop();
 }
 

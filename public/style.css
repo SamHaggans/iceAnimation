@@ -117,3 +117,14 @@
     display: block;
     margin: auto;
 }
+
+#missing-data-message {
+    position: absolute;
+    border: 1px solid black;
+    padding: 5px;
+    border-radius: 10px;
+    background-color: #e2e2e2;
+    left: 670px;
+    width: 500px;
+    display: none;
+}
