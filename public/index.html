@@ -48,7 +48,14 @@
             <input type="radio" value="n" name="n-s">Arctic
             <input type="radio" value="s" name="n-s">Antarctic
             <br>
-            <label for = "sDate" id = "startingText"></label><input id = "sDate" type = "date" name = "sDate">
+            <div id = "missing-data-message">
+                <h3>Available Dates</h3>
+                <hr>
+                Daily data begin on 26 October 1978 and go through yesterday. From 26 October 1978 through 20 August 1987, the daily data occur every other day. From 21 August 1987 through yesterday, the data occur daily. There are no daily data from 3 December 1987 to 13 January 1988 due to satellite problems.
+
+                <br><br>Monthly averaged data begin in November 1978 and go through last month. There are no monthly data for December 1987 or January 1988 due to satellite problems.</div>
+            <label for = "sDate" id = "startingText"></label><input id = "sDate" type = "date" name = "sDate">          <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
+
             <br>
             <label for = "eDate" id = "endingText"></label><input id = "eDate" type = "date" name = "eDate">
         <br>
