@@ -29,7 +29,7 @@ const validDates = [];
 async function main() { // eslint-disable-line no-unused-vars
   CONSTANTS = await readJSON('constants.json');
   const gcr = CONSTANTS.getCapabilities;
-  const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
+  const requestHTTP = `${gcr.server}`;
   const getCapabilities = await runXMLHTTPRequest(requestHTTP);
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
@@ -212,7 +212,6 @@ function getState(map, projection) {
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
-  console.log(340 + CONSTANTS[STATE.hemi].css.width);
   $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
   return [map, projection];
 }
@@ -393,16 +392,24 @@ function getLocationParams() {
  */
 function updateWMSLayerParams(layer, params) {
   toggleLegend();
-  return new Promise(function(resolve, reject) {
+  return new Promise(async function(resolve, reject) {
     const source = layer.getSource();
-    source.updateParams(params);
-    source.refresh();
+    await source.updateParams(params);
+    await source.refresh();
+    // Make requests on a 5 second interval to ensure that WMS loads eventually
+    const interval = setInterval(async () => {
+      const source = layer.getSource();
+      await source.updateParams(params);
+      await source.refresh();
+    }, 5000);
     map.once('rendercomplete', function(event) {
       if (STATE.temporality == 'daily') {
         $('#date').html(STATE.current.format('YYYY-MM-DD'));
       } else {
         $('#date').html(STATE.current.format('YYYY-MM'));
       }
+      // Delete interval requests after load
+      clearInterval(interval);
       // Wait for map to be ready to change the date tag
       resolve();
     });
@@ -463,7 +470,7 @@ function getWMSParams() {
     sourceType = 'daily';
   }
   const basemap = 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap';
-
+  const withMissing = 'NSIDC:g02135_' + STATE.dataType+ '_raster_with_missing';
   return {
     LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
     SRS: getLocationParams().srs,
