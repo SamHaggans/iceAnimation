@@ -1,14 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
-const outputDirectory = 'dist';
+const outputDirectory = path.join(__dirname, 'dist');
 
 module.exports = {
   devtool: 'inline-source-map',
   entry: './public/script.js',
   output: {
-    path: path.join(__dirname, outputDirectory),
+    path: outputDirectory,
     filename: 'bundle.js',
   },
   module: {
@@ -33,11 +33,15 @@ module.exports = {
   },
   devServer: {
     port: 3030,
+    contentBase: outputDirectory,
   },
   plugins: [
-    new CleanWebpackPlugin([outputDirectory]),
+    new CleanWebpackPlugin({
+      cleanStaleWebpackAssets: false,
+    }),
     new HtmlWebpackPlugin({
-      template: './public/index.html',
+      title: 'Sea Ice Animation',
+      template: './public/index.ejs',
     }),
   ],
 };
