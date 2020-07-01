@@ -20,15 +20,17 @@ import {CONSTANTS} from './constants.js';
 // Static Image Assets
 import extentLegend from './assets/extent_legend.png';
 import concentrationLegend from './assets/concentration_legend.png';
+/*
 import nNoData from './assets/n_nodata.png';
 import sNoData from './assets/s_nodata.png';
+*/
 
-
-// Save static assets in an object for access
+/* Save static assets in an object for access (not currently used)
 const noDataImages = {
   'n': nNoData,
   's': sNoData,
 };
+*/
 
 const STATE = {
   stop: true,
