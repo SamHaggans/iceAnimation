@@ -1,4 +1,35 @@
-let CONSTANTS;
+// Packages
+import $ from 'jquery';
+window.jQuery = $;
+window.$ = $;
+import 'ol/ol.css';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import ZoomToExtent from 'ol/control/ZoomToExtent';
+import ImageWMS from 'ol/source/ImageWMS';
+import Image from 'ol/layer/Image';
+import ImageStatic from 'ol/source/ImageStatic';
+import Projection from 'ol/proj/Projection';
+import {getCenter} from 'ol/extent';
+import moment from 'moment';
+
+// Static Assets
+import './style.css';
+import {CONSTANTS} from './constants.js';
+
+// Static Image Assets
+import extentLegend from './assets/extent_legend.png';
+import concentrationLegend from './assets/concentration_legend.png';
+import nNoData from './assets/n_nodata.png';
+import sNoData from './assets/s_nodata.png';
+
+
+// Save static assets in an object for access
+const noDataImages = {
+  'n': nNoData,
+  's': sNoData,
+};
+
 const STATE = {
   stop: true,
   rate: 100,
@@ -24,18 +55,18 @@ const DEFAULTS = {
 };
 
 let map;
+let projection;
 const validDates = [];
 /** Main function run to start animation */
 async function main() { // eslint-disable-line no-unused-vars
-  CONSTANTS = await readJSON('constants.json');
   const gcr = CONSTANTS.getCapabilities;
-  const requestHTTP = `${gcr.server}`;
+  const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
   const getCapabilities = await runXMLHTTPRequest(requestHTTP);
   const parser = new DOMParser();
   const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
   // Get layer tags in GetCapabilities XML
   const layers = xmlDoc.getElementsByTagName('Layer');
-  for (i = 0; i < layers.length; i++) { // Loop through all layer tags
+  for (let i = 0; i < layers.length; i++) { // Loop through all layer tags
     try {
       // Find the first (only) extent (dates) tag
       const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');
@@ -68,6 +99,9 @@ async function init() {
   $('#yearLoop').prop('checked', false);
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
+
+  $('#legend').attr('src', concentrationLegend);
+
   $('#map').html('');// Empty map when a new animation occurs
 
   const timeNow = moment();
@@ -79,7 +113,7 @@ async function init() {
   map = getMap(projection);
   map.addLayer(createLayer());
 
-  const zoomToExtentControl = new ol.control.ZoomToExtent({
+  const zoomToExtentControl = new ZoomToExtent({
     extent: getLocationParams().extent,
     size: [5, 5],
   });
@@ -142,8 +176,12 @@ async function init() {
     loadWMS(map, projection);
   });
 
-  $('#info-hover').hover(function() {
-    $('#missing-data-message').fadeToggle(300);
+  $('#info-hover').mouseover(function() {
+    $('#missing-data-message').removeClass('hidden');
+  });
+
+  $('#info-hover').mouseout(function() {
+    $('#missing-data-message').addClass('hidden');
   });
 
   $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
@@ -197,7 +235,7 @@ function getState(map, projection) {
     projection = getProjection();
     map = getMap(projection);
     map.addLayer(createLayer());
-    const zoomToExtentControl = new ol.control.ZoomToExtent({
+    const zoomToExtentControl = new ZoomToExtent({
       extent: getLocationParams().extent,
       size: [5, 5],
     });
@@ -306,7 +344,7 @@ function updateState() {
   $('#map').html('');// Empty map when a new animation occurs
   projection = getProjection();
   map = getMap(projection);
-  const zoomToExtentControl = new ol.control.ZoomToExtent({
+  const zoomToExtentControl = new ZoomToExtent({
     extent: getLocationParams().extent,
     size: [5, 5],
   });
@@ -321,7 +359,7 @@ function updateState() {
  * @return {projection} projection
  */
 function getProjection() {
-  const projection = new ol.proj.Projection({// Map projection
+  const projection = new Projection({// Map projection
     code: CONSTANTS[STATE.hemi].srs,
     extent: CONSTANTS[STATE.hemi].extent,
   });
@@ -333,13 +371,13 @@ function getProjection() {
  */
 function createLayer() {
   const wmsParams = getWMSParams();
-  const source = new ol.source.ImageWMS({
+  const source = new ImageWMS({
     url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
     params: wmsParams,
     serverType: 'geoserver',
   });
 
-  const layer = new ol.layer.Image({source});
+  const layer = new Image({source});
   return layer;
 }
 
@@ -349,16 +387,15 @@ function createLayer() {
  */
 function getMap(projection) {
   const extent = getLocationParams().extent;
-  const map = new ol.Map({ // New map
+  const map = new Map({ // New map
     target: 'map', // Div in which the map is displayed
-    view: new ol.View({
+    view: new View({
       projection: projection,
-      center: ol.extent.getCenter(extent), // Start in the center of the image
-      zoom: 0,
-      minZoom: 0,
+      center: getCenter(extent), // Start in the center of the image
+      zoom: 1,
+      minZoom: 1,
       extent: extent,
     }),
-    controls: ol.control.PanZoom,
   });
   return map;
 }
@@ -416,11 +453,11 @@ function updateWMSLayerParams(layer, params) {
   });
 }
 
-/** Method to read a json file
+/** Method to read a json file (Leaving in despite not being used because it may come up in the future)
  * @param {string} filename - The file to be read
  * @return {string} - The json read from the file
  */
-function readJSON(filename) {
+function readJSON(filename) { // eslint-disable-line no-unused-vars
   return new Promise(function(resolve, reject) {
     const request = new XMLHttpRequest();
     request.overrideMimeType('application/json');
@@ -487,10 +524,10 @@ function getWMSParams() {
  */
 function toggleLegend() {
   if (STATE.dataType == 'extent') {
-    $('#legend').attr('src', 'extent_legend.png');
+    $('#legend').attr('src', extentLegend);
   }
   if (STATE.dataType == 'concentration') {
-    $('#legend').attr('src', 'concentration_legend.png');
+    $('#legend').attr('src', concentrationLegend);
   }
 }
 
@@ -504,14 +541,14 @@ function clearMapOverlay() {// eslint-disable-line no-unused-vars
  * @param {string} text - Text to put over map
 */
 function setNoDataOverlay(text) {// eslint-disable-line no-unused-vars
-  const source = new ol.source.ImageStatic({
+  const source = new ImageStatic({
     url: `${STATE.hemi}_nodata.png`,
     serverType: 'geoserver',
     projection: map.getView().getProjection(),
     imageExtent: CONSTANTS[STATE.hemi].extent,
   });
 
-  const layer = new ol.layer.Image({source});
+  const layer = new Image({source});
   map.addLayer(layer);
 }
 
@@ -524,3 +561,5 @@ function validDate() {
   // Return whether or not the current date is in the queried layer
   return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
 }
+
+main();
