@@ -3,7 +3,7 @@ import $ from 'jquery';
 window.jQuery = $;
 window.$ = $;
 
-import util from './mapUtil.js';
+import * as util from './mapUtil.js';
 
 import moment from 'moment';
 

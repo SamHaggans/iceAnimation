@@ -26,7 +26,7 @@ import concentrationLegend from './assets/concentration_legend.png';
  * @param {projection} projection - The projection to be used
  * @param {object} STATE animation state
  */
-async function loadWMS(map, projection, STATE) {
+export async function loadWMS(map, projection, STATE) {
   await updateWMSLayerParams(map, map.getLayers().getArray(), STATE);
 }
 
@@ -34,7 +34,7 @@ async function loadWMS(map, projection, STATE) {
  * @return {projection} projection
  * @param {object} STATE animation state
  */
-function getProjection(STATE) {
+export function getProjection(STATE) {
   const projection = new Projection({// Map projection
     code: CONSTANTS[STATE.hemi].srs,
     extent: CONSTANTS[STATE.hemi].extent,
@@ -49,7 +49,7 @@ function getProjection(STATE) {
  * @return {promise} - A promise of updating the layer
  * @param {object} STATE animation state
  */
-function updateWMSLayerParams(map, layer, params, STATE) {
+export function updateWMSLayerParams(map, layer, params, STATE) {
   toggleLegend(STATE);
   return new Promise(async function(resolve, reject) {
     const source = layer.getSource();
@@ -79,7 +79,7 @@ function updateWMSLayerParams(map, layer, params, STATE) {
  * @return {layer} layer
  * @param {object} STATE animation state
  */
-function createLayer(STATE) {
+export function createLayer(STATE) {
   const wmsParams = getWMSParams(STATE);
   const source = new ImageWMS({
     url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
@@ -96,7 +96,7 @@ function createLayer(STATE) {
  * @param {projection} projection - The Projection to create the map with
  * @param {object} STATE Animation State
  */
-function getMap(projection, STATE) {
+export function getMap(projection, STATE) {
   const extent = getLocationParams(STATE).extent;
   const map = new Map({ // New map
     target: 'map', // Div in which the map is displayed
@@ -126,7 +126,7 @@ function getMap(projection, STATE) {
  * @return {object} The parameters
  * @param {object} STATE Animation state
  */
-function getLocationParams(STATE) {
+export function getLocationParams(STATE) {
   const extent = CONSTANTS[STATE.hemi].extent;// Map size
   // var extent = [0,0,0,0];
 
@@ -149,7 +149,7 @@ function getLocationParams(STATE) {
  * @return {object} wmsParameters
  * @param {object} STATE Animation State
  */
-function getWMSParams(STATE) {
+export function getWMSParams(STATE) {
   let sourceType = 'monthly';
   if (STATE.temporality == 'daily') {
     sourceType = 'daily';
@@ -171,7 +171,7 @@ function getWMSParams(STATE) {
  * @param {string} text - Text to put over map
  * @param {object} STATE - Animation State
 */
-function setNoDataOverlay(text, STATE) {// eslint-disable-line no-unused-vars
+export function setNoDataOverlay(text, STATE) {// eslint-disable-line no-unused-vars
   const source = new ImageStatic({
     url: `${STATE.hemi}_nodata.png`,
     serverType: 'geoserver',
@@ -186,7 +186,7 @@ function setNoDataOverlay(text, STATE) {// eslint-disable-line no-unused-vars
 /** Method to set the visibility of the legend
  * @param {object} STATE animation state
  */
-function toggleLegend(STATE) {
+export function toggleLegend(STATE) {
   if (STATE.dataType == 'extent') {
     $('#legend').attr('src', extentLegend);
   }
@@ -194,16 +194,3 @@ function toggleLegend(STATE) {
     $('#legend').attr('src', concentrationLegend);
   }
 }
-
-const methods = {
-  loadWMS: loadWMS,
-  getProjection: getProjection,
-  createLayer: createLayer,
-  getMap: getMap,
-  getLocationParams, getLocationParams,
-  getWMSParams: getWMSParams,
-  setNoDataOverlay: setNoDataOverlay,
-  updateWMSLayerParams: updateWMSLayerParams,
-};
-
-export default methods;
