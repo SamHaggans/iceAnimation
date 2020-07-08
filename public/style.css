@@ -19,7 +19,7 @@
 }
 
 .ol-zoom-extent button{ 
-    background-image: url("extentButton.png");
+    background-image: url("assets/extentButton.png");
 }
 #date {
     position: absolute;
@@ -39,25 +39,6 @@
     background-color: rgb(36, 149, 255);
     cursor: pointer;
     border-radius: 5px;
-}
-
-.firstFrame {
-    background-image: url("first.png");
-}
-.prevFrame {
-    background-image: url("prev.png");
-}
-.play {
-    background-image: url("play.png");
-}
-.pause {
-    background-image: url("pause.png");
-}
-.nextFrame {
-    background-image: url("next.png");
-}
-.lastFrame {
-    background-image: url("last.png");
 }
 
 .hidden {
@@ -126,5 +107,4 @@
     background-color: #e2e2e2;
     left: 690px;
     width: 500px;
-    display: none;
 }
