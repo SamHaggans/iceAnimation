@@ -134,7 +134,6 @@ export function getLocationParams(STATE) {
   $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
   $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#mapContainer').css('height', CONSTANTS[STATE.hemi].css.height);
-  $('#legendContainer').css('width', CONSTANTS[STATE.hemi].css.width);
   $('#mapAlert').css('left', CONSTANTS[STATE.hemi].css.width*0.30);
   $('#mapAlert').css('top', CONSTANTS[STATE.hemi].css.height*0.7);
   const locationVal = CONSTANTS[STATE.hemi].locationVal;

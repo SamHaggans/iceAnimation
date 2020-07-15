@@ -162,15 +162,23 @@ async function init() {
     util.loadWMS(map, projection, STATE);
   });
 
-  $('#info-hover').mouseover(function() {
-    $('#missing-data-message').removeClass('hidden');
+  document.getElementById('info-hover').onclick = function() {
+    $('#missing-data-message').toggleClass('hidden');
+  };
+
+  $('#closeButton').mouseover(function() {
+    $('#closeButton').removeClass('fa-window-close');
+    $('#closeButton').addClass('fa-window-close-o');
   });
 
-  $('#info-hover').mouseout(function() {
-    $('#missing-data-message').addClass('hidden');
+  $('#closeButton').mouseout(function() {
+    $('#closeButton').removeClass('fa-window-close-o');
+    $('#closeButton').addClass('fa-window-close');
   });
 
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
+  document.getElementById('closeButton').onclick = function() {
+    $('#missing-data-message').toggleClass('hidden');
+  };
 
   animationLoop();
 }
@@ -231,7 +239,6 @@ function getState(map, projection) {
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
   return [map, projection];
 }
 
@@ -328,7 +335,6 @@ function updateState() {
   $('.ol-zoom-extent button').html('');
   map.addLayer(util.createLayer(STATE));
   util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
 }
 
 /** Method to read a json file (Leaving in despite not being used because it may come up in the future)

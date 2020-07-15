@@ -1,8 +1,6 @@
 .map {
-    height: 502px;
-    width: 100%;
-    border-style: solid;
-    border-color: green;
+    height: 602px;
+    width: 408px;
     border-width: 5px;
     display:inline-block;
     text-align:center;
@@ -13,30 +11,30 @@
     position: relative;
 }
 
-.config {
+#config {
     display:inline-block;
     vertical-align: top;
+    margin-left: 30px;
 }
 
 .ol-zoom-extent button{ 
     background-image: url("assets/extentButton.png");
 }
+
 #date {
     position: absolute;
-    right: 0px;
+    right: 10px;
     z-index: 10000000;
     background-color: rgba(0,60,136,.7);
     border-radius: 3px;
     padding: 3px;
     color: #ffffff;
-
 }
+
 .playheadButton {
     margin-right: 3px;
     padding: 4px;
     display: inline-block;
-    background-size:100% 100%;
-    background-color: rgb(36, 149, 255);
     cursor: pointer;
     border-radius: 5px;
 }
@@ -56,11 +54,12 @@
 }
 
 #mapContainer {
-    display: inline-block;
     width: 340px;
     margin-right: 10px;
     position: relative;
-    margin-top: 10px;
+    display: table;
+    
+    margin: 0 auto;
 }
 
 .ol-zoom {
@@ -89,9 +88,7 @@
 }
 
 #legendContainer {
-    width: 100px;
-    margin-top: 20px;
-    margin-left: -15px;
+    padding-top: 30px;
 }
 
 #legend {
@@ -105,6 +102,36 @@
     padding: 5px;
     border-radius: 10px;
     background-color: #e2e2e2;
-    left: 690px;
+    left: 40%;
+    top: 150px;
     width: 500px;
+}
+
+#main {
+    display: table;
+    margin: 0 auto;
+}
+
+#mapSpace {
+    display: inline-block;
+    width: 580px;
+}
+
+#playhead {
+    display: table;
+    margin: 0 auto;
+}
+
+#playheadBox {
+    background-color: #bffbff;
+    padding: 10px;
+}
+
+#speedControls {
+    display: table;
+    margin: 0 auto;
+}
+
+#closeMissingData {
+    float: right;
 }
