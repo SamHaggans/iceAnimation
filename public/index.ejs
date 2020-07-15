@@ -19,11 +19,6 @@
             <div id = "config">
             <h2><%= htmlWebpackPlugin.options.title %></h2>
             <form id = "customize">
-                <label for = "sDate" id = "startingText">Starting Date: </label><input id = "sDate" type = "date" name = "sDate">          
-                <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
-                <br>
-                <label for = "eDate" id = "endingText">Ending Date: </label><input id = "eDate" type = "date" name = "eDate"><br>
-                <br><br><br>
                 <input type="radio" value="n" name="n-s">Arctic
                 <input type="radio" value="s" name="n-s">Antarctic
                 <br>
@@ -32,7 +27,12 @@
                 <br>
                 <input type="radio" value="daily" name="dates">Daily
                 <input type="radio" value="monthly" name="dates">Monthly
+                <br><br>
+                <label for = "sDate" id = "startingText">Starting Date: </label><input id = "sDate" type = "date" name = "sDate">          
+                <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
                 <br>
+                <label for = "eDate" id = "endingText">Ending Date: </label><input id = "eDate" type = "date" name = "eDate"><br>
+                
                 <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
                 <br>
                 <div id = "missing-data-message" class = "hidden">
@@ -58,7 +58,7 @@
 
                 <div id = "speedControls">
                     <hr>
-                    <br>Speed:
+                    <br>Speed:<br>
                     Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
                 </div>
             </div>

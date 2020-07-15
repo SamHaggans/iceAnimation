@@ -32,7 +32,7 @@
 }
 
 .playheadButton {
-    margin-right: 3px;
+    margin-right: 10px;
     padding: 4px;
     display: inline-block;
     cursor: pointer;
@@ -134,4 +134,8 @@
 
 #closeMissingData {
     float: right;
+}
+
+#speedSlider{
+  width: 100% !important;
 }
