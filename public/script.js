@@ -2,10 +2,11 @@
 import $ from 'jquery';
 window.jQuery = $;
 window.$ = $;
-
-import * as util from './mapUtil.js';
-
 import moment from 'moment';
+
+import * as mapUtil from './mapUtil.js';
+import * as stateUtil from './stateUtil.js';
+import * as timeUtil from './timeUtil.js';
 
 // Static Assets
 import './style.css';
@@ -96,12 +97,12 @@ async function init() {
   $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
 
 
-  projection = util.getProjection(STATE);
-  map = util.getMap(projection, STATE);
-  map.addLayer(util.createLayer(STATE));
+  projection = mapUtil.getProjection(STATE);
+  map = mapUtil.getMap(projection, STATE);
+  map.addLayer(mapUtil.createLayer(STATE));
 
   $('.ol-zoom-extent button').html('');
-  await updateState();
+  [map, projection] = await stateUtil.updateState(STATE);
 
   STATE.current = moment(STATE.start);
 
@@ -122,44 +123,29 @@ async function init() {
     }
   });
   $('#prevFrame').click(function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
-    previousDate();
-    [map, projection] = getState(map, projection);
-    util.loadWMS(map, projection, STATE);
+    stopAnimation();
+    timeUtil.previousDate(STATE, validDates);
+    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    mapUtil.loadWMS(map, projection, STATE);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
-    nextDate();
-    [map, projection] = getState(map, projection);
-    util.loadWMS(map, projection, STATE);
+    stopAnimation();
+    timeUtil.nextDate(STATE, validDates);
+    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    mapUtil.loadWMS(map, projection, STATE);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
+    stopAnimation();
     STATE.current = moment(STATE.start);
-    [map, projection] = getState(map, projection);
-    util.loadWMS(map, projection, STATE);
+    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    mapUtil.loadWMS(map, projection, STATE);
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
+    stopAnimation();
+    $('#playButton').removeClass('fa-pause');
     STATE.current = moment(STATE.end);
-    [map, projection] = getState(map, projection);
-    util.loadWMS(map, projection, STATE);
+    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    mapUtil.loadWMS(map, projection, STATE);
   });
 
   $('#info-hover').mouseover(function() {
@@ -181,155 +167,23 @@ async function init() {
 async function animationLoop() {
   while (true) {
     if (!STATE.stop) {
-      nextDate();
-      [map, projection] = await getState(map, projection);
-      const wmsParams = util.getWMSParams(STATE);
+      timeUtil.nextDate(STATE, validDates);
+      [map, projection] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
+      const wmsParams = mapUtil.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
-      await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+      await mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
       await sleep(STATE.rate);
     } else {
-      [map, projection] = await getState(map, projection);
-      const wmsParams = util.getWMSParams(STATE);
+      [map, projection] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
+      const wmsParams = mapUtil.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
-      await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+      await mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
       await sleep(50);
     }
   }
 }
 
-/** Method to get the state of the loop
- * @return {array} - An array containing the map and projection objects
- * @param {map} map - The map to be used
- * @param {projection} projection - The projection to be used
-*/
-function getState(map, projection) {
-  const oldHemisphere = STATE.hemi;
-  const oldMode = STATE.temporality;
-  // Get value for extent or concentration
-  STATE.dataType = $('input[name=ext-con]:checked').val();
-  // Get value for North or South
-  STATE.hemi = $('input[name=n-s]:checked').val();
-  // Get value for the looping style
-  STATE.temporality = $('input[name=dates]:checked').val();
-  // Get the value for the yearLoop option
-  STATE.yearLoop = $('#yearLoop').is(':checked');
-  STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-  STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-  if (oldHemisphere != STATE.hemi) {
-    const wmsParams = util.getWMSParams(STATE);
-    $('#map').html('');// Empty map when a new animation occurs
-    projection = util.getProjection(STATE);
-    map = util.getMap(projection, STATE);
-    map.addLayer(util.createLayer(STATE));
-    $('.ol-zoom-extent button').html('');
-    util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
-  }
-  if (oldMode != STATE.temporality) {
-    document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
-    document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
-    STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-    STATE.current = moment(STATE.start);
-    STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-  }
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
-  return [map, projection];
-}
 
-/** Method to go to the next date for the animation*/
-function nextDate() {
-  if (STATE.temporality == 'monthly') {
-    if (STATE.yearLoop) {
-      STATE.current.add(1, 'y');
-    } else {
-      STATE.current.add(1, 'M');
-    }
-    STATE.current.set({'date': 1});
-  } else {
-    if (STATE.yearLoop) {
-      STATE.current.add(1, 'y');
-    } else {
-      STATE.current.add(1, 'd');
-    }
-  }
-  if (!STATE.yearLoop) {
-    if (STATE.current.isAfter(STATE.end)) {
-      STATE.current = moment(STATE.start);
-    }
-    if (STATE.current.isBefore(STATE.start)) {
-      STATE.current = moment(STATE.start);
-    }
-  } else {
-    if (STATE.current.isAfter(STATE.end)) {
-      STATE.current.set({'year': STATE.start.year()});
-      while (STATE.current.isBefore(STATE.start)) {
-        STATE.current.add(1, 'y');
-      }
-    }
-    if (STATE.current.isBefore(STATE.start)) {
-      STATE.current.set({'year': STATE.start.year()});
-      while (STATE.current.isBefore(STATE.start)) {
-        STATE.current.add(1, 'y');
-      }
-    }
-  }
-  if (!validDate()) {
-    nextDate();
-  }
-}
-
-/** Method to go to the previous date for the animation*/
-function previousDate() {
-  if (STATE.temporality == 'monthly') {
-    if (STATE.yearLoop) {
-      STATE.current.subtract(1, 'y');
-    } else {
-      STATE.current.subtract(1, 'M');
-    }
-    STATE.current.set({'date': 1});
-  } else {
-    if (STATE.yearLoop) {
-      STATE.current.subtract(1, 'y');
-    } else {
-      STATE.current.subtract(1, 'd');
-    }
-  }
-  if (!STATE.yearLoop) {
-    if (STATE.current.isBefore(STATE.start)) {
-      STATE.current = moment(STATE.end);
-    }
-  } else {
-    if (STATE.current.isBefore(STATE.start)) {
-      STATE.current.set({'year': STATE.end.year()});
-      while (STATE.current.isAfter(STATE.end)) {
-        STATE.current.subtract(1, 'y');
-      }
-    }
-  }
-  if (!validDate()) {
-    previousDate();
-  }
-}
-
-/** Method to update the state of the loop*/
-function updateState() {
-  STATE.dataType = $('input[name=ext-con]:checked').val();
-  // Get value for extent or concentration
-  STATE.hemi = $('input[name=n-s]:checked').val();
-  // Get value for North or South
-  STATE.temporality = $('input[name=dates]:checked').val();
-  // Get value for the looping style
-  STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-  STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-  STATE.current = moment(STATE.start);
-  const wmsParams = util.getWMSParams(STATE);
-  $('#map').html('');// Empty map when a new animation occurs
-  projection = util.getProjection(STATE);
-  map = util.getMap(projection, STATE);
-  $('.ol-zoom-extent button').html('');
-  map.addLayer(util.createLayer(STATE));
-  util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
-}
 
 /** Method to read a json file (Leaving in despite not being used because it may come up in the future)
  * @param {string} filename - The file to be read
@@ -381,14 +235,15 @@ function clearMapOverlay() {// eslint-disable-line no-unused-vars
   map.removeLayer(map.getLayers().getArray()[1]);
 }
 
-/** Method to set the text covering the map
- * @return {boolean} - Valid date or not
+
+/** Method to stop the animation when buttons are pressed that should pause it
 */
-function validDate() {
-  // Get the key (layername) for searching the valid layers object
-  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
-  // Return whether or not the current date is in the queried layer
-  return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
+function stopAnimation() {
+  if (!STATE.stop) {
+    STATE.stop = true;
+    $('#playButton').addClass('fa-play');
+    ('#playButton').removeClass('fa-pause');
+  }
 }
 
 main();
