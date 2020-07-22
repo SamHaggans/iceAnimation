@@ -50,7 +50,6 @@ export function getProjection(STATE) {
  * @param {object} STATE animation state
  */
 export function updateWMSLayerParams(map, layer, params, STATE) {
-  console.log(params);
   toggleLegend(STATE);
   return new Promise(async function(resolve, reject) {
     const source = layer.getSource();

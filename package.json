@@ -9,7 +9,7 @@
     "build": "webpack --mode production",
     "serve": "node server.js",
     "start": "npm run build && npm run serve",
-    "dev": "webpack-dev-server --mode development & nodemon server.js "
+    "dev": "webpack-dev-server --mode development"
   },
   "author": "",
   "license": "ISC",

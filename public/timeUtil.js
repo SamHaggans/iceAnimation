@@ -6,6 +6,7 @@ import moment from 'moment';
 /** Method to go to the next date for the animation
  * @param {object} STATE Animation state
  * @param {array} validDates Array of valid dates
+ * @return {object}  animation state
 */
 export function nextDate(STATE, validDates) {
   if (STATE.temporality == 'monthly') {
@@ -46,11 +47,13 @@ export function nextDate(STATE, validDates) {
   if (!validDate(STATE, validDates)) {
     nextDate(STATE, validDates);
   }
+  return STATE;
 }
 
 /** Method to go to the previous date for the animation
  * @param {object} STATE Animation state
  * @param {array} validDates Array of valid dates
+ * @return {object}  animation state
 */
 export function previousDate(STATE, validDates) {
   if (STATE.temporality == 'monthly') {
@@ -82,6 +85,7 @@ export function previousDate(STATE, validDates) {
   if (!validDate(STATE, validDates)) {
     previousDate(STATE, validDates);
   }
+  return STATE;
 }
 
 /** Method to set the text covering the map

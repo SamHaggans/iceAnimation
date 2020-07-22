@@ -43,7 +43,7 @@ export function getState(map, projection, STATE, DEFAULTS) {
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
   $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
-  return [map, projection];
+  return [map, projection, STATE];
 }
 
 /** Method to update the state of the loop
@@ -68,5 +68,5 @@ export function updateState(STATE) {
   map.addLayer(mapUtil.createLayer(STATE));
   mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
   $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
-  return [map, projection];
+  return [map, projection, STATE];
 }

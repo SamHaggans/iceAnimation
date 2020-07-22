@@ -28,7 +28,7 @@ const noDataImages = {
 };
 */
 
-const STATE = {
+let STATE = {
   stop: true,
   rate: 100,
   current: moment(),
@@ -102,7 +102,7 @@ async function init() {
   map.addLayer(mapUtil.createLayer(STATE));
 
   $('.ol-zoom-extent button').html('');
-  [map, projection] = await stateUtil.updateState(STATE);
+  [map, projection, STATE] = await stateUtil.updateState(STATE);
 
   STATE.current = moment(STATE.start);
 
@@ -124,27 +124,27 @@ async function init() {
   });
   $('#prevFrame').click(function() {// When animation button is clicked
     stopAnimation();
-    timeUtil.previousDate(STATE, validDates);
-    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    STATE = timeUtil.previousDate(STATE, validDates);
+    [map, projection, STATE] = stateUtil.getState(map, projection, STATE, DEFAULTS);
     mapUtil.loadWMS(map, projection, STATE);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     stopAnimation();
-    timeUtil.nextDate(STATE, validDates);
-    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    STATE = timeUtil.nextDate(STATE, validDates);
+    [map, projection, STATE] = stateUtil.getState(map, projection, STATE, DEFAULTS);
     mapUtil.loadWMS(map, projection, STATE);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
     stopAnimation();
     STATE.current = moment(STATE.start);
-    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    [map, projection, STATE] = stateUtil.getState(map, projection, STATE, DEFAULTS);
     mapUtil.loadWMS(map, projection, STATE);
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     stopAnimation();
     $('#playButton').removeClass('fa-pause');
     STATE.current = moment(STATE.end);
-    [map, projection] = stateUtil.getState(map, projection, STATE, DEFAULTS);
+    [map, projection, STATE] = stateUtil.getState(map, projection, STATE, DEFAULTS);
     mapUtil.loadWMS(map, projection, STATE);
   });
 
@@ -167,14 +167,16 @@ async function init() {
 async function animationLoop() {
   while (true) {
     if (!STATE.stop) {
-      timeUtil.nextDate(STATE, validDates);
-      [map, projection] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
+      debugger;
+      STATE = timeUtil.nextDate(STATE, validDates);
+      debugger;
+      [map, projection, STATE] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
       const wmsParams = mapUtil.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
       await mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
       await sleep(STATE.rate);
     } else {
-      [map, projection] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
+      [map, projection, STATE] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
       const wmsParams = mapUtil.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
       await mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
