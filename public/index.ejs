@@ -17,7 +17,7 @@
             </div>
 
             <div id = "config">
-            <h2><%= htmlWebpackPlugin.options.title %></h2>
+            <h2>Visualize Sea Ice Change Over Time</h2>
             <form id = "customize">
                 <input type="radio" value="n" name="n-s">Arctic
                 <input type="radio" value="s" name="n-s">Antarctic
@@ -58,8 +58,11 @@
 
                 <div id = "speedControls">
                     <hr>
-                    <br>Speed:<br>
+                    
+                    <div id = "sliderContainer">
+                      <span id = "centerSpeed">Speed:</span>
                     Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
+                  </div>
                 </div>
             </div>
             <div id = "legendContainer">
