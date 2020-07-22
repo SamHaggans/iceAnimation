@@ -156,3 +156,12 @@
   display: table;
   margin: 0 auto;
 }
+
+.col1 {
+  width: 70px;
+  display: inline-block;
+}
+.col2 {
+  width: 180px;
+  display: inline-block;
+}

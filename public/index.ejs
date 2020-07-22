@@ -19,19 +19,19 @@
             <div id = "config">
             <h2>Visualize Sea Ice Change Over Time</h2>
             <form id = "customize">
-                <input type="radio" value="n" name="n-s">Arctic
+                <div class = "col1"><input type="radio" value="n" name="n-s">Arctic</div>
                 <input type="radio" value="s" name="n-s">Antarctic
                 <br>
-                <input type="radio" value="extent" name="ext-con">Extent
+                <div class = "col1"><input type="radio" value="extent" name="ext-con">Extent</div>
                 <input type="radio" value="concentration" name="ext-con">Concentration
                 <br>
-                <input type="radio" value="daily" name="dates">Daily
+                <div class = "col1"><input type="radio" value="daily" name="dates">Daily</div>
                 <input type="radio" value="monthly" name="dates">Monthly
                 <br><br>
-                <label for = "sDate" id = "startingText">Starting Date: </label><input id = "sDate" type = "date" name = "sDate">          
+                <div class = "col2"><label for = "sDate" id = "startingText">Starting Date: </label></div><input id = "sDate" type = "date" name = "sDate">          
                 <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
                 <br>
-                <label for = "eDate" id = "endingText">Ending Date: </label><input id = "eDate" type = "date" name = "eDate"><br>
+                <div class = "col2"><label for = "eDate" id = "endingText">Ending Date: </label></div><input id = "eDate" type = "date" name = "eDate"><br>
                 
                 <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
                 <br>
