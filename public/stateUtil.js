@@ -29,8 +29,8 @@ export function getState(map, projection, STATE, DEFAULTS) {
   if (oldHemisphere != STATE.hemi) {
     const wmsParams = mapUtil.getWMSParams(STATE);
     $('#map').html('');// Empty map when a new animation occurs
-    let projection = mapUtil.getProjection(STATE);
-    let map = mapUtil.getMap(projection, STATE);
+    projection = mapUtil.getProjection(STATE);
+    map = mapUtil.getMap(projection, STATE);
     map.addLayer(mapUtil.createLayer(STATE));
     $('.ol-zoom-extent button').html('');
     mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
