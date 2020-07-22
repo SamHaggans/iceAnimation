@@ -27,7 +27,8 @@ import concentrationLegend from './assets/concentration_legend.png';
  * @param {object} STATE animation state
  */
 export async function loadWMS(map, projection, STATE) {
-  await updateWMSLayerParams(map, map.getLayers().getArray(), STATE);
+  const params = getWMSParams(STATE);
+  await updateWMSLayerParams(map, map.getLayers().getArray()[0], params, STATE);
 }
 
 /** Method to create a projection for a map
