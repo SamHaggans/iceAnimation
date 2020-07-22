@@ -167,9 +167,7 @@ async function init() {
 async function animationLoop() {
   while (true) {
     if (!STATE.stop) {
-      debugger;
       STATE = timeUtil.nextDate(STATE, validDates);
-      debugger;
       [map, projection, STATE] = await stateUtil.getState(map, projection, STATE, DEFAULTS);
       const wmsParams = mapUtil.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
