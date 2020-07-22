@@ -2,15 +2,9 @@
 import $ from 'jquery';
 window.jQuery = $;
 window.$ = $;
-import 'ol/ol.css';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import ZoomToExtent from 'ol/control/ZoomToExtent';
-import ImageWMS from 'ol/source/ImageWMS';
-import Image from 'ol/layer/Image';
-import ImageStatic from 'ol/source/ImageStatic';
-import Projection from 'ol/proj/Projection';
-import {getCenter} from 'ol/extent';
+
+import * as util from './mapUtil.js';
+
 import moment from 'moment';
 
 // Static Assets
@@ -18,8 +12,9 @@ import './style.css';
 import {CONSTANTS} from './constants.js';
 
 // Static Image Assets
-import extentLegend from './assets/extent_legend.png';
+// import extentLegend from './assets/extent_legend.png';
 import concentrationLegend from './assets/concentration_legend.png';
+
 /*
 import nNoData from './assets/n_nodata.png';
 import sNoData from './assets/s_nodata.png';
@@ -82,16 +77,6 @@ async function main() { // eslint-disable-line no-unused-vars
   // Set default settings into the selectors and some other starting values
   init();
 }
-/** Method to load the wms with the current params
- * @return {array} - An array containing the map and projection objects
- * @param {map} map - The map to be used
- * @param {projection} projection - The projection to be used
-*/
-async function loadWMS(map, projection) {
-  [map, projection] = await getState(map, projection);
-  const wmsParams = getWMSParams();
-  await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
-}
 
 /** Initiaties the input values and the map */
 async function init() {
@@ -111,15 +96,10 @@ async function init() {
   $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
 
 
-  projection = getProjection();
-  map = getMap(projection);
-  map.addLayer(createLayer());
+  projection = util.getProjection(STATE);
+  map = util.getMap(projection, STATE);
+  map.addLayer(util.createLayer(STATE));
 
-  const zoomToExtentControl = new ZoomToExtent({
-    extent: getLocationParams().extent,
-    size: [5, 5],
-  });
-  map.addControl(zoomToExtentControl);// Add control to reset view
   $('.ol-zoom-extent button').html('');
   await updateState();
 
@@ -148,7 +128,8 @@ async function init() {
       $('#playButton').removeClass('fa-pause');
     }
     previousDate();
-    loadWMS(map, projection);
+    [map, projection] = getState(map, projection);
+    util.loadWMS(map, projection, STATE);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
@@ -157,7 +138,8 @@ async function init() {
       $('#playButton').removeClass('fa-pause');
     }
     nextDate();
-    loadWMS(map, projection);
+    [map, projection] = getState(map, projection);
+    util.loadWMS(map, projection, STATE);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
     if (!STATE.stop) {
@@ -166,7 +148,8 @@ async function init() {
       $('#playButton').removeClass('fa-pause');
     }
     STATE.current = moment(STATE.start);
-    loadWMS(map, projection);
+    [map, projection] = getState(map, projection);
+    util.loadWMS(map, projection, STATE);
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     if (!STATE.stop) {
@@ -175,18 +158,27 @@ async function init() {
       $('#playButton').removeClass('fa-pause');
     }
     STATE.current = moment(STATE.end);
-    loadWMS(map, projection);
+    [map, projection] = getState(map, projection);
+    util.loadWMS(map, projection, STATE);
   });
 
-  $('#info-hover').mouseover(function() {
-    $('#missing-data-message').removeClass('hidden');
+  document.getElementById('info-hover').onclick = function() {
+    $('#missing-data-message').toggleClass('hidden');
+  };
+
+  $('#closeButton').mouseover(function() {
+    $('#closeButton').removeClass('fa-window-close');
+    $('#closeButton').addClass('fa-window-close-o');
   });
 
-  $('#info-hover').mouseout(function() {
-    $('#missing-data-message').addClass('hidden');
+  $('#closeButton').mouseout(function() {
+    $('#closeButton').removeClass('fa-window-close-o');
+    $('#closeButton').addClass('fa-window-close');
   });
 
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
+  document.getElementById('closeButton').onclick = function() {
+    $('#missing-data-message').toggleClass('hidden');
+  };
 
   animationLoop();
 }
@@ -199,15 +191,15 @@ async function animationLoop() {
     if (!STATE.stop) {
       nextDate();
       [map, projection] = await getState(map, projection);
-      const wmsParams = getWMSParams();
+      const wmsParams = util.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
-      await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+      await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
       await sleep(STATE.rate);
     } else {
       [map, projection] = await getState(map, projection);
-      const wmsParams = getWMSParams();
+      const wmsParams = util.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
-      await updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+      await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
       await sleep(50);
     }
   }
@@ -232,18 +224,13 @@ function getState(map, projection) {
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   if (oldHemisphere != STATE.hemi) {
-    const wmsParams = getWMSParams();
+    const wmsParams = util.getWMSParams(STATE);
     $('#map').html('');// Empty map when a new animation occurs
-    projection = getProjection();
-    map = getMap(projection);
-    map.addLayer(createLayer());
-    const zoomToExtentControl = new ZoomToExtent({
-      extent: getLocationParams().extent,
-      size: [5, 5],
-    });
-    map.addControl(zoomToExtentControl);// Add control to reset view
+    projection = util.getProjection(STATE);
+    map = util.getMap(projection, STATE);
+    map.addLayer(util.createLayer(STATE));
     $('.ol-zoom-extent button').html('');
-    updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
+    util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
   }
   if (oldMode != STATE.temporality) {
     document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
@@ -252,7 +239,6 @@ function getState(map, projection) {
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
   return [map, projection];
 }
 
@@ -342,117 +328,13 @@ function updateState() {
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   STATE.current = moment(STATE.start);
-  const wmsParams = getWMSParams();
+  const wmsParams = util.getWMSParams(STATE);
   $('#map').html('');// Empty map when a new animation occurs
-  projection = getProjection();
-  map = getMap(projection);
-  const zoomToExtentControl = new ZoomToExtent({
-    extent: getLocationParams().extent,
-    size: [5, 5],
-  });
-  map.addControl(zoomToExtentControl);// Add control to reset view
+  projection = util.getProjection(STATE);
+  map = util.getMap(projection, STATE);
   $('.ol-zoom-extent button').html('');
-  map.addLayer(createLayer());
-  updateWMSLayerParams(map.getLayers().getArray()[0], wmsParams);
-  $('#missing-data-message').css('left', `${340 + CONSTANTS[STATE.hemi].css.width}px`);
-}
-
-/** Method to create a projection for a map
- * @return {projection} projection
- */
-function getProjection() {
-  const projection = new Projection({// Map projection
-    code: CONSTANTS[STATE.hemi].srs,
-    extent: CONSTANTS[STATE.hemi].extent,
-  });
-  return projection;
-}
-
-/** Method to create a layer for a map
- * @return {layer} layer
- */
-function createLayer() {
-  const wmsParams = getWMSParams();
-  const source = new ImageWMS({
-    url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
-    params: wmsParams,
-    serverType: 'geoserver',
-  });
-
-  const layer = new Image({source});
-  return layer;
-}
-
-/** Method to create a map
- * @return {map} Map
- * @param {projection} projection - The Projection to create the map with
- */
-function getMap(projection) {
-  const extent = getLocationParams().extent;
-  const map = new Map({ // New map
-    target: 'map', // Div in which the map is displayed
-    view: new View({
-      projection: projection,
-      center: getCenter(extent), // Start in the center of the image
-      zoom: 1,
-      minZoom: 1,
-      extent: extent,
-    }),
-  });
-  return map;
-}
-
-/** Method to create a map
- * @return {object} The parameters
- */
-function getLocationParams() {
-  const extent = CONSTANTS[STATE.hemi].extent;// Map size
-  // var extent = [0,0,0,0];
-
-  $('#map').css('width', CONSTANTS[STATE.hemi].css.width);
-  $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
-  $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
-  $('#mapContainer').css('height', CONSTANTS[STATE.hemi].css.height);
-  $('#legendContainer').css('width', CONSTANTS[STATE.hemi].css.width);
-  $('#mapAlert').css('left', CONSTANTS[STATE.hemi].css.width*0.30);
-  $('#mapAlert').css('top', CONSTANTS[STATE.hemi].css.height*0.7);
-  const locationVal = CONSTANTS[STATE.hemi].locationVal;
-  const width = CONSTANTS[STATE.hemi].width;
-  const height = CONSTANTS[STATE.hemi].height;
-  const srs = CONSTANTS[STATE.hemi].srs;// Location for request url
-
-  return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
-}
-
-/** Method to update the map layers
- * @param {layer} layer - The layer to be updated
- * @param {object} params - The parameters to be updated
- * @return {promise} - A promise of updating the layer
- */
-function updateWMSLayerParams(layer, params) {
-  toggleLegend();
-  return new Promise(async function(resolve, reject) {
-    const source = layer.getSource();
-    await source.updateParams(params);
-    await source.refresh();
-    // Make requests on a 5 second interval to ensure that WMS loads eventually
-    const interval = setInterval(async () => {
-      const source = layer.getSource();
-      await source.updateParams(params);
-      await source.refresh();
-    }, 5000);
-    map.once('rendercomplete', function(event) {
-      if (STATE.temporality == 'daily') {
-        $('#date').html(STATE.current.format('YYYY-MM-DD'));
-      } else {
-        $('#date').html(STATE.current.format('YYYY-MM'));
-      }
-      // Delete interval requests after load
-      clearInterval(interval);
-      // Wait for map to be ready to change the date tag
-      resolve();
-    });
-  });
+  map.addLayer(util.createLayer(STATE));
+  util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
 }
 
 /** Method to read a json file (Leaving in despite not being used because it may come up in the future)
@@ -500,62 +382,13 @@ function sleep(ms) { // Sleep function for pauses between frames
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Method to set the wms parameters
- * @return {object} wmsParameters
- */
-function getWMSParams() {
-  let sourceType = 'monthly';
-  if (STATE.temporality == 'daily') {
-    sourceType = 'daily';
-  }
-  const basemap = 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap';
-  // const withMissing = 'NSIDC:g02135_' + STATE.dataType+ '_raster_with_missing';
-  return {
-    LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
-    SRS: getLocationParams().srs,
-    BBOX: getLocationParams().locationVal,
-    TILED: false,
-    format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
-    STYLES: [basemap],
-  };
-}
-
-/** Method to set the visibility of the legend
- * @param {string} dataType - Sets the extent or concentration setting
- */
-function toggleLegend() {
-  if (STATE.dataType == 'extent') {
-    $('#legend').attr('src', extentLegend);
-  }
-  if (STATE.dataType == 'concentration') {
-    $('#legend').attr('src', concentrationLegend);
-  }
-}
-
-
 /** Method to clear the text covering the map (currently unused) */
 function clearMapOverlay() {// eslint-disable-line no-unused-vars
   map.removeLayer(map.getLayers().getArray()[1]);
 }
 
-/** Method to set the text covering the map (currently unused)
- * @param {string} text - Text to put over map
-*/
-function setNoDataOverlay(text) {// eslint-disable-line no-unused-vars
-  const source = new ImageStatic({
-    url: `${STATE.hemi}_nodata.png`,
-    serverType: 'geoserver',
-    projection: map.getView().getProjection(),
-    imageExtent: CONSTANTS[STATE.hemi].extent,
-  });
-
-  const layer = new Image({source});
-  map.addLayer(layer);
-}
-
 /** Method to set the text covering the map
- * @return {booleab} - Valid date or not
+ * @return {boolean} - Valid date or not
 */
 function validDate() {
   // Get the key (layername) for searching the valid layers object

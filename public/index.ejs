@@ -3,63 +3,74 @@
   <head>
     <script src="./bundle.js"></script>
     <script src="https://use.fontawesome.com/f31bd6d608.js"></script>    
-    <title><%= htmlWebpackPlugin.options.title %></title>
+    <title>Sea Ice Animation</title>
   </head>
   <body>
-    <h2>Sea Ice Animation</h2>
-    
-    <div class = "playheadButton fa fa-3x fa-fast-backward"  id = "firstFrame"></div>
-    <div class = "playheadButton fa fa-3x fa-step-backward" id = "prevFrame"></div>
-    <div class = "playheadButton fa fa-3x fa-play" id = "playButton"></div>
-    <div class = "playheadButton fa fa-3x fa-step-forward" id = "nextFrame"></div>
-    <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
-    <br>
-    <div id = "mapContainer">
-        <h3 id = "date"></h3>
-        <div id = "mapAlert">Loading...</div>
-        <div id="map" class="map"></div>
-    </div>
-
-
-    
-
-    <div class = "config">
-    <form id = "customize">
-    <input type="radio" value="extent" name="ext-con">Extent
-    <input type="radio" value="concentration" name="ext-con">Concentration
-    <br>
-    
-        
-        <input type="radio" value="daily" name="dates">Daily
-        <input type="radio" value="monthly" name="dates">Monthly
-        <br>
-        <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
-        <br>
-            <input type="radio" value="n" name="n-s">Arctic
-            <input type="radio" value="s" name="n-s">Antarctic
+        <div id = "main">
             <br>
-            <div id = "missing-data-message" class = "hidden">
-                <h3>Available Dates</h3>
-                <hr>
-                Daily data begin on 26 October 1978 and go through yesterday. From 26 October 1978 through 20 August 1987, the daily data occur every other day. From 21 August 1987 through yesterday, the data occur daily. There are no daily data from 3 December 1987 to 13 January 1988 due to satellite problems.
-
-                <br><br>Monthly averaged data begin in November 1978 and go through last month. There are no monthly data for December 1987 or January 1988 due to satellite problems.
-                <br><br>Daily data and monthly average data are not displayed by the animation when they are not available, and are skipped.
+            <div id = "mapSpace">
+                <div id = "mapContainer">
+                    <h3 id = "date"></h3>
+                    <div id = "mapAlert">Loading...</div>
+                    <div id="map" class="map"></div>
+                </div>
             </div>
-            <label for = "sDate" id = "startingText"></label><input id = "sDate" type = "date" name = "sDate">          <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
 
-            <br>
-            <label for = "eDate" id = "endingText"></label><input id = "eDate" type = "date" name = "eDate">
-        <br>
+            <div id = "config">
+            <h2>Visualize Sea Ice Change Over Time</h2>
+            <form id = "customize">
+                <div class = "col1"><input type="radio" value="n" name="n-s">Arctic</div>
+                <input type="radio" value="s" name="n-s">Antarctic
+                <br>
+                <div class = "col1"><input type="radio" value="extent" name="ext-con">Extent</div>
+                <input type="radio" value="concentration" name="ext-con">Concentration
+                <br>
+                <div class = "col1"><input type="radio" value="daily" name="dates">Daily</div>
+                <input type="radio" value="monthly" name="dates">Monthly
+                <br><br>
+                <div class = "col2"><label for = "sDate" id = "startingText">Starting Date: </label></div><input id = "sDate" type = "date" name = "sDate">          
+                <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
+                <br>
+                <div class = "col2"><label for = "eDate" id = "endingText">Ending Date: </label></div><input id = "eDate" type = "date" name = "eDate"><br>
+                
+                <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
+                <br>
+                <div id = "missing-data-message" class = "hidden">
+                    <span id = "closeMissingData"><i id = "closeButton" class="fa fa-3x fa-window-close" aria-hidden="true"></i>
+                    </span>
+                    <h3>Available Dates</h3> 
+                    <hr>
+                    Daily data begin on 26 October 1978 and go through yesterday. From 26 October 1978 through 20 August 1987, the daily data occur every other day. From 21 August 1987 through yesterday, the data occur daily. There are no daily data from 3 December 1987 to 13 January 1988 due to satellite problems.
 
-          
-    </form>
-    <br>Speed:<br>
-    Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
-  </div><br>
-  <div id = "legendContainer">
-  <img id = "legend">
-  </div>
-  
+                    <br><br>Monthly averaged data begin in November 1978 and go through last month. There are no monthly data for December 1987 or January 1988 due to satellite problems.
+                    <br><br>Daily data and monthly average data are not displayed by the animation when they are not available, and are skipped.
+                </div>
+                <br>
+            </form>
+            <div id = "playheadBox">
+                <div id = "playhead">
+                    <div class = "playheadButton fa fa-3x fa-fast-backward"  id = "firstFrame"></div>
+                    <div class = "playheadButton fa fa-3x fa-step-backward" id = "prevFrame"></div>
+                    <div class = "playheadButton fa fa-3x fa-play" id = "playButton"></div>
+                    <div class = "playheadButton fa fa-3x fa-step-forward" id = "nextFrame"></div>
+                    <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
+                </div>
+
+                <div id = "speedControls">
+                    <hr>
+                    
+                    <div id = "sliderContainer">
+                      <span id = "centerSpeed">Speed:</span>
+                    Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
+                  </div>
+                </div>
+            </div>
+            <div id = "legendContainer">
+                Map Legend:
+                <hr>
+                <img id = "legend">
+                </div>
+            </div>
+        </div>
   </body>
 </html>
