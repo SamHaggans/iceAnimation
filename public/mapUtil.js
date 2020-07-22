@@ -27,6 +27,8 @@ import concentrationLegend from './assets/concentration_legend.png';
  * @param {object} STATE animation state
  */
 export async function loadWMS(map, projection, STATE) {
+  console.log("load");
+  console.log(STATE);
   await updateWMSLayerParams(map, map.getLayers().getArray(), STATE);
 }
 
@@ -50,6 +52,8 @@ export function getProjection(STATE) {
  * @param {object} STATE animation state
  */
 export function updateWMSLayerParams(map, layer, params, STATE) {
+  console.log("update");
+  console.log(STATE);
   toggleLegend(STATE);
   return new Promise(async function(resolve, reject) {
     const source = layer.getSource();

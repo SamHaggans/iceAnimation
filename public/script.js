@@ -244,7 +244,7 @@ function stopAnimation() {
   if (!STATE.stop) {
     STATE.stop = true;
     $('#playButton').addClass('fa-play');
-    ('#playButton').removeClass('fa-pause');
+    $('#playButton').removeClass('fa-pause');
   }
 }
 
