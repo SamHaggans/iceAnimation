@@ -37,7 +37,6 @@ module.exports = {
       cleanStaleWebpackAssets: false,
     }),
     new HtmlWebpackPlugin({
-      title: 'Visualize Sea Ice Change Over Time',
       template: './public/index.ejs',
     }),
   ],
