@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
+const pkg = require('./package.json');
 
 const outputDirectory = path.join(__dirname, 'dist');
 
@@ -38,6 +39,7 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: './public/index.ejs',
+      version: pkg.version,
     }),
   ],
 };
