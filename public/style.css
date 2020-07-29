@@ -165,3 +165,10 @@
   width: 180px;
   display: inline-block;
 }
+
+.loopSelection {
+  margin-left: 40px;
+  margin-top: 10px;
+  display: none;
+  margin-bottom: 0px;
+}

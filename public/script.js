@@ -86,6 +86,7 @@ async function init() {
   $('#yearLoop').prop('checked', false);
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
+  document.querySelector('input[name="loopDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
 
   $('#legend').attr('src', concentrationLegend);
 
@@ -239,11 +240,21 @@ function getState(map, projection) {
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
+  if (STATE.yearLoop) {
+    $('.loopSelection').css('display', 'block');
+  } else {
+    $('.loopSelection').css('display', 'none');
+  }
   return [map, projection];
 }
 
 /** Method to go to the next date for the animation*/
 function nextDate() {
+  if (STATE.yearLoop) {
+    const selectorTime = moment(document.querySelector('input[name="loopDate"]').value);
+    STATE.current.set({'date': selectorTime.date()});
+    STATE.current.set({'month': selectorTime.month()});
+  }
   if (STATE.temporality == 'monthly') {
     if (STATE.yearLoop) {
       STATE.current.add(1, 'y');
