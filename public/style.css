@@ -184,8 +184,39 @@
   width: 97%;
   background-color: #e2e0e0;
   border-radius: 4px;
+  margin-bottom: 3px;
 }
 
 a {
   text-decoration: none;
+}
+
+#dayLoop {
+  width: 30px;
+}
+
+.timeline {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 35px;
+  background: #d3d3d3;
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.timeline::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 35px;
+  background: #0974ff;
+  cursor: pointer;
+}
+
+.timeline::-moz-range-thumb {
+  width: 15px;
+  height: 35px;
+  background: #0974ff;
+  cursor: pointer;
 }

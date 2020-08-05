@@ -27,6 +27,8 @@ const noDataImages = {
 };
 */
 
+const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
 const STATE = {
   stop: true,
   rate: 100,
@@ -54,6 +56,7 @@ const DEFAULTS = {
 let map;
 let projection;
 const validDates = [];
+
 /** Main function run to start animation */
 async function main() { // eslint-disable-line no-unused-vars
   const gcr = CONSTANTS.getCapabilities;
@@ -94,7 +97,6 @@ async function init() {
   $('#yearLoop').prop('checked', false);
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
-  document.querySelector('input[name="loopDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
 
   $('#legend').attr('src', concentrationLegend);
 
@@ -232,6 +234,8 @@ function getState(map, projection) {
   STATE.yearLoop = $('#yearLoop').is(':checked');
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
+  const month = document.querySelector('select[name="monthLoop"]').value;
+  $('#dayLoop').attr({'max': daysInMonth[month]});
   if (oldHemisphere != STATE.hemi) {
     const wmsParams = util.getWMSParams(STATE);
     $('#map').html('');// Empty map when a new animation occurs
@@ -259,9 +263,10 @@ function getState(map, projection) {
 /** Method to go to the next date for the animation*/
 function nextDate() {
   if (STATE.yearLoop) {
-    const selectorTime = moment(document.querySelector('input[name="loopDate"]').value);
-    STATE.current.set({'date': selectorTime.date()});
-    STATE.current.set({'month': selectorTime.month()});
+    const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+    const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+    STATE.current.set({'date': dayLoop});
+    STATE.current.set({'month': monthLoop});
   }
   if (STATE.temporality == 'monthly') {
     if (STATE.yearLoop) {
