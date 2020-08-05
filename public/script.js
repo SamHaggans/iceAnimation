@@ -43,11 +43,11 @@ const STATE = {
 const DEFAULTS = {
   daily: {
     start: moment().year(1978).month(9).date(26),
-    end: moment().subtract(2, 'days'),
+    end: moment(),
   },
   monthly: {
     start: moment().year(1978).month(10).startOf('month'),
-    end: moment().subtract(1, 'months').subtract(2, 'days').startOf('month'),
+    end: moment(),
   },
 };
 
@@ -80,6 +80,14 @@ async function main() { // eslint-disable-line no-unused-vars
 
 /** Initiaties the input values and the map */
 async function init() {
+  // Set the "last" day and month to be the last of the getCapabilities data
+  const dailyDates = `g02135_extent_raster_daily_n`;
+  const lastDay = getLast(validDates[dailyDates]).split('T')[0];
+  DEFAULTS['daily'].end = moment(lastDay);
+  const monthlyDates = `g02135_extent_raster_monthly_n`;
+  const lastMonth = getLast(validDates[monthlyDates]).split('T')[0];
+  DEFAULTS['monthly'].end = moment(lastMonth);
+
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
@@ -384,9 +392,7 @@ function runXMLHTTPRequest(url) {
 }
 
 /** Method to sleep for a set time in ms
-    return new Promise(resolve => setTimeout(resolve, ms));
  * @param {int} ms - Milliseconds to sleep for
-}
  * @return {promise} - A promise that can be awaited for the specified time
  */
 function sleep(ms) { // Sleep function for pauses between frames
@@ -406,6 +412,14 @@ function validDate() {
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
   return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
+}
+
+/** Method to get the last index of an array
+ * @param {Array} arr - Array
+ * @return {object} - The last index of the array
+ */
+function getLast(arr) {
+  return (arr[arr.length - 1]);
 }
 
 main();
