@@ -16,6 +16,7 @@
     vertical-align: top;
     margin-left: 30px;
     width: 400px;
+    margin-bottom: 80px;
 }
 
 .ol-zoom-extent button{ 
@@ -174,10 +175,17 @@
 }
 
 #footer {
-  position: absolute;
+  position: fixed;
   bottom: 0px;
-  padding-bottom: 10px;
-  float: right;
-  text-align: right;
-  width: 90%;
+  margin: 0px;
+  padding: 10px;
+  text-align: left;
+  border: 2px solid black;
+  width: 97%;
+  background-color: #e2e0e0;
+  border-radius: 4px;
+}
+
+a {
+  text-decoration: none;
 }
