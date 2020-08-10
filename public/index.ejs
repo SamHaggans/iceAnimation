@@ -28,11 +28,13 @@
               <div class = "col1"><input type="radio" value="daily" name="dates">Daily</div>
               <input type="radio" value="monthly" name="dates">Monthly
               <br><br>
-              <div class = "col2"><label for = "sDate" id = "startingText">Starting Date: </label></div><input id = "sDate" type = "date" name = "sDate">          
+              <div class = "dateSelect"><div class = "col2"><label for = "sDate" id = "startingText">Starting Date: </label></div><input id = "sDate" type = "date" name = "sDate"></div> 
+              <div class = "yearSelect"><div class = "col2"><label for = "sYear" id = "startingYearText">Starting Year: </label></div><input type="number" id="sYear" name="sYear" min="1978" value = "1978"></div>
               <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
               <br>
-              <div class = "col2"><label for = "eDate" id = "endingText">Ending Date: </label></div><input id = "eDate" type = "date" name = "eDate"><br>
-              
+              <div class = "dateSelect"> <div class = "col2"><label for = "eDate" id = "endingText">Ending Date: </label></div><input id = "eDate" type = "date" name = "eDate"><br></div> 
+              <div class = "yearSelect"><div class = "col2"><label for = "eYear" id = "endingYearText">Ending Year: </label></div><input type="number" id="eYear" name="eYear" min="1978"></div>
+              <br>
               <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
               <div class = "loopSelection">
                   Date to Be Looped:
@@ -50,19 +52,9 @@
                     <option value="10">November</option>
                     <option value="11">December</option>
                   </select>
-                  <input type="number" id="dayLoop" name="dayLoop" min="1" max="31">
+                  <input type="number" id="dayLoop" name="dayLoop" min="1" max="31" value = "1">
               </div> 
               <br>
-              <div id = "missing-data-message" class = "hidden">
-                  <span id = "closeMissingData"><i id = "closeButton" class="fa fa-3x fa-window-close" aria-hidden="true"></i>
-                  </span>
-                  <h3>Available Dates</h3> 
-                  <hr>
-                  Daily data begin on 26 October 1978 and go through yesterday. From 26 October 1978 through 20 August 1987, the daily data occur every other day. From 21 August 1987 through yesterday, the data occur daily. There are no daily data from 3 December 1987 to 13 January 1988 due to satellite problems.
-
-                  <br><br>Monthly averaged data begin in November 1978 and go through last month. There are no monthly data for December 1987 or January 1988 due to satellite problems.
-                  <br><br>Daily data and monthly average data are not displayed by the animation when they are not available, and are skipped.
-              </div>
               <br>
           </form>
           <div id = "playheadBox">
@@ -85,11 +77,25 @@
               Map Legend:
               <hr>
               <img id = "legend">
-              </div>
+            </div>
+            <div id = "attribution">
+              © 2020 National Snow and Ice Data Center, University of Colorado Boulder, Data Source: <a href = "https://nsidc.org/data/G02135">Sea Ice Index</a> 
+            </div>
           </div>
+          
+      </div>
+      <div id = "missing-data-message" class = "hidden">
+        <span id = "closeMissingData"><i id = "closeButton" class="fa fa-3x fa-window-close" aria-hidden="true"></i>
+        </span>
+        <h3>Available Dates</h3> 
+        <hr>
+        Daily data begin on 26 October 1978 and go through yesterday. From 26 October 1978 through 20 August 1987, the daily data occur every other day. From 21 August 1987 through yesterday, the data occur daily. There are no daily data from 3 December 1987 to 13 January 1988 due to satellite problems.
+
+        <br><br>Monthly averaged data begin in November 1978 and go through last month. There are no monthly data for December 1987 or January 1988 due to satellite problems.
+        <br><br>Daily data and monthly average data are not displayed by the animation when they are not available, and are skipped.
       </div>
       <div id = "footer">
-        Data Source: <a href = "https://nsidc.org/data/G02135">Sea Ice Index</a> | Animation v<%= htmlWebpackPlugin.options.version %> 
+        Animation v<%= htmlWebpackPlugin.options.version %> 
       </div>
   </body>
 </html>

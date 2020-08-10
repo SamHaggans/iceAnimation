@@ -17,6 +17,8 @@
     margin-left: 30px;
     width: 400px;
     margin-bottom: 80px;
+    position: relative;
+    height: 602px;
 }
 
 .ol-zoom-extent button{ 
@@ -162,6 +164,7 @@
   width: 80px;
   display: inline-block;
 }
+
 .col2 {
   width: 180px;
   display: inline-block;
@@ -179,7 +182,7 @@
   bottom: 0px;
   margin: 0px;
   padding: 10px;
-  text-align: left;
+  text-align: right;
   border: 2px solid black;
   width: 97%;
   background-color: #e2e0e0;
@@ -193,4 +196,24 @@ a {
 
 #dayLoop {
   width: 30px;
+}
+
+
+#attribution {
+  margin-top: 50px;
+  font-size: 12.5px;
+  position: absolute; 
+  bottom: 0;
+}
+
+.yearSelect {
+  display: none;
+}
+
+.dateSelect {
+  display: inline-block;
+}
+
+#sYear, #eYear {
+  width: 80px;
 }

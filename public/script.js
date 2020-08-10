@@ -35,6 +35,8 @@ const STATE = {
   current: moment(),
   start: moment(),
   end: moment(),
+  startYear: moment(),
+  endYear: moment(),
   dataType: 'extent',
   hemi: 'n',
   temporality: 'daily',
@@ -91,6 +93,10 @@ async function init() {
   const lastMonth = getLast(validDates[monthlyDates]).split('T')[0];
   DEFAULTS['monthly'].end = moment(lastMonth);
 
+  const lastYear = getLast(validDates[dailyDates]).split('-')[0];
+  $('#sYear').attr({'max': lastYear});
+  $('#eYear').attr({'max': lastYear, 'value': lastYear});
+
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);
   $('input:radio[name=dates]').val(['daily']);
@@ -105,6 +111,8 @@ async function init() {
   const timeNow = moment();
   $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
   $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
+  $('#startingYearText').html(`Starting Year (1978-${timeNow.year()}):`);
+  $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
 
 
   projection = util.getProjection(STATE);
@@ -234,6 +242,8 @@ function getState(map, projection) {
   STATE.yearLoop = $('#yearLoop').is(':checked');
   STATE.start = moment(document.querySelector('input[name="sDate"]').value);
   STATE.end = moment(document.querySelector('input[name="eDate"]').value);
+  STATE.startYear = moment(`${document.querySelector('input[name="sYear"]').value}-01-01`);
+  STATE.endYear = moment(`${document.querySelector('input[name="eYear"]').value}-12-31`);
   const month = document.querySelector('select[name="monthLoop"]').value;
   $('#dayLoop').attr({'max': daysInMonth[month]});
   if (oldHemisphere != STATE.hemi) {
@@ -254,8 +264,18 @@ function getState(map, projection) {
   }
   if (STATE.yearLoop) {
     $('.loopSelection').css('display', 'block');
+    $('.dateSelect').css('display', 'none');
+    $('.yearSelect').css('display', 'inline-block');
+
+    if (STATE.temporality == 'monthly') {
+      $('#dayLoop').css('display', 'none');
+    } else {
+      $('#dayLoop').css('display', 'inline');
+    }
   } else {
     $('.loopSelection').css('display', 'none');
+    $('.dateSelect').css('display', 'inline-block');
+    $('.yearSelect').css('display', 'none');
   }
   return [map, projection];
 }
@@ -303,6 +323,15 @@ function nextDate() {
       }
     }
   }
+  if (STATE.yearLoop) {
+    while (STATE.current.isBefore(STATE.startYear)) {
+      STATE.current.add(1, 'y');
+    }
+    if (STATE.current.isAfter(STATE.endYear)) {
+      STATE.current.set({'year': STATE.startYear.year()});
+    }
+  }
+
   if (!validDate()) {
     nextDate();
   }
