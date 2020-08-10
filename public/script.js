@@ -161,6 +161,10 @@ async function init() {
     STATE.current = moment(STATE.start);
     [map, projection] = getState(map, projection);
     util.loadWMS(map, projection, STATE);
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     if (!STATE.stop) {
@@ -171,6 +175,10 @@ async function init() {
     STATE.current = moment(STATE.end);
     [map, projection] = getState(map, projection);
     util.loadWMS(map, projection, STATE);
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
   });
 
   document.getElementById('info-hover').onclick = function() {
@@ -191,6 +199,20 @@ async function init() {
     $('#missing-data-message').toggleClass('hidden');
   };
 
+  document.getElementById('timeline').value = 1;
+
+  document.getElementById('timeline').oninput = function() {
+    if (!STATE.stop) {
+      STATE.stop = true;
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
+    };
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const sliderVal = $(this).val();
+    const selectedTime = (sliderVal / 1000000) * totalDays;
+    STATE.current = moment(STATE.start).add(selectedTime, 'd');
+  };
+
   animationLoop();
 }
 
@@ -199,6 +221,7 @@ async function init() {
 */
 async function animationLoop() {
   while (true) {
+    console.log(STATE.current);
     if (!STATE.stop) {
       nextDate();
       [map, projection] = await getState(map, projection);
@@ -249,7 +272,7 @@ function getState(map, projection) {
     document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
     document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
     STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-    STATE.current = moment(STATE.start);
+    //STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
   if (STATE.yearLoop) {
@@ -303,6 +326,12 @@ function nextDate() {
       }
     }
   }
+
+  const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+  const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+  const sliderPos = (animateDistance / totalDays) * 1000000;
+  document.getElementById('timeline').value = sliderPos;
+
   if (!validDate()) {
     nextDate();
   }
@@ -336,6 +365,12 @@ function previousDate() {
       }
     }
   }
+
+  const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+  const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+  const sliderPos = (animateDistance / totalDays) * 1000000;
+  document.getElementById('timeline').value = sliderPos;
+
   if (!validDate()) {
     previousDate();
   }
