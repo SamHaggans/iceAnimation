@@ -6,10 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint --ignore-path .gitignore . --fix",
-    "build": "webpack --mode production",
+    "build": "webpack --env.NODE_ENV=production",
+    "build-dev": "webpack --env.NODE_ENV=development",
     "serve": "node server.js",
     "start": "npm run build && npm run serve",
-    "dev": "webpack-dev-server --mode development & nodemon server.js "
+    "start-dev": "webpack-dev-server --env.NODE_ENV=development --open"
   },
   "author": "",
   "license": "ISC",
