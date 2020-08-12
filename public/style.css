@@ -197,12 +197,13 @@ a {
 
 .timeline {
   -webkit-appearance: none;
-  width: 100%;
+  width: 80%;
   height: 35px;
   background: #d3d3d3;
   outline: none;
   -webkit-transition: .2s;
   transition: opacity .2s;
+  margin-left: 10%;
 }
 
 .timeline::-webkit-slider-thumb {
@@ -219,4 +220,10 @@ a {
   height: 35px;
   background: #0974ff;
   cursor: pointer;
+}
+
+.timelineScale {
+  width: 19%;
+  display: inline-block;
+  text-align: center;
 }

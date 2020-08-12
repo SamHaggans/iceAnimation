@@ -211,6 +211,9 @@ async function init() {
     const sliderVal = $(this).val();
     const selectedTime = (sliderVal / 1000000) * totalDays;
     STATE.current = moment(STATE.start).add(selectedTime, 'd');
+    if (!validDate()) {
+      nextDate();
+    }
   };
 
   animationLoop();
@@ -221,7 +224,6 @@ async function init() {
 */
 async function animationLoop() {
   while (true) {
-    console.log(STATE.current);
     if (!STATE.stop) {
       nextDate();
       [map, projection] = await getState(map, projection);
@@ -272,7 +274,7 @@ function getState(map, projection) {
     document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
     document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
     STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-    //STATE.current = moment(STATE.start);
+    STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
   if (STATE.yearLoop) {
@@ -280,6 +282,14 @@ function getState(map, projection) {
   } else {
     $('.loopSelection').css('display', 'none');
   }
+
+  for (let i = 0; i < 5; i++) {
+    let totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    let forwardDays = (totalDays / 4) * i;
+    let scaleDate = moment(STATE.start).add(forwardDays, 'd');
+    $(`#scale${i}`).html(scaleDate.format('YYYY'));
+  }
+
   return [map, projection];
 }
 
