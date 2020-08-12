@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link href="./style.css" rel="stylesheet">
+    <title>Sea Ice Animation</title>
+  </head>
+  <body id="template-body">
+    <div id="grid-container">
+
+      <div>
+        <a href='https://nsidc.org/nsidc-labs'>
+          <img id="labs_logo" src="./nsidc_labs_logo.png" alt='NSIDC Labs logo'/>
+        </a>
+
+        <a id="feedback-link" href='https://nsidc.org/nsidc-labs/ice-animation'>
+          Send Feedback
+        </a>
+      </div>
+
+      // TODO: have iframe overflow 'spill over' to the parent div. See e.g., https://stackoverflow.com/questions/325273/make-iframe-to-fit-100-of-containers-remaining-height
+      <iframe id="app" width="100%" height="100%" src="https://ice-animation.herokuapp.com/"></iframe>
+
+    </div>
+  </body>
+</html>
