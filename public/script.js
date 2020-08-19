@@ -215,15 +215,32 @@ async function init() {
       $('#playButton').addClass('fa-play');
       $('#playButton').removeClass('fa-pause');
     };
-    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-    const sliderVal = $(this).val();
-    const selectedTime = (sliderVal / 1000000) * totalDays;
-    STATE.current = moment(STATE.start).add(selectedTime, 'd');
+    if (STATE.yearLoop) {
+      let firstDate;
+      let lastDate;
+      [firstDate, lastDate] = getSliderPositioning();
+
+      const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+      const sliderVal = $(this).val();
+      const selectedTime = (sliderVal / 1000000) * totalDays;
+      STATE.current = moment(firstDate).add(selectedTime, 'd');
+    } else {
+      const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+      const sliderVal = $(this).val();
+      const selectedTime = (sliderVal / 1000000) * totalDays;
+      STATE.current = moment(STATE.start).add(selectedTime, 'd');
+    }
+    if (STATE.yearLoop) {
+      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+      STATE.current.set({'date': dayLoop});
+      STATE.current.set({'month': monthLoop});
+    }
+
     if (!validDate()) {
       nextDate();
     }
   };
-
   animationLoop();
 }
 
@@ -287,6 +304,7 @@ function getState(map, projection) {
     STATE.current = moment(STATE.start);
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
+  STATE.start = STATE.start.startOf('day');
   if (STATE.yearLoop) {
     $('.loopSelection').css('display', 'block');
     $('.dateSelect').css('display', 'none');
@@ -304,10 +322,21 @@ function getState(map, projection) {
   }
 
   for (let i = 0; i < 5; i++) {
-    let totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-    let forwardDays = (totalDays / 4) * i;
-    let scaleDate = moment(STATE.start).add(forwardDays, 'd');
-    $(`#scale${i}`).html(scaleDate.format('YYYY'));
+    if (STATE.yearLoop) {
+      let firstDate;
+      let lastDate;
+      [firstDate, lastDate] = getSliderPositioning();
+
+      let totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+      let forwardDays = (totalDays / 4) * i;
+      let scaleDate = moment(firstDate).add(forwardDays, 'd');
+      $(`#scale${i}`).html(scaleDate.format('YYYY'));
+    } else {
+      let totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+      let forwardDays = (totalDays / 4) * i;
+      let scaleDate = moment(STATE.start).add(forwardDays, 'd');
+      $(`#scale${i}`).html(scaleDate.format('YYYY'));
+    }
   }
 
   return [map, projection];
@@ -358,19 +387,43 @@ function nextDate() {
   }
 
   if (STATE.yearLoop) {
+    const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+    const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+    STATE.startYear.set({'date': dayLoop});
+    STATE.startYear.set({'month': monthLoop});
     while (STATE.current.isBefore(STATE.startYear)) {
       STATE.current.add(1, 'y');
     }
+    STATE.endYear.set({'date': dayLoop});
+    STATE.endYear.set({'month': monthLoop});
     if (STATE.current.isAfter(STATE.endYear)) {
       STATE.current.set({'year': STATE.startYear.year()});
     }
   }
 
-  const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-  const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
-  const sliderPos = (animateDistance / totalDays) * 1000000;
-  document.getElementById('timeline').value = sliderPos;
+  if (STATE.yearLoop) {
+    let firstDate;
+    let lastDate;
+    [firstDate, lastDate] = getSliderPositioning();
 
+    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+    const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
+  } else {
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
+  }
+
+
+  if (STATE.yearLoop) {
+    const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+    const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+    STATE.current.set({'date': dayLoop});
+    STATE.current.set({'month': monthLoop});
+  }
   if (!validDate()) {
     nextDate();
   }
@@ -396,19 +449,38 @@ function previousDate() {
     if (STATE.current.isBefore(STATE.start)) {
       STATE.current = moment(STATE.end);
     }
-  } else {
-    if (STATE.current.isBefore(STATE.start)) {
-      STATE.current.set({'year': STATE.end.year()});
-      while (STATE.current.isAfter(STATE.end)) {
-        STATE.current.subtract(1, 'y');
-      }
+  }
+
+  if (STATE.yearLoop) {
+    const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+    const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+    STATE.startYear.set({'date': dayLoop});
+    STATE.startYear.set({'month': monthLoop});
+    if (STATE.current.isBefore(STATE.startYear)) {
+      STATE.current.set({'year': STATE.endYear.year()});
+    }
+    STATE.endYear.set({'date': dayLoop});
+    STATE.endYear.set({'month': monthLoop});
+    if (STATE.current.isAfter(STATE.endYear)) {
+      STATE.current.set({'year': STATE.startYear.year()});
     }
   }
 
-  const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-  const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
-  const sliderPos = (animateDistance / totalDays) * 1000000;
-  document.getElementById('timeline').value = sliderPos;
+  if (STATE.yearLoop) {
+    let firstDate;
+    let lastDate;
+    [firstDate, lastDate] = getSliderPositioning();
+
+    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+    const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
+  } else {
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
+  }
 
   if (!validDate()) {
     previousDate();
@@ -491,6 +563,44 @@ function validDate() {
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
   return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
+}
+
+/** Method to set the text covering the map
+ * @param {moment} date - The date to be tested
+ * @return {boolean} - Valid date or not
+*/
+function validDateInput(date) {
+  // Get the key (layername) for searching the valid layers object
+  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
+  // Return whether or not the current date is in the queried layer
+  return (validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
+}
+
+/** Method to get the positioning of the slider and get the first and last date selectors when in looping mode
+ * @return {array} - The first and last dates to be displayed on the slider
+*/
+function getSliderPositioning() {
+  const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+  const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+  let firstDate = moment();
+  firstDate.set({'year': STATE.startYear.year()});
+  firstDate.set({'date': dayLoop});
+  firstDate.set({'month': monthLoop});
+
+  while (!validDateInput(firstDate)) {
+    firstDate.add(1, 'y');
+  }
+
+  let lastDate = moment();
+  lastDate.set({'year': STATE.endYear.year()});
+  lastDate.set({'date': dayLoop});
+  lastDate.set({'month': monthLoop});
+
+  while (!validDateInput(lastDate)) {
+    lastDate.subtract(1, 'y');
+  }
+
+  return [firstDate, lastDate];
 }
 
 /** Method to get the last index of an array
