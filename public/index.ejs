@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="./bundle.js"></script>
     <script src="https://use.fontawesome.com/f31bd6d608.js"></script>    
     <title>Sea Ice Animation</title>
   </head>
@@ -35,7 +34,22 @@
               
               <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
               <div class = "loopSelection">
-                  Date to Be Looped: <input id = "loopDate" type = "date" name = "loopDate">
+                  Date to Be Looped:
+                  <select name="monthLoop">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                  </select>
+                  <input type="number" id="dayLoop" name="dayLoop" min="1" max="31">
               </div> 
               <br>
               <div id = "missing-data-message" class = "hidden">
@@ -58,10 +72,14 @@
                   <div class = "playheadButton fa fa-3x fa-step-forward" id = "nextFrame"></div>
                   <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
               </div>
-
+              <input type="range" min="1" max="1000000" value="1" class="timeline" id="timeline">
+              <div class = "timelineScale" id = "scale0"></div>
+              <div class = "timelineScale" id = "scale1"></div>
+              <div class = "timelineScale" id = "scale2"></div>
+              <div class = "timelineScale" id = "scale3"></div>
+              <div class = "timelineScale" id = "scale4"></div>
               <div id = "speedControls">
                   <hr>
-                  
                   <div id = "sliderContainer">
                     <span id = "centerSpeed">Speed:</span>
                   Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
@@ -76,7 +94,7 @@
           </div>
       </div>
       <div id = "footer">
-       Version <%= htmlWebpackPlugin.options.version %> 
+        © 2020 National Snow and Ice Data Center, University of Colorado Boulder, Data Source: <a href = "https://nsidc.org/data/G02135">Sea Ice Index</a> | Animation v<%= htmlWebpackPlugin.options.version %> 
       </div>
   </body>
 </html>
