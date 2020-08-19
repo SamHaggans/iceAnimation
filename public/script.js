@@ -169,6 +169,10 @@ async function init() {
     STATE.current = moment(STATE.start);
     [map, projection] = getState(map, projection);
     util.loadWMS(map, projection, STATE);
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     if (!STATE.stop) {
@@ -179,6 +183,10 @@ async function init() {
     STATE.current = moment(STATE.end);
     [map, projection] = getState(map, projection);
     util.loadWMS(map, projection, STATE);
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+    const sliderPos = (animateDistance / totalDays) * 1000000;
+    document.getElementById('timeline').value = sliderPos;
   });
 
   document.getElementById('info-hover').onclick = function() {
@@ -197,6 +205,23 @@ async function init() {
 
   document.getElementById('closeButton').onclick = function() {
     $('#missing-data-message').toggleClass('hidden');
+  };
+
+  document.getElementById('timeline').value = 1;
+
+  document.getElementById('timeline').oninput = function() {
+    if (!STATE.stop) {
+      STATE.stop = true;
+      $('#playButton').addClass('fa-play');
+      $('#playButton').removeClass('fa-pause');
+    };
+    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    const sliderVal = $(this).val();
+    const selectedTime = (sliderVal / 1000000) * totalDays;
+    STATE.current = moment(STATE.start).add(selectedTime, 'd');
+    if (!validDate()) {
+      nextDate();
+    }
   };
 
   animationLoop();
@@ -277,6 +302,14 @@ function getState(map, projection) {
     $('.dateSelect').css('display', 'inline-block');
     $('.yearSelect').css('display', 'none');
   }
+
+  for (let i = 0; i < 5; i++) {
+    let totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+    let forwardDays = (totalDays / 4) * i;
+    let scaleDate = moment(STATE.start).add(forwardDays, 'd');
+    $(`#scale${i}`).html(scaleDate.format('YYYY'));
+  }
+
   return [map, projection];
 }
 
@@ -323,6 +356,7 @@ function nextDate() {
       }
     }
   }
+
   if (STATE.yearLoop) {
     while (STATE.current.isBefore(STATE.startYear)) {
       STATE.current.add(1, 'y');
@@ -331,6 +365,11 @@ function nextDate() {
       STATE.current.set({'year': STATE.startYear.year()});
     }
   }
+
+  const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+  const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+  const sliderPos = (animateDistance / totalDays) * 1000000;
+  document.getElementById('timeline').value = sliderPos;
 
   if (!validDate()) {
     nextDate();
@@ -365,6 +404,12 @@ function previousDate() {
       }
     }
   }
+
+  const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+  const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+  const sliderPos = (animateDistance / totalDays) * 1000000;
+  document.getElementById('timeline').value = sliderPos;
+
   if (!validDate()) {
     previousDate();
   }

@@ -1,219 +1,251 @@
 .map {
-    height: 602px;
-    width: 408px;
-    border-width: 5px;
-    display:inline-block;
-    text-align:center;
-    vertical-align:middle;
-    line-height: 500px;
-    font-size:30px;
-    background-color: black;
-    position: relative;
+  height: 602px;
+  width: 408px;
+  border-width: 5px;
+  display:inline-block;
+  text-align:center;
+  vertical-align:middle;
+  line-height: 500px;
+  font-size:30px;
+  background-color: black;
+  position: relative;
 }
 
 #config {
-    display:inline-block;
-    vertical-align: top;
-    margin-left: 30px;
-    width: 400px;
-    margin-bottom: 80px;
-    position: relative;
-    height: 602px;
+  display:inline-block;
+  vertical-align: top;
+  margin-left: 30px;
+  width: 400px;
+  margin-bottom: 80px;
+  position: relative;
+  height: 602px;
 }
 
 .ol-zoom-extent button{ 
-    background-image: url("assets/extentButton.png");
+  background-image: url("assets/extentButton.png");
 }
 
 #date {
-    position: absolute;
-    right: 10px;
-    z-index: 10000000;
-    background-color: rgba(0,60,136,.7);
-    border-radius: 3px;
-    padding: 3px;
-    color: #ffffff;
+  position: absolute;
+  right: 10px;
+  z-index: 10000000;
+  background-color: rgba(0,60,136,.7);
+  border-radius: 3px;
+  padding: 3px;
+  color: #ffffff;
 }
 
 .playheadButton {
-    margin-right: 5px;
-    margin-left: 5px;
-    padding: 4px;
-    display: inline-block;
-    cursor: pointer;
-    border-radius: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
+  padding: 4px;
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 5px;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 
 #mapAlert {
-    z-index: 100;
-    font-size: 50px;
-    color: rgb(46, 92, 241);
-    position: absolute;
-    left: 100px;
-    top: 200px;
+  z-index: 100;
+  font-size: 50px;
+  color: rgb(46, 92, 241);
+  position: absolute;
+  left: 100px;
+  top: 200px;
 }
 
 #mapContainer {
-    width: 340px;
-    margin-right: 10px;
-    position: relative;
-    display: table;
-    
-    margin: 0 auto;
+  width: 340px;
+  margin-right: 10px;
+  position: relative;
+  display: table;
+  
+  margin: 0 auto;
 }
 
 .ol-zoom {
-    width: 25px;
-    height: 50px;
+  width: 25px;
+  height: 50px;
 }
 
 .ol-zoom-extent {
-    width: 25px;
-    height: 25px;
-    top: 2.643em;
+  width: 25px;
+  height: 25px;
+  top: 2.643em;
 }
 
 .ol-zoom-in, .ol-zoom-out {
-    width: 23px !important;
-    height: 23px !important;
-    font-size: 0.85em !important;
+  width: 23px !important;
+  height: 23px !important;
+  font-size: 0.85em !important;
 }
 
 
 .ol-zoom-extent button {
-    width: 23px;
-    height: 23px;
-    font-size: 0.57em;
-    background-size: cover;
+  width: 23px;
+  height: 23px;
+  font-size: 0.57em;
+  background-size: cover;
 }
 
 #legendContainer {
-    padding-top: 30px;
+  padding-top: 30px;
 }
 
 #legend {
-    display: block;
-    margin: auto;
+  display: block;
+  margin: auto;
 }
 
 #missing-data-message {
-    position: absolute;
-    border: 1px solid black;
-    padding: 5px;
-    border-radius: 10px;
-    background-color: #e2e2e2;
-    left: 40%;
-    top: 150px;
-    width: 500px;
+  position: absolute;
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 10px;
+  background-color: #e2e2e2;
+  left: 40%;
+  top: 150px;
+  width: 500px;
 }
 
 #main {
-    display: table;
-    margin: 0 auto;
+  display: table;
+  margin: 0 auto;
 }
 
 #mapSpace {
-    display: inline-block;
-    width: 580px;
+  display: inline-block;
+  width: 580px;
 }
 
 #playhead {
-    display: table;
-    margin: 0 auto;
+  display: table;
+  margin: 0 auto;
 }
 
 #playheadBox {
-    border: 1px solid black;
-    border-radius: 15px;
-    padding: 10px;
-    background-color: #e3fdff
+  border: 1px solid black;
+  border-radius: 15px;
+  padding: 10px;
+  background-color: #e3fdff
 }
 
 #speedControls {
-    display: table;
-    margin: 0 auto;
-    width: 100%;
+  display: table;
+  margin: 0 auto;
+  width: 100%;
 }
 
 #closeMissingData {
-    float: right;
+  float: right;
 }
 
 #speedSlider{
-  width: 65% !important;
-  margin-bottom: -6px;
+width: 65% !important;
+margin-bottom: -6px;
 }
 
 #sliderContainer {
-  display: table;
-  margin: 0 auto;
-  width: 90%;
+display: table;
+margin: 0 auto;
+width: 90%;
 }
 
 #centerSpeed {
-  display: table;
-  margin: 0 auto;
+display: table;
+margin: 0 auto;
 }
 
 .col1 {
-  width: 80px;
-  display: inline-block;
+width: 80px;
+display: inline-block;
 }
 
 .col2 {
-  width: 180px;
-  display: inline-block;
+width: 180px;
+display: inline-block;
 }
 
 .loopSelection {
-  margin-left: 40px;
-  margin-top: 10px;
-  display: none;
-  margin-bottom: 0px;
+margin-left: 40px;
+margin-top: 10px;
+display: none;
+margin-bottom: 0px;
 }
 
 #footer {
-  position: fixed;
-  bottom: 0px;
-  margin: 0px;
-  padding: 10px;
-  text-align: right;
-  border: 2px solid black;
-  width: 97%;
-  background-color: #e2e0e0;
-  border-radius: 4px;
-  margin-bottom: 3px;
+position: fixed;
+bottom: 0px;
+margin: 0px;
+padding: 10px;
+text-align: right;
+border: 2px solid black;
+width: 97%;
+background-color: #e2e0e0;
+border-radius: 4px;
+margin-bottom: 3px;
 }
 
 a {
-  text-decoration: none;
+text-decoration: none;
 }
 
 #dayLoop {
-  width: 30px;
+width: 30px;
 }
 
-
 #attribution {
-  margin-top: 50px;
-  font-size: 12.5px;
-  position: absolute; 
-  bottom: 0;
+margin-top: 50px;
+font-size: 12.5px;
+position: absolute; 
+bottom: 0;
+}
+
+.timeline {
+-webkit-appearance: none;
+width: 80%;
+height: 35px;
+background: #d3d3d3;
+outline: none;
+-webkit-transition: .2s;
+transition: opacity .2s;
+margin-left: 10%;
+}
+
+.timeline::-webkit-slider-thumb {
+-webkit-appearance: none;
+appearance: none;
+width: 15px;
+height: 35px;
+background: #0974ff;
+cursor: pointer;
 }
 
 .yearSelect {
-  display: none;
+display: none;
+}
+
+.timeline::-moz-range-thumb {
+width: 15px;
+height: 35px;
+background: #0974ff;
+cursor: pointer;
 }
 
 .dateSelect {
-  display: inline-block;
+display: inline-block;
 }
 
 #sYear, #eYear {
-  width: 80px;
+width: 80px;
+}
+
+.timelineScale {
+width: 19%;
+display: inline-block;
+text-align: center;
 }

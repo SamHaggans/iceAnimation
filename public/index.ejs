@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="./bundle.js"></script>
     <script src="https://use.fontawesome.com/f31bd6d608.js"></script>    
     <title>Sea Ice Animation</title>
   </head>
@@ -65,6 +64,12 @@
                   <div class = "playheadButton fa fa-3x fa-step-forward" id = "nextFrame"></div>
                   <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
               </div>
+              <input type="range" min="1" max="1000000" value="1" class="timeline" id="timeline">
+              <div class = "timelineScale" id = "scale0"></div>
+              <div class = "timelineScale" id = "scale1"></div>
+              <div class = "timelineScale" id = "scale2"></div>
+              <div class = "timelineScale" id = "scale3"></div>
+              <div class = "timelineScale" id = "scale4"></div>
               <div id = "speedControls">
                   <hr>
                   <div id = "sliderContainer">
