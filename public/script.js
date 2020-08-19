@@ -272,6 +272,9 @@ async function animationLoop() {
  * @param {projection} projection - The projection to be used
 */
 function getState(map, projection) {
+  STATE.start.hour(0);
+  STATE.current.hour(10);
+  STATE.end.hour(20);
   const oldHemisphere = STATE.hemi;
   const oldMode = STATE.temporality;
   // Get value for extent or concentration
@@ -344,6 +347,9 @@ function getState(map, projection) {
 
 /** Method to go to the next date for the animation*/
 function nextDate() {
+  STATE.start.hour(0);
+  STATE.current.hour(10);
+  STATE.end.hour(20);
   if (STATE.yearLoop) {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
@@ -431,6 +437,10 @@ function nextDate() {
 
 /** Method to go to the previous date for the animation*/
 function previousDate() {
+  STATE.start.hour(0);
+  STATE.current.hour(10);
+  STATE.end.hour(20);
+
   if (STATE.temporality == 'monthly') {
     if (STATE.yearLoop) {
       STATE.current.subtract(1, 'y');
