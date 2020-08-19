@@ -198,7 +198,6 @@ a {
   width: 30px;
 }
 
-
 #attribution {
   margin-top: 50px;
   font-size: 12.5px;
@@ -206,8 +205,35 @@ a {
   bottom: 0;
 }
 
+.timeline {
+  -webkit-appearance: none;
+  width: 80%;
+  height: 35px;
+  background: #d3d3d3;
+  outline: none;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  margin-left: 10%;
+}
+
+.timeline::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 35px;
+  background: #0974ff;
+  cursor: pointer;
+}
+
 .yearSelect {
   display: none;
+}
+
+.timeline::-moz-range-thumb {
+  width: 15px;
+  height: 35px;
+  background: #0974ff;
+  cursor: pointer;
 }
 
 .dateSelect {
@@ -216,4 +242,10 @@ a {
 
 #sYear, #eYear {
   width: 80px;
+}
+
+.timelineScale {
+  width: 19%;
+  display: inline-block;
+  text-align: center;
 }
