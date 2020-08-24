@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.2] - 2020-08-24
+- Fix visual issues with elements dropping down lines due to element size differences between browsers and computers
+- Modify styling of timeline
+- Timeline now moves once frames have been loaded, not before
+- Fix a bug causing the step backward button to break under certain conditions
+
 ## [1.5.1] - 2020-08-19
 - Fix issues with timeline when in the year loop mode
 - Fix functionality of looping from start date to last date and vice-versa caused by inconsistencies with the hours of the moment objects
