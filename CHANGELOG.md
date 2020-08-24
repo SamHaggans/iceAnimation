@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.5.3] - 2020-08-24
+- Fix bug with getSliderPositioning
+
 ## [1.5.2] - 2020-08-24
 - Fix visual issues with elements dropping down lines due to element size differences between browsers and computers
 - Modify styling of timeline
