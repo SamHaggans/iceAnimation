@@ -41,7 +41,7 @@ const STATE = {
   hemi: 'n',
   temporality: 'daily',
   yearLoop: false,
-  validDates: {},
+  validDates: [],
 };
 
 const DEFAULTS = {
@@ -57,7 +57,6 @@ const DEFAULTS = {
 
 let map;
 let projection;
-const validDates = [];
 
 /** Main function run to start animation */
 async function main() { // eslint-disable-line no-unused-vars
@@ -73,7 +72,7 @@ async function main() { // eslint-disable-line no-unused-vars
       // Find the first (only) extent (dates) tag
       const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');
       // Add the extents to the state object
-      validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;
+      STATE.validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;
     } catch (error) {
       // Layer without extent tag, which means it is not relevant
     }
@@ -87,13 +86,13 @@ async function main() { // eslint-disable-line no-unused-vars
 async function init() {
   // Set the "last" day and month to be the last of the getCapabilities data
   const dailyDates = `g02135_extent_raster_daily_n`;
-  const lastDay = getLast(validDates[dailyDates]).split('T')[0];
+  const lastDay = getLast(STATE.validDates[dailyDates]).split('T')[0];
   DEFAULTS['daily'].end = moment(lastDay);
   const monthlyDates = `g02135_extent_raster_monthly_n`;
-  const lastMonth = getLast(validDates[monthlyDates]).split('T')[0];
+  const lastMonth = getLast(STATE.validDates[monthlyDates]).split('T')[0];
   DEFAULTS['monthly'].end = moment(lastMonth);
 
-  const lastYear = getLast(validDates[dailyDates]).split('-')[0];
+  const lastYear = getLast(STATE.validDates[dailyDates]).split('-')[0];
   $('#sYear').attr({'max': lastYear});
   $('#eYear').attr({'max': lastYear, 'value': lastYear});
 
@@ -553,7 +552,7 @@ function validDate() {
   // Get the key (layername) for searching the valid layers object
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
-  return (validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
+  return (STATE.validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
 }
 
 /** Method to set the text covering the map
@@ -564,7 +563,7 @@ function validDateInput(date) {
   // Get the key (layername) for searching the valid layers object
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
-  return (validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
+  return (STATE.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
 }
 
 /** Method to get the positioning of the slider and get the first and last date selectors when in looping mode

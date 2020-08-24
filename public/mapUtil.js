@@ -12,6 +12,7 @@ import Image from 'ol/layer/Image';
 import ImageStatic from 'ol/source/ImageStatic';
 import Projection from 'ol/proj/Projection';
 import {getCenter} from 'ol/extent';
+import moment from 'moment';
 
 import {CONSTANTS} from './constants.js';
 import './style.css';
@@ -72,7 +73,7 @@ export function updateWMSLayerParams(map, layer, params, STATE) {
       if (STATE.yearLoop) {
         let firstDate;
         let lastDate;
-        [firstDate, lastDate] = getSliderPositioning();
+        [firstDate, lastDate] = getSliderPositioning(STATE);
 
         const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
         const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
@@ -209,4 +210,44 @@ export function toggleLegend(STATE) {
   if (STATE.dataType == 'concentration') {
     $('#legend').attr('src', concentrationLegend);
   }
+}
+
+/** Method to get the positioning of the slider and get the first and last date selectors when in looping mode
+ * @param {object} STATE - The state of the animation
+ * @return {array} - The first and last dates to be displayed on the slider
+*/
+function getSliderPositioning(STATE) {
+  const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+  const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+  let firstDate = moment();
+  firstDate.set({'year': STATE.startYear.year()});
+  firstDate.set({'date': dayLoop});
+  firstDate.set({'month': monthLoop});
+
+  while (!validDateInput(firstDate, STATE)) {
+    firstDate.add(1, 'y');
+  }
+
+  let lastDate = moment();
+  lastDate.set({'year': STATE.endYear.year()});
+  lastDate.set({'date': dayLoop});
+  lastDate.set({'month': monthLoop});
+
+  while (!validDateInput(lastDate, STATE)) {
+    lastDate.subtract(1, 'y');
+  }
+
+  return [firstDate, lastDate];
+}
+
+/** Method to set the text covering the map
+ * @param {moment} date - The date to be tested
+ * @param {object} STATE - The state of the animation
+ * @return {boolean} - Valid date or not
+*/
+function validDateInput(date, STATE) {
+  // Get the key (layername) for searching the valid layers object
+  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
+  // Return whether or not the current date is in the queried layer
+  return (STATE.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
 }
