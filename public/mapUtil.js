@@ -68,6 +68,22 @@ export function updateWMSLayerParams(map, layer, params, STATE) {
       } else {
         $('#date').html(STATE.current.format('YYYY-MM'));
       }
+
+      if (STATE.yearLoop) {
+        let firstDate;
+        let lastDate;
+        [firstDate, lastDate] = getSliderPositioning();
+
+        const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+        const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
+        const sliderPos = (animateDistance / totalDays) * 1000000;
+        document.getElementById('timeline').value = sliderPos;
+      } else {
+        const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
+        const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+        const sliderPos = (animateDistance / totalDays) * 1000000;
+        document.getElementById('timeline').value = sliderPos;
+      }
       // Delete interval requests after load
       clearInterval(interval);
       // Wait for map to be ready to change the date tag

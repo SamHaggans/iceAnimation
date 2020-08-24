@@ -181,19 +181,10 @@ async function init() {
       while (!validDate()) {
         nextDate();
       }
-
-      const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-      const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
-      const sliderPos = (animateDistance / totalDays) * 1000000;
-      document.getElementById('timeline').value = sliderPos;
     } else {
       STATE.current = moment(STATE.start);
       [map, projection] = getState(map, projection);
       util.loadWMS(map, projection, STATE);
-      const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-      const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
-      const sliderPos = (animateDistance / totalDays) * 1000000;
-      document.getElementById('timeline').value = sliderPos;
     }
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
@@ -216,18 +207,10 @@ async function init() {
       while (!validDate()) {
         previousDate();
       }
-      const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-      const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
-      const sliderPos = (animateDistance / totalDays) * 1000000;
-      document.getElementById('timeline').value = sliderPos;
     } else {
       STATE.current = moment(STATE.end);
       [map, projection] = getState(map, projection);
       util.loadWMS(map, projection, STATE);
-      const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-      const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
-      const sliderPos = (animateDistance / totalDays) * 1000000;
-      document.getElementById('timeline').value = sliderPos;
     }
   });
 
@@ -436,22 +419,6 @@ function nextDate() {
     STATE.current.set({'month': monthLoop});
   }
 
-  if (STATE.yearLoop) {
-    let firstDate;
-    let lastDate;
-    [firstDate, lastDate] = getSliderPositioning();
-
-    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-    const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
-    const sliderPos = (animateDistance / totalDays) * 1000000;
-    document.getElementById('timeline').value = sliderPos;
-  } else {
-    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
-    const sliderPos = (animateDistance / totalDays) * 1000000;
-    document.getElementById('timeline').value = sliderPos;
-  }
-
 
   if (STATE.yearLoop) {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
@@ -505,21 +472,6 @@ function previousDate() {
     STATE.current.set({'month': monthLoop});
   }
 
-  if (STATE.yearLoop) {
-    let firstDate;
-    let lastDate;
-    [firstDate, lastDate] = getSliderPositioning();
-
-    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-    const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
-    const sliderPos = (animateDistance / totalDays) * 1000000;
-    document.getElementById('timeline').value = sliderPos;
-  } else {
-    const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-    const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
-    const sliderPos = (animateDistance / totalDays) * 1000000;
-    document.getElementById('timeline').value = sliderPos;
-  }
 
   if (!validDate()) {
     previousDate();
