@@ -419,34 +419,21 @@ function nextDate() {
     if (STATE.current.isBefore(STATE.start)) {
       STATE.current = moment(STATE.start);
     }
-  } else {
-    if (STATE.current.isAfter(STATE.end)) {
-      STATE.current.set({'year': STATE.start.year()});
-      while (STATE.current.isBefore(STATE.start)) {
-        STATE.current.add(1, 'y');
-      }
-    }
-    if (STATE.current.isBefore(STATE.start)) {
-      STATE.current.set({'year': STATE.start.year()});
-      while (STATE.current.isBefore(STATE.start)) {
-        STATE.current.add(1, 'y');
-      }
-    }
   }
 
   if (STATE.yearLoop) {
+    let firstDate;
+    let lastDate;
+    [firstDate, lastDate] = getSliderPositioning();
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-    STATE.startYear.set({'date': dayLoop});
-    STATE.startYear.set({'month': monthLoop});
-    while (STATE.current.isBefore(STATE.startYear)) {
-      STATE.current.add(1, 'y');
+    if (STATE.current.isBefore(firstDate)) {
+      STATE.current.set({'year': lastDate.year()});
+    } else if (STATE.current.isAfter(lastDate)) {
+      STATE.current.set({'year': firstDate.year()});
     }
-    STATE.endYear.set({'date': dayLoop});
-    STATE.endYear.set({'month': monthLoop});
-    if (STATE.current.isAfter(STATE.endYear)) {
-      STATE.current.set({'year': STATE.startYear.year()});
-    }
+    STATE.current.set({'date': dayLoop});
+    STATE.current.set({'month': monthLoop});
   }
 
   if (STATE.yearLoop) {
@@ -504,18 +491,18 @@ function previousDate() {
   }
 
   if (STATE.yearLoop) {
+    let firstDate;
+    let lastDate;
+    [firstDate, lastDate] = getSliderPositioning();
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-    STATE.startYear.set({'date': dayLoop});
-    STATE.startYear.set({'month': monthLoop});
-    if (STATE.current.isBefore(STATE.startYear)) {
-      STATE.current.set({'year': STATE.endYear.year()});
+    if (STATE.current.isBefore(firstDate)) {
+      STATE.current.set({'year': lastDate.year()});
+    } else if (STATE.current.isAfter(lastDate)) {
+      STATE.current.set({'year': firstDate.year()});
     }
-    STATE.endYear.set({'date': dayLoop});
-    STATE.endYear.set({'month': monthLoop});
-    if (STATE.current.isAfter(STATE.endYear)) {
-      STATE.current.set({'year': STATE.startYear.year()});
-    }
+    STATE.current.set({'date': dayLoop});
+    STATE.current.set({'month': monthLoop});
   }
 
   if (STATE.yearLoop) {
