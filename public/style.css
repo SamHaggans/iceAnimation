@@ -199,10 +199,9 @@ a {
 }
 
 #attribution {
-  margin-top: 50px;
+  margin-top: 20px;
+  text-align: center;
   font-size: 12.5px;
-  position: absolute; 
-  bottom: 0;
 }
 
 .timeline {
