@@ -13,9 +13,6 @@
                   <div id = "mapAlert">Loading...</div>
                   <div id="map" class="map"></div>
               </div>
-              <div id = "attribution">
-                © 2020 National Snow and Ice Data Center, University of Colorado Boulder, <br>Data Source: <a href = "https://nsidc.org/data/G02135">Sea Ice Index</a> 
-              </div>
           </div>
 
           <div id = "config">
@@ -30,13 +27,17 @@
               <div class = "col1"><input type="radio" value="daily" name="dates">Daily</div>
               <input type="radio" value="monthly" name="dates">Monthly
               <br><br>
-              <div class = "dateSelect"><div class = "col2"><label for = "sDate" id = "startingText">Starting Date: </label></div><input id = "sDate" type = "date" name = "sDate"></div> 
-              <div class = "yearSelect"><div class = "col2"><label for = "sYear" id = "startingYearText">Starting Year: </label></div><input type="number" id="sYear" name="sYear" min="1978" value = "1978"></div>
+              <div class = "timeSelect">
+                <div class = "dateSelect"><div class = "dateFlex3"><label for = "sDate" id = "startingText">Starting Date: </label></div><span class = "dateFlex2"><input id = "sDate" type = "date" name = "sDate"></span></div> 
+                <div class = "yearSelect"><div class = "dateFlex3"><label for = "sYear" id = "startingYearText">Starting Year: </label></div><span class = "dateFlex2"><input type="number" id="sYear" name="sYear" min="1978" value = "1978"></span></div>  
+              </div>
               <i class = "fa fa-info-circle" aria-hidden = "true" id = "info-hover"></i>
+              <div class = "timeSelect">
+                <div class = "dateSelect"> <div class = "dateFlex3"><label for = "eDate" id = "endingText">Ending Date: </label></div><span class = "dateFlex2"><input id = "eDate" type = "date" name = "eDate"><br></span></div>
+                <div class = "yearSelect"><div class = "dateFlex3"><label for = "eYear" id = "endingYearText">Ending Year: </label></div><span class = "dateFlex2"><input type="number" id="eYear" name="eYear" min="1978"></span></div>
+              </div>
               <br>
-              <div class = "dateSelect"> <div class = "col2"><label for = "eDate" id = "endingText">Ending Date: </label></div><input id = "eDate" type = "date" name = "eDate"><br></div> 
-              <div class = "yearSelect"><div class = "col2"><label for = "eYear" id = "endingYearText">Ending Year: </label></div><input type="number" id="eYear" name="eYear" min="1978"></div>
-              <br>
+              
               <input type="checkbox" id = "yearLoop">Keep Date Constant and Animate Through Years
               <div class = "loopSelection">
                   Date to Be Looped:
@@ -68,16 +69,20 @@
                   <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
               </div>
               <input type="range" min="1" max="1000000" value="1" class="timeline" id="timeline">
-              <div class = "timelineScale" id = "scale0"></div>
-              <div class = "timelineScale" id = "scale1"></div>
-              <div class = "timelineScale" id = "scale2"></div>
-              <div class = "timelineScale" id = "scale3"></div>
-              <div class = "timelineScale" id = "scale4"></div>
+              <div id  = "timelineScaleContainer">
+                <div class = "timelineScale" id = "scale0"></div>
+                <div class = "timelineScale" id = "scale1"></div>
+                <div class = "timelineScale" id = "scale2"></div>
+                <div class = "timelineScale" id = "scale3"></div>
+                <div class = "timelineScale" id = "scale4"></div>
+              </div>
               <div id = "speedControls">
                   <hr>
                   <div id = "sliderContainer">
                     <span id = "centerSpeed">Speed:</span>
-                  Slowest <input type="range" id = "speedSlider" name="speed" min="0" max="1900"> Fastest
+                    <div id = "sliderSelectionContainer">
+                      <span class = "speedSlider1">Slowest</span> <span class = "speedSlider3"><input type="range" id = "speedSlider" name="speed" min="0" max="1900"></span> <span class = "speedSlider1">Fastest</span>
+                    </div>
                 </div>
               </div>
           </div>
@@ -85,8 +90,10 @@
               Map Legend:
               <hr>
               <img id = "legend">
-            </div>
-            
+          </div>
+          <div id = "attribution">
+            © 2020 National Snow and Ice Data Center, University of Colorado Boulder, <br>Data Source: <a href = "https://nsidc.org/data/G02135">Sea Ice Index</a> 
+          </div>
           </div>
           
       </div>

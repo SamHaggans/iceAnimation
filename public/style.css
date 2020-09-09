@@ -145,7 +145,7 @@
 }
 
 #speedSlider{
-  width: 65% !important;
+  width: 100% !important;
   margin-bottom: -6px;
 }
 
@@ -206,14 +206,14 @@ a {
 
 .timeline {
   -webkit-appearance: none;
-  width: 90%;
+  width: 85%;
   height: 15px;
   border-radius: 7px;
   background: #d3d3d3;
   outline: none;
   -webkit-transition: .2s;
   transition: opacity .2s;
-  margin-left: 5%;
+  margin-left: 8%;
 }
 
 .timeline::-webkit-slider-thumb {
@@ -228,6 +228,7 @@ a {
 
 .yearSelect {
   display: none;
+  width: 100%;
 }
 
 .timeline::-moz-range-thumb {
@@ -236,22 +237,57 @@ a {
   border-radius: 7px;
   background: #0974ff;
   cursor: pointer;
-  }
-
-.dateSelect {
-  display: inline-block;
 }
 
 #sYear, #eYear {
   width: 80px;
 }
 
-.timelineScale {
-  margin-left: 46px;
+#timelineScaleContainer {
+  display: flex;
+  width: 100%;
+}
+
+.timelineScale{
+  flex-grow: 1;
   display: inline-block;
   text-align: center;
 }
 
 #scale0 {
   margin-left: 10px;
+}
+
+#sliderSelectionContainer {
+  display: flex;
+  width: 100%;
+}
+
+.speedSlider1{
+  flex-grow: 1;
+  display: inline-block;
+  text-align: center;
+}
+.speedSlider3{
+  flex-grow: 3;
+  display: inline-block;
+  text-align: center;
+}
+
+
+.dateSelect {
+  display: flex;
+  width: 100%;
+}
+
+.dateFlex3 {
+  flex-grow: 3;
+}
+.dateFlex2 {
+  flex-grow: 2;
+}
+
+.timeSelect {
+  display: inline-block;
+  width: 80%;
 }

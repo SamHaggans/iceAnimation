@@ -335,7 +335,7 @@ function getState(map, projection) {
   if (STATE.yearLoop) {
     $('.loopSelection').css('display', 'block');
     $('.dateSelect').css('display', 'none');
-    $('.yearSelect').css('display', 'inline-block');
+    $('.yearSelect').css('display', 'flex');
 
     if (STATE.temporality == 'monthly') {
       $('#dayLoop').css('display', 'none');
@@ -344,7 +344,7 @@ function getState(map, projection) {
     }
   } else {
     $('.loopSelection').css('display', 'none');
-    $('.dateSelect').css('display', 'inline-block');
+    $('.dateSelect').css('display', 'flex');
     $('.yearSelect').css('display', 'none');
   }
 
