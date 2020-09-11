@@ -16,9 +16,9 @@
   vertical-align: top;
   margin-left: 30px;
   width: 400px;
-  margin-bottom: 80px;
+  margin-bottom: 10px;
   position: relative;
-  height: 602px;
+  height: auto;
 }
 
 .ol-zoom-extent button{ 
@@ -115,6 +115,7 @@
 #main {
   display: table;
   margin: 0 auto;
+  height: auto;
 }
 
 #mapSpace {
