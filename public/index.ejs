@@ -60,6 +60,9 @@
               <br>
               <br>
           </form>
+          <div id = "hoverDate" class = "hidden">
+            2020-01-01
+          </div>
           <div id = "playheadBox">
               <div id = "playhead">
                   <div class = "playheadButton fa fa-3x fa-fast-backward"  id = "firstFrame"></div>
@@ -69,6 +72,13 @@
                   <div class = "playheadButton fa fa-3x fa-fast-forward" id = "lastFrame"></div>
               </div>
               <input type="range" min="1" max="1000000" value="1" class="timeline" id="timeline">
+              <div id  = "timelineTickContainer">
+                <div class = "timelineScaleTick">|</div>
+                <div class = "timelineScaleTick">|</div>
+                <div class = "timelineScaleTick">|</div>
+                <div class = "timelineScaleTick">|</div>
+                <div class = "timelineScaleTick">|</div>
+              </div>
               <div id  = "timelineScaleContainer">
                 <div class = "timelineScale" id = "scale0"></div>
                 <div class = "timelineScale" id = "scale1"></div>

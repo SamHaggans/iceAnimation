@@ -209,7 +209,6 @@ a {
   -webkit-appearance: none;
   width: 85%;
   height: 15px;
-  border-radius: 7px;
   background: #d3d3d3;
   outline: none;
   -webkit-transition: .2s;
@@ -220,7 +219,7 @@ a {
 .timeline::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 15px;
+  width: 5px;
   height: 15px;
   border-radius: 7px;
   background: #0974ff;
@@ -233,7 +232,7 @@ a {
 }
 
 .timeline::-moz-range-thumb {
-  width: 15px;
+  width: 5px;
   height: 15px;
   border-radius: 7px;
   background: #0974ff;
@@ -249,19 +248,36 @@ a {
   width: 103%;
   height: 50px;
   margin-top: 15px;
-  margin-left: -10px;
+  margin-left: -22px;
 }
+
+#timelineTickContainer {
+  display: flex;
+  width: 105%;
+  margin-left: -46px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+
+}
+
 
 .timelineScale{
   flex-grow: 1;
   font-size: 14px;
   display: inline-block;
   text-align: right;
-  transform: rotate(-60deg);
-  -webkit-transform: rotate(-60deg);
-  -moz-transform: rotate(-60deg);
-  -ms-transform: rotate(-60deg);
-  -o-transform: rotate(-60deg);
+  transform: rotate(-35deg);
+  -webkit-transform: rotate(-35deg);
+  -moz-transform: rotate(-35deg);
+  -ms-transform: rotate(-35deg);
+  -o-transform: rotate(-35deg);
+}
+
+.timelineScaleTick{
+  flex-grow: 1;
+  font-size: 14px;
+  display: inline-block;
+  text-align: right;
 }
 
 #scale0 {
@@ -300,4 +316,15 @@ a {
 .timeSelect {
   display: inline-block;
   width: 80%;
+}
+
+#hoverDate {
+  position: fixed;
+  top: 100px;
+  left: 100px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid black;
+  z-index: 100;
+  padding: 5px;
 }
