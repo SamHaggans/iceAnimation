@@ -78,12 +78,12 @@ export function updateWMSLayerParams(map, layer, params, STATE) {
         const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
         const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
         const sliderPos = (animateDistance / totalDays) * 1000000;
-        //document.getElementById('timeline').value = sliderPos;
+        document.getElementById('timeline').value = sliderPos;
       } else {
         const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
         const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
         const sliderPos = (animateDistance / totalDays) * 1000000;
-        //document.getElementById('timeline').value = sliderPos;
+        document.getElementById('timeline').value = sliderPos;
       }
       // Delete interval requests after load
       clearInterval(interval);
