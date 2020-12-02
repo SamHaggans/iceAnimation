@@ -219,7 +219,7 @@ a {
 .timeline::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 5px;
+  width: 15px;
   height: 15px;
   border-radius: 7px;
   background: #0974ff;
@@ -232,7 +232,7 @@ a {
 }
 
 .timeline::-moz-range-thumb {
-  width: 5px;
+  width: 15px;
   height: 15px;
   border-radius: 7px;
   background: #0974ff;
@@ -253,13 +253,11 @@ a {
 
 #timelineTickContainer {
   display: flex;
-  width: 105%;
-  margin-left: -46px;
+  width: 101%;
+  margin-left: -38px;
   margin-top: 0px;
   margin-bottom: 0px;
-
 }
-
 
 .timelineScale{
   flex-grow: 1;
@@ -316,15 +314,4 @@ a {
 .timeSelect {
   display: inline-block;
   width: 80%;
-}
-
-#hoverDate {
-  position: fixed;
-  top: 100px;
-  left: 100px;
-  background-color: white;
-  border-radius: 5px;
-  border: 1px solid black;
-  z-index: 100;
-  padding: 5px;
 }
