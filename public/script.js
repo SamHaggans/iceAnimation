@@ -233,7 +233,7 @@ async function init() {
 
   document.getElementById('timeline').value = 1;
 
-  document.getElementById('timeline').oninput = function() {
+  document.getElementById('timeline').oninput = function(e) {
     if (!STATE.stop) {
       STATE.stop = true;
       $('#playButton').addClass('fa-play');
@@ -246,12 +246,12 @@ async function init() {
 
       const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
       const sliderVal = $(this).val();
-      const selectedTime = (sliderVal / 1000000) * totalDays;
+      const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
       STATE.current = moment(firstDate).add(selectedTime, 'd');
     } else {
       const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
       const sliderVal = $(this).val();
-      const selectedTime = (sliderVal / 1000000) * totalDays;
+      const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
       STATE.current = moment(STATE.start).add(selectedTime, 'd');
     }
     if (STATE.yearLoop) {
@@ -357,12 +357,16 @@ function getState(map, projection) {
       let totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
       let forwardDays = (totalDays / 4) * i;
       let scaleDate = moment(firstDate).add(forwardDays, 'd');
-      $(`#scale${i}`).html(scaleDate.format('YYYY'));
+      $(`#scale${i}`).html(scaleDate.format(
+          STATE.temporality == 'monthly'? 'YYYY-MM' : 'YYYY-MM-DD'
+      ));
     } else {
       let totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
       let forwardDays = (totalDays / 4) * i;
       let scaleDate = moment(STATE.start).add(forwardDays, 'd');
-      $(`#scale${i}`).html(scaleDate.format('YYYY'));
+      $(`#scale${i}`).html(scaleDate.format(
+        STATE.temporality == 'monthly'? 'YYYY-MM' : 'YYYY-MM-DD'
+      ));
     }
   }
 

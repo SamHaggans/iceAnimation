@@ -21,4 +21,7 @@ export const CONSTANTS = {
     'service': 'wms',
     'version': '1.1.1',
   },
+  'timeline': {
+    'maxValue': 1000000,
+  },
 };
