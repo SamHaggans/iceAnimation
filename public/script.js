@@ -134,44 +134,26 @@ async function init() {
       $('#playButton').addClass('fa-pause');
       $('#playButton').removeClass('fa-play');
     } else {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
+      pauseAnimation();
     }
   });
   $('#prevFrame').click(function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
+    pauseAnimation();
     previousDate();
     [map, projection] = getState(map, projection);
     util.loadWMS(map, projection, STATE);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
+    pauseAnimation();
     nextDate();
     [map, projection] = getState(map, projection);
     util.loadWMS(map, projection, STATE);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
+    pauseAnimation();
     if (STATE.yearLoop) {
-      let firstDate;
-      let lastDate;
       const dayLoop = document.querySelector('input[name="dayLoop"]').value;
       const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-
-      [firstDate, lastDate] = getSliderPositioning();
 
       STATE.current.set({'year': STATE.startYear.year()});
       STATE.current.set({'date': dayLoop});
@@ -187,18 +169,10 @@ async function init() {
     }
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    }
+    pauseAnimation();
     if (STATE.yearLoop) {
-      let firstDate;
-      let lastDate;
       const dayLoop = document.querySelector('input[name="dayLoop"]').value;
       const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-
-      [firstDate, lastDate] = getSliderPositioning();
 
       STATE.current.set({'year': STATE.endYear.year()});
       STATE.current.set({'date': dayLoop});
@@ -234,26 +208,15 @@ async function init() {
   document.getElementById('timeline').value = 1;
 
   document.getElementById('timeline').oninput = function(e) {
-    if (!STATE.stop) {
-      STATE.stop = true;
-      $('#playButton').addClass('fa-play');
-      $('#playButton').removeClass('fa-pause');
-    };
-    if (STATE.yearLoop) {
-      let firstDate;
-      let lastDate;
-      [firstDate, lastDate] = getSliderPositioning();
+    pauseAnimation();
+    let firstDate;
+    let lastDate;
+    [firstDate, lastDate] = getSliderPositioning();
 
-      const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-      const sliderVal = $(this).val();
-      const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
-      STATE.current = moment(firstDate).add(selectedTime, 'd');
-    } else {
-      const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-      const sliderVal = $(this).val();
-      const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
-      STATE.current = moment(STATE.start).add(selectedTime, 'd');
-    }
+    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+    const sliderVal = $(this).val();
+    const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
+    STATE.current = moment(firstDate).add(selectedTime, 'd');
     if (STATE.yearLoop) {
       const dayLoop = document.querySelector('input[name="dayLoop"]').value;
       const monthLoop = document.querySelector('select[name="monthLoop"]').value;
@@ -604,5 +567,16 @@ function getSliderPositioning() {
 function getLast(arr) {
   return (arr[arr.length - 1]);
 }
+
+/** Method to pause animation
+ */
+function pauseAnimation() {
+  if (!STATE.stop) {
+    STATE.stop = true;
+    $('#playButton').addClass('fa-play');
+    $('#playButton').removeClass('fa-pause');
+  }
+}
+
 
 main();
