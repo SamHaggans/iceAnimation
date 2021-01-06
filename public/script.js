@@ -59,176 +59,43 @@ let map;
 let projection;
 
 /** Main function run to start animation */
-async function main() { // eslint-disable-line no-unused-vars
-  const gcr = CONSTANTS.getCapabilities;
-  const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
-  const getCapabilities = await runXMLHTTPRequest(requestHTTP);
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
-  // Get layer tags in GetCapabilities XML
-  const layers = xmlDoc.getElementsByTagName('Layer');
-  for (let i = 0; i < layers.length; i++) { // Loop through all layer tags
-    try {
-      // Find the first (only) extent (dates) tag
-      const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');
-      // Add the extents to the state object
-      STATE.validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;
-    } catch (error) {
-      // Layer without extent tag, which means it is not relevant
-    }
-  }
+async function main() {
+  // Run GetCapabilies request to load available dates and load into STATE
+  STATE.validDates = await runGetCapabilities();
 
   // Set default settings into the selectors and some other starting values
   init();
+
+  // Run main animation loop
+  animationLoop();
 }
 
 /** Initiaties the input values and the map */
 async function init() {
-  // Set the "last" day and month to be the last of the getCapabilities data
-  const dailyDates = `g02135_extent_raster_daily_n`;
-  const lastDay = getLast(STATE.validDates[dailyDates]).split('T')[0];
-  DEFAULTS['daily'].end = moment(lastDay);
-  const monthlyDates = `g02135_extent_raster_monthly_n`;
-  const lastMonth = getLast(STATE.validDates[monthlyDates]).split('T')[0];
-  DEFAULTS['monthly'].end = moment(lastMonth);
-
-  const lastYear = getLast(STATE.validDates[dailyDates]).split('-')[0];
-  $('#sYear').attr({'max': lastYear});
-  $('#eYear').attr({'max': lastYear, 'value': lastYear});
-
-  $('input:radio[name=ext-con]').val(['extent']);// Default values
-  $('input:radio[name=n-s]').val(['n']);
-  $('input:radio[name=dates]').val(['daily']);
-  $('#yearLoop').prop('checked', false);
-  document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
-  document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
-
-  $('#legend').attr('src', concentrationLegend);
-
-  $('#map').html('');// Empty map when a new animation occurs
-
-  const timeNow = moment();
-  $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
-  $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
-  $('#startingYearText').html(`Starting Year (1978-${timeNow.year()}):`);
-  $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
-
-
+  // Create OpenLayers objects
   projection = util.getProjection(STATE);
   map = util.getMap(projection, STATE);
   map.addLayer(util.createLayer(STATE));
 
-  $('.ol-zoom-extent button').html('');
+  // Set initial date settings from the GetCapabilities data
+  setDateSettings();
+
+  // Set default configuration for the animation
+  setDefaultConfiguration();
+
+  // Set playhead and timeline action bindings
+  setPlayheadBindings();
+
   await updateState();
 
   STATE.current = moment(STATE.start);
 
   STATE.stop = true;
-  $('#pauseAnimation').html('Start Animation');
+
   $('#date').html(STATE.current.format('YYYY-MM-DD'));
+
+  // Clear loading message
   $('#mapAlert').html('');
-
-  $('#playButton').click(function() {// When animation button is clicked
-    if (STATE.stop) {
-      STATE.stop = false;// Start animation
-      $('#playButton').addClass('fa-pause');
-      $('#playButton').removeClass('fa-play');
-    } else {
-      pauseAnimation();
-    }
-  });
-  $('#prevFrame').click(function() {// When animation button is clicked
-    pauseAnimation();
-    previousDate();
-    [map, projection] = getState(map, projection);
-    util.loadWMS(map, projection, STATE);
-  });
-  $('#nextFrame').click(function() {// When animation button is clicked
-    pauseAnimation();
-    nextDate();
-    [map, projection] = getState(map, projection);
-    util.loadWMS(map, projection, STATE);
-  });
-  $('#firstFrame').click(function() {// When animation button is clicked
-    pauseAnimation();
-    if (STATE.yearLoop) {
-      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
-      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-
-      STATE.current.set({'year': STATE.startYear.year()});
-      STATE.current.set({'date': dayLoop});
-      STATE.current.set({'month': monthLoop});
-
-      while (!validDate()) {
-        nextDate();
-      }
-    } else {
-      STATE.current = moment(STATE.start);
-      [map, projection] = getState(map, projection);
-      util.loadWMS(map, projection, STATE);
-    }
-  });
-  $('#lastFrame').click(async function() {// When animation button is clicked
-    pauseAnimation();
-    if (STATE.yearLoop) {
-      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
-      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-
-      STATE.current.set({'year': STATE.endYear.year()});
-      STATE.current.set({'date': dayLoop});
-      STATE.current.set({'month': monthLoop});
-      while (!validDate()) {
-        previousDate();
-      }
-    } else {
-      STATE.current = moment(STATE.end);
-      [map, projection] = getState(map, projection);
-      util.loadWMS(map, projection, STATE);
-    }
-  });
-
-  document.getElementById('info-hover').onclick = function() {
-    $('#missing-data-message').toggleClass('hidden');
-  };
-
-  $('#closeButton').mouseover(function() {
-    $('#closeButton').removeClass('fa-window-close');
-    $('#closeButton').addClass('fa-window-close-o');
-  });
-
-  $('#closeButton').mouseout(function() {
-    $('#closeButton').removeClass('fa-window-close-o');
-    $('#closeButton').addClass('fa-window-close');
-  });
-
-  document.getElementById('closeButton').onclick = function() {
-    $('#missing-data-message').toggleClass('hidden');
-  };
-
-  document.getElementById('timeline').value = 1;
-
-  document.getElementById('timeline').oninput = function(e) {
-    pauseAnimation();
-    let firstDate;
-    let lastDate;
-    [firstDate, lastDate] = getSliderPositioning();
-
-    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-    const sliderVal = $(this).val();
-    const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
-    STATE.current = moment(firstDate).add(selectedTime, 'd');
-    if (STATE.yearLoop) {
-      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
-      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-      STATE.current.set({'date': dayLoop});
-      STATE.current.set({'month': monthLoop});
-    }
-
-    if (!validDate()) {
-      nextDate();
-    }
-  };
-  animationLoop();
 }
 
 /** Actual animation loop
@@ -444,24 +311,29 @@ function previousDate() {
   }
 }
 
-/** Method to update the state of the loop*/
+/** Method to update the state of the loop
+ * @return {Promise} - Resolves when loading is completed
+*/
 function updateState() {
-  STATE.dataType = $('input[name=ext-con]:checked').val();
-  // Get value for extent or concentration
-  STATE.hemi = $('input[name=n-s]:checked').val();
-  // Get value for North or South
-  STATE.temporality = $('input[name=dates]:checked').val();
-  // Get value for the looping style
-  STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-  STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-  STATE.current = moment(STATE.start);
-  const wmsParams = util.getWMSParams(STATE);
-  $('#map').html('');// Empty map when a new animation occurs
-  projection = util.getProjection(STATE);
-  map = util.getMap(projection, STATE);
-  $('.ol-zoom-extent button').html('');
-  map.addLayer(util.createLayer(STATE));
-  util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+  return new Promise(function(resolve, reject) {
+    STATE.dataType = $('input[name=ext-con]:checked').val();
+    // Get value for extent or concentration
+    STATE.hemi = $('input[name=n-s]:checked').val();
+    // Get value for North or South
+    STATE.temporality = $('input[name=dates]:checked').val();
+    // Get value for the looping style
+    STATE.start = moment(document.querySelector('input[name="sDate"]').value);
+    STATE.end = moment(document.querySelector('input[name="eDate"]').value);
+    STATE.current = moment(STATE.start);
+    const wmsParams = util.getWMSParams(STATE);
+    $('#map').html('');// Empty map when a new animation occurs
+    projection = util.getProjection(STATE);
+    map = util.getMap(projection, STATE);
+    $('.ol-zoom-extent button').html('');
+    map.addLayer(util.createLayer(STATE));
+    util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+    resolve();
+  });
 }
 
 /** Method to read a json file (Leaving in despite not being used because it may come up in the future)
@@ -578,5 +450,174 @@ function pauseAnimation() {
   }
 }
 
+/** Method to run the GetCapabilities request to find available dates
+ * @return {Promise} - Promise, resolves when request is complete
+ */
+function runGetCapabilities() {
+  return new Promise(async function(resolve, reject) {
+    const gcr = CONSTANTS.getCapabilities;
+    const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
+    const getCapabilities = await runXMLHTTPRequest(requestHTTP);
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
+    const validDates = [];
+    // Get layer tags in GetCapabilities XML
+    const layers = xmlDoc.getElementsByTagName('Layer');
+    for (let i = 0; i < layers.length; i++) { // Loop through all layer tags
+      try {
+        // Find the first (only) extent (dates) tag
+        const datesArray = layers[i].getElementsByTagName('Extent')[0].textContent.split(',');
+        // Add the extents to the state object
+        validDates[layers[i].getElementsByTagName('Name')[0].textContent] = datesArray;
+      } catch (error) {
+        // Layer without extent tag, which means it is not relevant
+      }
+    }
+    resolve(validDates);
+  });
+}
+/** Method to find the ending dates based on the GetCapabilities data and set starting date text
+ */
+function setDateSettings() {
+  // Set the "last" day and month to be the last of the getCapabilities data
+  const dailyDates = `g02135_extent_raster_daily_n`;
+  const lastDay = getLast(STATE.validDates[dailyDates]).split('T')[0];
+  DEFAULTS['daily'].end = moment(lastDay);
+  const monthlyDates = `g02135_extent_raster_monthly_n`;
+  const lastMonth = getLast(STATE.validDates[monthlyDates]).split('T')[0];
+  DEFAULTS['monthly'].end = moment(lastMonth);
 
+  const lastYear = getLast(STATE.validDates[dailyDates]).split('-')[0];
+  $('#sYear').attr({'max': lastYear});
+  $('#eYear').attr({'max': lastYear, 'value': lastYear});
+
+  document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
+  document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
+
+  const timeNow = moment();
+  $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
+  $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
+  $('#startingYearText').html(`Starting Year (1978-${timeNow.year()}):`);
+  $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
+}
+
+/** Method to set the configuration to default
+ */
+function setDefaultConfiguration() {
+  $('input:radio[name=ext-con]').val(['extent']);// Default values
+  $('input:radio[name=n-s]').val(['n']);
+  $('input:radio[name=dates]').val(['daily']);
+  $('#yearLoop').prop('checked', false);
+
+
+  $('#legend').attr('src', concentrationLegend);
+
+  $('#map').html('');// Empty map when a new animation occurs
+
+  $('.ol-zoom-extent button').html('');
+}
+
+/** Method to set the action bindings to the playhead controls
+ */
+function setPlayheadBindings() {
+  $('#playButton').click(function() {// When animation button is clicked
+    if (STATE.stop) {
+      STATE.stop = false;// Start animation
+      $('#playButton').addClass('fa-pause');
+      $('#playButton').removeClass('fa-play');
+    } else {
+      pauseAnimation();
+    }
+  });
+  $('#prevFrame').click(function() {// When animation button is clicked
+    pauseAnimation();
+    previousDate();
+    [map, projection] = getState(map, projection);
+    util.loadWMS(map, projection, STATE);
+  });
+  $('#nextFrame').click(function() {// When animation button is clicked
+    pauseAnimation();
+    nextDate();
+    [map, projection] = getState(map, projection);
+    util.loadWMS(map, projection, STATE);
+  });
+  $('#firstFrame').click(function() {// When animation button is clicked
+    pauseAnimation();
+    if (STATE.yearLoop) {
+      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+
+      STATE.current.set({'year': STATE.startYear.year()});
+      STATE.current.set({'date': dayLoop});
+      STATE.current.set({'month': monthLoop});
+
+      while (!validDate()) {
+        nextDate();
+      }
+    } else {
+      STATE.current = moment(STATE.start);
+      [map, projection] = getState(map, projection);
+      util.loadWMS(map, projection, STATE);
+    }
+  });
+  $('#lastFrame').click(async function() {// When animation button is clicked
+    pauseAnimation();
+    if (STATE.yearLoop) {
+      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+
+      STATE.current.set({'year': STATE.endYear.year()});
+      STATE.current.set({'date': dayLoop});
+      STATE.current.set({'month': monthLoop});
+      while (!validDate()) {
+        previousDate();
+      }
+    } else {
+      STATE.current = moment(STATE.end);
+      [map, projection] = getState(map, projection);
+      util.loadWMS(map, projection, STATE);
+    }
+  });
+  document.getElementById('info-hover').onclick = function() {
+    $('#missing-data-message').toggleClass('hidden');
+  };
+
+  $('#closeButton').mouseover(function() {
+    $('#closeButton').removeClass('fa-window-close');
+    $('#closeButton').addClass('fa-window-close-o');
+  });
+
+  $('#closeButton').mouseout(function() {
+    $('#closeButton').removeClass('fa-window-close-o');
+    $('#closeButton').addClass('fa-window-close');
+  });
+
+  document.getElementById('closeButton').onclick = function() {
+    $('#missing-data-message').toggleClass('hidden');
+  };
+
+  document.getElementById('timeline').value = 1;
+
+  document.getElementById('timeline').oninput = function(e) {
+    pauseAnimation();
+    let firstDate;
+    let lastDate;
+    [firstDate, lastDate] = getSliderPositioning();
+
+    const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+    const sliderVal = $(this).val();
+    const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
+    STATE.current = moment(firstDate).add(selectedTime, 'd');
+    if (STATE.yearLoop) {
+      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+      STATE.current.set({'date': dayLoop});
+      STATE.current.set({'month': monthLoop});
+    }
+
+    if (!validDate()) {
+      nextDate();
+    }
+  };
+}
 main();
