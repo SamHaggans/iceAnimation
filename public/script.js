@@ -188,14 +188,14 @@ function getState(map, projection) {
       let forwardDays = (totalDays / 4) * i;
       let scaleDate = moment(firstDate).add(forwardDays, 'd');
       $(`#scale${i}`).html(scaleDate.format(
-          STATE.temporality == 'monthly'? 'YYYY-MM' : 'YYYY-MM-DD'
+          STATE.temporality == 'monthly' ? 'YYYY-MM' : 'YYYY-MM-DD',
       ));
     } else {
       let totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
       let forwardDays = (totalDays / 4) * i;
       let scaleDate = moment(STATE.start).add(forwardDays, 'd');
       $(`#scale${i}`).html(scaleDate.format(
-        STATE.temporality == 'monthly'? 'YYYY-MM' : 'YYYY-MM-DD'
+        STATE.temporality == 'monthly' ? 'YYYY-MM' : 'YYYY-MM-DD',
       ));
     }
   }
