@@ -136,6 +136,8 @@ export function getMap(projection, STATE) {
   });
   map.addControl(zoomControl);// Add control to reset view
 
+  $('.ol-zoom-extent button').html('');
+
   return map;
 }
 
@@ -249,4 +251,4 @@ export let validDateInput = function(date, STATE) {
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
   return (STATE.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
-}
+};

@@ -73,9 +73,7 @@ async function main() {
 /** Initiate the input values and the map */
 async function init() {
   // Create OpenLayers objects
-  projection = util.getProjection(STATE);
-  map = util.getMap(projection, STATE);
-  map.addLayer(util.createLayer(STATE));
+  resetMap();
 
   // Set initial date settings from the GetCapabilities data
   setDateSettings();
@@ -86,7 +84,7 @@ async function init() {
   // Set playhead and timeline action bindings
   setPlayheadBindings();
 
-  await updateState();
+  await initialMapLoad();
 
   STATE.current = moment(STATE.start);
 
@@ -105,13 +103,13 @@ async function animationLoop() {
   while (true) {
     if (!STATE.stop) {
       nextDate();
-      [map, projection] = await getState(map, projection);
+      [map, projection] = await configureState(map, projection);
       const wmsParams = util.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
       await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
       await sleep(STATE.rate);
     } else {
-      [map, projection] = await getState(map, projection);
+      [map, projection] = await configureState(map, projection);
       const wmsParams = util.getWMSParams(STATE);
       STATE.rate = 2000 - $('#speedSlider').val();
       await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
@@ -120,17 +118,12 @@ async function animationLoop() {
   }
 }
 
-/** Get the state of the loop
- * @return {array} - An array containing the map and projection objects
- * @param {map} map - The map to be used
- * @param {projection} projection - The projection to be used
-*/
-function getState(map, projection) {
+/** Read the configuration of the animation and save to STATE
+ */
+function readConfiguration() {
   STATE.start.hour(0);
   STATE.current.hour(10);
   STATE.end.hour(20);
-  const oldHemisphere = STATE.hemi;
-  const oldMode = STATE.temporality;
   // Get value for extent or concentration
   STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for North or South
@@ -145,16 +138,32 @@ function getState(map, projection) {
   STATE.endYear = moment(`${document.querySelector('input[name="eYear"]').value}-12-31`);
   const month = document.querySelector('select[name="monthLoop"]').value;
   $('#dayLoop').attr({'max': daysInMonth[month]});
+}
+
+/** Recreate the map and projection objects
+ */
+function resetMap() {
+  $('#map').html('');// Empty map when a new animation occurs
+  projection = util.getProjection(STATE);
+  map = util.getMap(projection, STATE);
+  map.addLayer(util.createLayer(STATE));
+}
+
+/** Get the state of the loop
+ * @return {array} - An array containing the map and projection objects
+ * @param {map} map - The map to be used
+ * @param {projection} projection - The projection to be used
+*/
+function configureState(map, projection) {
+  const oldHemisphere = STATE.hemi;
+  const oldTemporality = STATE.temporality;
+
+  readConfiguration();
   if (oldHemisphere != STATE.hemi) {
-    const wmsParams = util.getWMSParams(STATE);
-    $('#map').html('');// Empty map when a new animation occurs
-    projection = util.getProjection(STATE);
-    map = util.getMap(projection, STATE);
-    map.addLayer(util.createLayer(STATE));
-    $('.ol-zoom-extent button').html('');
-    util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+    resetMap();
+    util.loadWMS(map, projection, STATE);
   }
-  if (oldMode != STATE.temporality) {
+  if (oldTemporality != STATE.temporality) {
     document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
     document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
     STATE.start = moment(document.querySelector('input[name="sDate"]').value);
@@ -178,6 +187,14 @@ function getState(map, projection) {
     $('.yearSelect').css('display', 'none');
   }
 
+  generateTimelineScale();
+
+  return [map, projection];
+}
+
+/** Generate and set the scale dates for the timeline
+ */
+function generateTimelineScale() {
   for (let i = 0; i < 5; i++) {
     if (STATE.yearLoop) {
       let firstDate;
@@ -199,8 +216,6 @@ function getState(map, projection) {
       ));
     }
   }
-
-  return [map, projection];
 }
 
 /** Find and move to next date for the animation*/
@@ -311,27 +326,14 @@ function previousDate() {
   }
 }
 
-/** Update the state of the loop
+/** Initialize the map settings
  * @return {Promise} - Resolves when loading is completed
 */
-function updateState() {
+function initialMapLoad() {
   return new Promise(function(resolve, reject) {
-    STATE.dataType = $('input[name=ext-con]:checked').val();
-    // Get value for extent or concentration
-    STATE.hemi = $('input[name=n-s]:checked').val();
-    // Get value for North or South
-    STATE.temporality = $('input[name=dates]:checked').val();
-    // Get value for the looping style
-    STATE.start = moment(document.querySelector('input[name="sDate"]').value);
-    STATE.end = moment(document.querySelector('input[name="eDate"]').value);
-    STATE.current = moment(STATE.start);
-    const wmsParams = util.getWMSParams(STATE);
-    $('#map').html('');// Empty map when a new animation occurs
-    projection = util.getProjection(STATE);
-    map = util.getMap(projection, STATE);
-    $('.ol-zoom-extent button').html('');
-    map.addLayer(util.createLayer(STATE));
-    util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+    readConfiguration();
+    resetMap();
+    util.loadWMS(map, projection, STATE);
     resolve();
   });
 }
@@ -511,13 +513,13 @@ function setPlayheadBindings() {
   $('#prevFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     previousDate();
-    [map, projection] = getState(map, projection);
+    [map, projection] = configureState(map, projection);
     util.loadWMS(map, projection, STATE);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     nextDate();
-    [map, projection] = getState(map, projection);
+    [map, projection] = configureState(map, projection);
     util.loadWMS(map, projection, STATE);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
@@ -535,7 +537,7 @@ function setPlayheadBindings() {
       }
     } else {
       STATE.current = moment(STATE.start);
-      [map, projection] = getState(map, projection);
+      [map, projection] = configureState(map, projection);
       util.loadWMS(map, projection, STATE);
     }
   });
@@ -553,7 +555,7 @@ function setPlayheadBindings() {
       }
     } else {
       STATE.current = moment(STATE.end);
-      [map, projection] = getState(map, projection);
+      [map, projection] = configureState(map, projection);
       util.loadWMS(map, projection, STATE);
     }
   });
