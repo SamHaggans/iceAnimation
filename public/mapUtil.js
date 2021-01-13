@@ -217,7 +217,7 @@ export function toggleLegend(STATE) {
  * @param {object} STATE - The state of the animation
  * @return {array} - The first and last dates to be displayed on the slider
 */
-export let getSliderPositioning = function(STATE) {
+function getSliderPositioning(STATE) {
   const dayLoop = document.querySelector('input[name="dayLoop"]').value;
   const monthLoop = document.querySelector('select[name="monthLoop"]').value;
   let firstDate = moment();
@@ -246,9 +246,11 @@ export let getSliderPositioning = function(STATE) {
  * @param {object} STATE - The state of the animation
  * @return {boolean} - Valid date or not
 */
-export let validDateInput = function(date, STATE) {
+function validDateInput(date, STATE) {
   // Get the key (layername) for searching the valid layers object
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
   return (STATE.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
 };
+
+export {getSliderPositioning, validDateInput};

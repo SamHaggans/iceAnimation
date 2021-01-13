@@ -171,21 +171,8 @@ function configureState(map, projection) {
     STATE.end = moment(document.querySelector('input[name="eDate"]').value);
   }
   STATE.start = STATE.start.startOf('day');
-  if (STATE.yearLoop) {
-    $('.loopSelection').css('display', 'block');
-    $('.dateSelect').css('display', 'none');
-    $('.yearSelect').css('display', 'flex');
 
-    if (STATE.temporality == 'monthly') {
-      $('#dayLoop').css('display', 'none');
-    } else {
-      $('#dayLoop').css('display', 'inline');
-    }
-  } else {
-    $('.loopSelection').css('display', 'none');
-    $('.dateSelect').css('display', 'flex');
-    $('.yearSelect').css('display', 'none');
-  }
+  updateCSS();
 
   generateTimelineScale();
 
@@ -215,6 +202,26 @@ function generateTimelineScale() {
         STATE.temporality == 'monthly' ? 'YYYY-MM' : 'YYYY-MM-DD',
       ));
     }
+  }
+}
+
+/** Update CSS to reflect STATE
+ */
+function updateCSS() {
+  if (STATE.yearLoop) {
+    $('.loopSelection').css('display', 'block');
+    $('.dateSelect').css('display', 'none');
+    $('.yearSelect').css('display', 'flex');
+
+    if (STATE.temporality == 'monthly') {
+      $('#dayLoop').css('display', 'none');
+    } else {
+      $('#dayLoop').css('display', 'inline');
+    }
+  } else {
+    $('.loopSelection').css('display', 'none');
+    $('.dateSelect').css('display', 'flex');
+    $('.yearSelect').css('display', 'none');
   }
 }
 
@@ -397,7 +404,7 @@ function getSliderPositioning() {
   firstDate.set({'date': dayLoop});
   firstDate.set({'month': monthLoop});
 
-  while (!validDateInput(firstDate)) {
+  while (!util.validDateInput(firstDate, STATE)) {
     firstDate.add(1, 'y');
   }
 
@@ -406,7 +413,7 @@ function getSliderPositioning() {
   lastDate.set({'date': dayLoop});
   lastDate.set({'month': monthLoop});
 
-  while (!validDateInput(lastDate)) {
+  while (!util.validDateInput(lastDate, STATE)) {
     lastDate.subtract(1, 'y');
   }
 
