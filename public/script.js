@@ -58,10 +58,10 @@ const DEFAULTS = {
 let map;
 let projection;
 
-/** Main function run to start animation */
+/** Start animation */
 async function main() {
   // Run GetCapabilies request to load available dates and load into STATE
-  STATE.validDates = await runGetCapabilities();
+  STATE.validDates = await getValidDatesFromGetCapabilities();
 
   // Set default settings into the selectors and some other starting values
   init();
@@ -70,7 +70,7 @@ async function main() {
   animationLoop();
 }
 
-/** Initiaties the input values and the map */
+/** Initiate the input values and the map */
 async function init() {
   // Create OpenLayers objects
   projection = util.getProjection(STATE);
@@ -98,7 +98,7 @@ async function init() {
   $('#mapAlert').html('');
 }
 
-/** Actual animation loop
+/** Run the animation loop
  * @param {map} map - The map object to animate
 */
 async function animationLoop() {
@@ -120,7 +120,7 @@ async function animationLoop() {
   }
 }
 
-/** Method to get the state of the loop
+/** Get the state of the loop
  * @return {array} - An array containing the map and projection objects
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
@@ -203,7 +203,7 @@ function getState(map, projection) {
   return [map, projection];
 }
 
-/** Method to go to the next date for the animation*/
+/** Find and move to next date for the animation*/
 function nextDate() {
   STATE.start.hour(0);
   STATE.current.hour(10);
@@ -259,12 +259,12 @@ function nextDate() {
     STATE.current.set({'date': dayLoop});
     STATE.current.set({'month': monthLoop});
   }
-  if (!validDate()) {
+  if (!util.validDateInput(STATE.current, STATE)) {
     nextDate();
   }
 }
 
-/** Method to go to the previous date for the animation*/
+/** Find and move to previous date for the animation*/
 function previousDate() {
   STATE.start.hour(0);
   STATE.current.hour(10);
@@ -306,12 +306,12 @@ function previousDate() {
   }
 
 
-  if (!validDate()) {
+  if (!util.validDateInput(STATE.current, STATE)) {
     previousDate();
   }
 }
 
-/** Method to update the state of the loop
+/** Update the state of the loop
  * @return {Promise} - Resolves when loading is completed
 */
 function updateState() {
@@ -336,7 +336,7 @@ function updateState() {
   });
 }
 
-/** Method to read a json file (Leaving in despite not being used because it may come up in the future)
+/** Read a json file
  * @param {string} filename - The file to be read
  * @return {string} - The json read from the file
  */
@@ -354,7 +354,7 @@ function readJSON(filename) { // eslint-disable-line no-unused-vars
   });
 }
 
-/** Method to read a json file
+/** Run and return an XMLHTTP request
  * @param {string} url - Request url
  * @return {string} - The returned information
 */
@@ -371,7 +371,7 @@ function runXMLHTTPRequest(url) {
   });
 }
 
-/** Method to sleep for a set time in ms
+/** Pause execution for a set time in ms
  * @param {int} ms - Milliseconds to sleep for
  * @return {promise} - A promise that can be awaited for the specified time
  */
@@ -379,33 +379,12 @@ function sleep(ms) { // Sleep function for pauses between frames
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-/** Method to clear the text covering the map (currently unused) */
+/** Clear the text covering the map */
 function clearMapOverlay() {// eslint-disable-line no-unused-vars
   map.removeLayer(map.getLayers().getArray()[1]);
 }
 
-/** Method to set the text covering the map
- * @return {boolean} - Valid date or not
-*/
-function validDate() {
-  // Get the key (layername) for searching the valid layers object
-  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
-  // Return whether or not the current date is in the queried layer
-  return (STATE.validDates[objectKey].includes(STATE.current.utc().startOf('day').toISOString()));
-}
-
-/** Method to set the text covering the map
- * @param {moment} date - The date to be tested
- * @return {boolean} - Valid date or not
-*/
-function validDateInput(date) {
-  // Get the key (layername) for searching the valid layers object
-  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
-  // Return whether or not the current date is in the queried layer
-  return (STATE.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
-}
-
-/** Method to get the positioning of the slider and get the first and last date selectors when in looping mode
+/** Get the positioning of the slider and get the first and last date selectors when in looping mode
  * @return {array} - The first and last dates to be displayed on the slider
 */
 function getSliderPositioning() {
@@ -432,7 +411,7 @@ function getSliderPositioning() {
   return [firstDate, lastDate];
 }
 
-/** Method to get the last index of an array
+/** Get the last index of an array
  * @param {Array} arr - Array
  * @return {object} - The last index of the array
  */
@@ -440,7 +419,7 @@ function getLast(arr) {
   return (arr[arr.length - 1]);
 }
 
-/** Method to pause animation
+/** Pause animation
  */
 function pauseAnimation() {
   if (!STATE.stop) {
@@ -450,10 +429,10 @@ function pauseAnimation() {
   }
 }
 
-/** Method to run the GetCapabilities request to find available dates
+/** Run the GetCapabilities request to find available dates
  * @return {Promise} - Promise, resolves when request is complete
  */
-function runGetCapabilities() {
+function getValidDatesFromGetCapabilities() {
   return new Promise(async function(resolve, reject) {
     const gcr = CONSTANTS.getCapabilities;
     const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
@@ -476,7 +455,7 @@ function runGetCapabilities() {
     resolve(validDates);
   });
 }
-/** Method to find the ending dates based on the GetCapabilities data and set starting date text
+/** Find the ending dates based on the GetCapabilities data and set starting date text
  */
 function setDateSettings() {
   // Set the "last" day and month to be the last of the getCapabilities data
@@ -501,7 +480,7 @@ function setDateSettings() {
   $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
 }
 
-/** Method to set the configuration to default
+/** Set the configuration to default
  */
 function setDefaultConfiguration() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
@@ -517,7 +496,7 @@ function setDefaultConfiguration() {
   $('.ol-zoom-extent button').html('');
 }
 
-/** Method to set the action bindings to the playhead controls
+/** Set the action bindings to the playhead controls
  */
 function setPlayheadBindings() {
   $('#playButton').click(function() {// When animation button is clicked
@@ -551,7 +530,7 @@ function setPlayheadBindings() {
       STATE.current.set({'date': dayLoop});
       STATE.current.set({'month': monthLoop});
 
-      while (!validDate()) {
+      while (!util.validDateInput(STATE.current, STATE)) {
         nextDate();
       }
     } else {
@@ -569,7 +548,7 @@ function setPlayheadBindings() {
       STATE.current.set({'year': STATE.endYear.year()});
       STATE.current.set({'date': dayLoop});
       STATE.current.set({'month': monthLoop});
-      while (!validDate()) {
+      while (!util.validDateInput(STATE.current, STATE)) {
         previousDate();
       }
     } else {
@@ -615,9 +594,10 @@ function setPlayheadBindings() {
       STATE.current.set({'month': monthLoop});
     }
 
-    if (!validDate()) {
+    if (!util.validDateInput(STATE.current, STATE)) {
       nextDate();
     }
   };
 }
+
 main();
