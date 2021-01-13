@@ -21,8 +21,7 @@ import './style.css';
 import extentLegend from './assets/extent_legend.png';
 import concentrationLegend from './assets/concentration_legend.png';
 
-/** Method to load the wms with the current params
- * @return {array} - An array containing the map and projection objects
+/** Load the wms with the current params
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
  * @param {object} STATE animation state
@@ -32,7 +31,7 @@ export async function loadWMS(map, projection, STATE) {
   await updateWMSLayerParams(map, map.getLayers().getArray()[0], params, STATE);
 }
 
-/** Method to create a projection for a map
+/** Create a projection for a map
  * @return {projection} projection
  * @param {object} STATE animation state
  */
@@ -44,7 +43,7 @@ export function getProjection(STATE) {
   return projection;
 }
 
-/** Method to update the map layers
+/** Update a given layer with specific parameters
  * @param {map} map Map to be updated
  * @param {layer} layer - The layer to be updated
  * @param {object} params - The parameters to be updated
@@ -93,7 +92,7 @@ export function updateWMSLayerParams(map, layer, params, STATE) {
   });
 }
 
-/** Method to create a layer for a map
+/** Create a layer for a map
  * @return {layer} layer
  * @param {object} STATE animation state
  */
@@ -109,7 +108,7 @@ export function createLayer(STATE) {
   return layer;
 }
 
-/** Method to create a map
+/** Create a map
  * @return {map} Map
  * @param {projection} projection - The Projection to create the map with
  * @param {object} STATE Animation State
@@ -140,7 +139,7 @@ export function getMap(projection, STATE) {
   return map;
 }
 
-/** Method to create a map
+/** Get location parameters from CONSTANTS
  * @return {object} The parameters
  * @param {object} STATE Animation state
  */
@@ -162,7 +161,7 @@ export function getLocationParams(STATE) {
   return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
-/** Method to set the wms parameters
+/** Get the wms parameters
  * @return {object} wmsParameters
  * @param {object} STATE Animation State
  */
@@ -184,7 +183,7 @@ export function getWMSParams(STATE) {
   };
 }
 
-/** Method to set the text covering the map (currently unused)
+/** Set the text covering the map
  * @param {string} text - Text to put over map
  * @param {object} STATE - Animation State
 */
@@ -200,7 +199,7 @@ export function setNoDataOverlay(text, STATE) {// eslint-disable-line no-unused-
   map.addLayer(layer);
 }
 
-/** Method to set the visibility of the legend
+/** Toggle the visibility of the legend
  * @param {object} STATE animation state
  */
 export function toggleLegend(STATE) {
@@ -212,11 +211,11 @@ export function toggleLegend(STATE) {
   }
 }
 
-/** Method to get the positioning of the slider and get the first and last date selectors when in looping mode
+/** Get the positioning of the slider and get the first and last date selectors when in looping mode
  * @param {object} STATE - The state of the animation
  * @return {array} - The first and last dates to be displayed on the slider
 */
-function getSliderPositioning(STATE) {
+export let getSliderPositioning = function(STATE) {
   const dayLoop = document.querySelector('input[name="dayLoop"]').value;
   const monthLoop = document.querySelector('select[name="monthLoop"]').value;
   let firstDate = moment();
@@ -238,14 +237,14 @@ function getSliderPositioning(STATE) {
   }
 
   return [firstDate, lastDate];
-}
+};
 
-/** Method to set the text covering the map
+/** Check if a given date is valid and available
  * @param {moment} date - The date to be tested
  * @param {object} STATE - The state of the animation
  * @return {boolean} - Valid date or not
 */
-function validDateInput(date, STATE) {
+export let validDateInput = function(date, STATE) {
   // Get the key (layername) for searching the valid layers object
   const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
   // Return whether or not the current date is in the queried layer
