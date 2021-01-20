@@ -481,12 +481,6 @@ function setDateSettings() {
 
   document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
   document.querySelector('input[name="eDate"]').value = DEFAULTS[STATE.temporality].end.format('YYYY-MM-DD');
-
-  const timeNow = moment();
-  $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
-  $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
-  $('#startingYearText').html(`Starting Year (1978-${timeNow.year()}):`);
-  $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
 }
 
 /** Set the configuration to default
@@ -503,6 +497,13 @@ function setDefaultConfiguration() {
   $('#map').html('');// Empty map when a new animation occurs
 
   $('.ol-zoom-extent button').html('');
+
+  const timeNow = moment();
+
+  $('#startingText').html(`Starting Date (1978-${timeNow.year()}):`);
+  $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
+  $('#startingYearText').html(`Starting Year (1978-${timeNow.year()}):`);
+  $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
 }
 
 /** Set the action bindings to the playhead controls
