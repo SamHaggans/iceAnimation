@@ -103,18 +103,12 @@ async function animationLoop() {
   while (true) {
     if (!STATE.stop) {
       nextDate();
-      [map, projection] = await configureState(map, projection);
-      const wmsParams = util.getWMSParams(STATE);
-      STATE.rate = 2000 - $('#speedSlider').val();
-      await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
-      await sleep(STATE.rate);
-    } else {
-      [map, projection] = await configureState(map, projection);
-      const wmsParams = util.getWMSParams(STATE);
-      STATE.rate = 2000 - $('#speedSlider').val();
-      await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
-      await sleep(50);
     }
+    [map, projection] = await configureState(map, projection);
+    const wmsParams = util.getWMSParams(STATE);
+    STATE.rate = 2000 - $('#speedSlider').val();
+    await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+    await sleep(!STATE.stop ? STATE.rate : 50);
   }
 }
 
