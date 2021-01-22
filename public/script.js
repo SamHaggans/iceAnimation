@@ -504,6 +504,12 @@ function setDefaultConfiguration() {
   $('#endingText').html(`Ending Date (1978-${timeNow.year()}):`);
   $('#startingYearText').html(`Starting Year (1978-${timeNow.year()}):`);
   $('#endingYearText').html(`Ending Year (1978-${timeNow.year()}):`);
+
+  $('#attribution').html(`
+  © ${timeNow.year()} National Snow and Ice Data Center, University of Colorado Boulder,
+  <br>
+  Data Source: <a href = "https://nsidc.org/data/G02135">Sea Ice Index</a>
+  `);
 }
 
 /** Set the action bindings to the playhead controls
