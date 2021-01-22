@@ -3,7 +3,9 @@ import $ from 'jquery';
 window.jQuery = $;
 window.$ = $;
 
-import * as util from './mapUtil.js';
+import * as mapUtil from './modules/mapUtil.js';
+import * as util from './modules/util.js';
+
 
 import moment from 'moment';
 
@@ -105,10 +107,10 @@ async function animationLoop() {
       nextDate();
     }
     [map, projection] = await configureState(map, projection);
-    const wmsParams = util.getWMSParams(STATE);
+    const wmsParams = mapUtil.getWMSParams(STATE);
     STATE.rate = 2000 - $('#speedSlider').val();
-    await util.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
-    await sleep(!STATE.stop ? STATE.rate : 50);
+    await mapUtil.updateWMSLayerParams(map, map.getLayers().getArray()[0], wmsParams, STATE);
+    await util.sleep(!STATE.stop ? STATE.rate : 50);
   }
 }
 
@@ -138,9 +140,9 @@ function readConfiguration() {
  */
 function resetMap() {
   $('#map').html('');// Empty map when a new animation occurs
-  projection = util.getProjection(STATE);
-  map = util.getMap(projection, STATE);
-  map.addLayer(util.createLayer(STATE));
+  projection = mapUtil.getProjection(STATE);
+  map = mapUtil.getMap(projection, STATE);
+  map.addLayer(mapUtil.createLayer(STATE));
 }
 
 /** Load and set the state configuration from the user inputs and return the correct map and projection
@@ -155,7 +157,7 @@ function configureState(map, projection) {
   readConfiguration();
   if (oldHemisphere != STATE.hemi) {
     resetMap();
-    util.loadWMS(map, projection, STATE);
+    mapUtil.loadWMS(map, projection, STATE);
   }
   if (oldTemporality != STATE.temporality) {
     document.querySelector('input[name="sDate"]').value = DEFAULTS[STATE.temporality].start.format('YYYY-MM-DD');
@@ -275,7 +277,7 @@ function nextDate() {
     STATE.current.set({'date': dayLoop});
     STATE.current.set({'month': monthLoop});
   }
-  if (!util.validDateInput(STATE.current, STATE)) {
+  if (!mapUtil.validDateInput(STATE.current, STATE)) {
     nextDate();
   }
 }
@@ -322,7 +324,7 @@ function previousDate() {
   }
 
 
-  if (!util.validDateInput(STATE.current, STATE)) {
+  if (!mapUtil.validDateInput(STATE.current, STATE)) {
     previousDate();
   }
 }
@@ -334,53 +336,14 @@ function initialMapLoad() {
   return new Promise(function(resolve, reject) {
     readConfiguration();
     resetMap();
-    util.loadWMS(map, projection, STATE);
+    mapUtil.loadWMS(map, projection, STATE);
     resolve();
   });
 }
 
-/** Read a json file
- * @param {string} filename - The file to be read
- * @return {string} - The json read from the file
- */
-function readJSON(filename) { // eslint-disable-line no-unused-vars
-  return new Promise(function(resolve, reject) {
-    const request = new XMLHttpRequest();
-    request.overrideMimeType('application/json');
-    request.open('GET', filename, true);
-    request.onreadystatechange = function() {
-      if (request.readyState == 4 && request.status == '200') {
-        resolve(JSON.parse(request.responseText));
-      }
-    };
-    request.send(null);
-  });
-}
 
-/** Run and return an XMLHTTP request
- * @param {string} url - Request url
- * @return {string} - The returned information
-*/
-function runXMLHTTPRequest(url) {
-  return new Promise(function(resolve, reject) {
-    const request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.onreadystatechange = function() {
-      if (request.readyState == 4 && request.status == '200') {
-        resolve(request.responseText);
-      }
-    };
-    request.send(null);
-  });
-}
 
-/** Pause execution for a set time in ms
- * @param {int} ms - Milliseconds to sleep for
- * @return {promise} - A promise that can be awaited for the specified time
- */
-function sleep(ms) { // Sleep function for pauses between frames
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+
 
 /** Clear the text covering the map */
 function clearMapOverlay() {// eslint-disable-line no-unused-vars
@@ -398,7 +361,7 @@ function getSliderPositioning() {
   firstDate.set({'date': dayLoop});
   firstDate.set({'month': monthLoop});
 
-  while (!util.validDateInput(firstDate, STATE)) {
+  while (!mapUtil.validDateInput(firstDate, STATE)) {
     firstDate.add(1, 'y');
   }
 
@@ -407,20 +370,14 @@ function getSliderPositioning() {
   lastDate.set({'date': dayLoop});
   lastDate.set({'month': monthLoop});
 
-  while (!util.validDateInput(lastDate, STATE)) {
+  while (!mapUtil.validDateInput(lastDate, STATE)) {
     lastDate.subtract(1, 'y');
   }
 
   return [firstDate, lastDate];
 }
 
-/** Get the last index of an array
- * @param {Array} arr - Array
- * @return {object} - The last index of the array
- */
-function getLast(arr) {
-  return (arr[arr.length - 1]);
-}
+
 
 /** Pause animation
  */
@@ -439,7 +396,7 @@ function getValidDatesFromGetCapabilities() {
   return new Promise(async function(resolve, reject) {
     const gcr = CONSTANTS.getCapabilities;
     const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
-    const getCapabilities = await runXMLHTTPRequest(requestHTTP);
+    const getCapabilities = await util.runXMLHTTPRequest(requestHTTP);
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
     const validDates = [];
@@ -463,13 +420,13 @@ function getValidDatesFromGetCapabilities() {
 function setDateSettings() {
   // Set the "last" day and month to be the last of the getCapabilities data
   const dailyDates = `g02135_extent_raster_daily_n`;
-  const lastDay = getLast(STATE.validDates[dailyDates]).split('T')[0];
+  const lastDay = util.getLast(STATE.validDates[dailyDates]).split('T')[0];
   DEFAULTS['daily'].end = moment(lastDay);
   const monthlyDates = `g02135_extent_raster_monthly_n`;
-  const lastMonth = getLast(STATE.validDates[monthlyDates]).split('T')[0];
+  const lastMonth = util.getLast(STATE.validDates[monthlyDates]).split('T')[0];
   DEFAULTS['monthly'].end = moment(lastMonth);
 
-  const lastYear = getLast(STATE.validDates[dailyDates]).split('-')[0];
+  const lastYear = util.getLast(STATE.validDates[dailyDates]).split('-')[0];
   $('#sYear').attr({'max': lastYear});
   $('#eYear').attr({'max': lastYear, 'value': lastYear});
 
@@ -522,13 +479,13 @@ function setPlayheadBindings() {
     pauseAnimation();
     previousDate();
     [map, projection] = configureState(map, projection);
-    util.loadWMS(map, projection, STATE);
+    mapUtil.loadWMS(map, projection, STATE);
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     nextDate();
     [map, projection] = configureState(map, projection);
-    util.loadWMS(map, projection, STATE);
+    mapUtil.loadWMS(map, projection, STATE);
   });
   $('#firstFrame').click(function() {// When animation button is clicked
     pauseAnimation();
@@ -540,13 +497,13 @@ function setPlayheadBindings() {
       STATE.current.set({'date': dayLoop});
       STATE.current.set({'month': monthLoop});
 
-      while (!util.validDateInput(STATE.current, STATE)) {
+      while (!mapUtil.validDateInput(STATE.current, STATE)) {
         nextDate();
       }
     } else {
       STATE.current = moment(STATE.start);
       [map, projection] = configureState(map, projection);
-      util.loadWMS(map, projection, STATE);
+      mapUtil.loadWMS(map, projection, STATE);
     }
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
@@ -558,13 +515,13 @@ function setPlayheadBindings() {
       STATE.current.set({'year': STATE.endYear.year()});
       STATE.current.set({'date': dayLoop});
       STATE.current.set({'month': monthLoop});
-      while (!util.validDateInput(STATE.current, STATE)) {
+      while (!mapUtil.validDateInput(STATE.current, STATE)) {
         previousDate();
       }
     } else {
       STATE.current = moment(STATE.end);
       [map, projection] = configureState(map, projection);
-      util.loadWMS(map, projection, STATE);
+      mapUtil.loadWMS(map, projection, STATE);
     }
   });
   document.getElementById('info-hover').onclick = function() {
@@ -604,7 +561,7 @@ function setPlayheadBindings() {
       STATE.current.set({'month': monthLoop});
     }
 
-    if (!util.validDateInput(STATE.current, STATE)) {
+    if (!mapUtil.validDateInput(STATE.current, STATE)) {
       nextDate();
     }
   };
