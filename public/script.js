@@ -149,7 +149,7 @@ function resetMap() {
   map.addLayer(util.createLayer(STATE));
 }
 
-/** Get the state of the loop
+/** Load and set the state configuration from the user inputs and return the correct map and projection
  * @return {array} - An array containing the map and projection objects
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used

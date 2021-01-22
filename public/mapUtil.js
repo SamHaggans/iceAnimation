@@ -136,7 +136,7 @@ export function getMap(projection, STATE) {
   });
   map.addControl(zoomControl);// Add control to reset view
 
-  $('.ol-zoom-extent button').html('');
+  $('.ol-zoom-extent button').html(''); // Remove the default "E" from the zoom to extent button
 
   return map;
 }
