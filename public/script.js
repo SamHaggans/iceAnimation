@@ -5,7 +5,7 @@ window.$ = $;
 
 import * as mapUtil from './modules/mapUtil.js';
 import * as util from './modules/util.js';
-
+import * as STATE from './modules/STATE.js';
 
 import moment from 'moment';
 
@@ -31,22 +31,8 @@ const noDataImages = {
 
 const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-const STATE = {
-  stop: true,
-  rate: 100,
-  current: moment(),
-  start: moment(),
-  end: moment(),
-  startYear: moment(),
-  endYear: moment(),
-  dataType: 'extent',
-  hemi: 'n',
-  temporality: 'daily',
-  yearLoop: false,
-  validDates: [],
-};
 
-const DEFAULTS = {
+DEFAULTS = {
   daily: {
     start: moment().year(1978).month(9).date(26),
     end: moment(),
