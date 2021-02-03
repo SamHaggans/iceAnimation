@@ -14,6 +14,8 @@ import Projection from 'ol/proj/Projection';
 import {getCenter} from 'ol/extent';
 import moment from 'moment';
 
+import * as STATE from './STATE.js';
+
 import {CONSTANTS} from '../constants.js';
 
 // Static Image Assets
@@ -23,21 +25,20 @@ import concentrationLegend from '../assets/concentration_legend.png';
 /** Load the wms with the current params
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
- * @param {object} STATE animation state
  */
-export async function loadWMS(map, projection, STATE) {
-  const params = getWMSParams(STATE);
-  await updateWMSLayerParams(map, map.getLayers().getArray()[0], params, STATE);
+export async function loadWMS(map, projection) {
+  const params = getWMSParams();
+  await updateWMSLayerParams(map, map.getLayers().getArray()[0], params);
 }
 
 /** Create a projection for a map
  * @return {projection} projection
- * @param {object} STATE animation state
  */
-export function getProjection(STATE) {
+export function getProjection() {
+  let state = STATE.get();
   const projection = new Projection({// Map projection
-    code: CONSTANTS[STATE.hemi].srs,
-    extent: CONSTANTS[STATE.hemi].extent,
+    code: CONSTANTS[state.hemi].srs,
+    extent: CONSTANTS[state.hemi].extent,
   });
   return projection;
 }
@@ -47,10 +48,10 @@ export function getProjection(STATE) {
  * @param {layer} layer - The layer to be updated
  * @param {object} params - The parameters to be updated
  * @return {promise} - A promise of updating the layer
- * @param {object} STATE animation state
  */
-export function updateWMSLayerParams(map, layer, params, STATE) {
-  toggleLegend(STATE);
+export function updateWMSLayerParams(map, layer, params) {
+  let state = STATE.get();
+  toggleLegend(state);
   return new Promise(async function(resolve, reject) {
     const source = layer.getSource();
     await source.updateParams(params);
@@ -62,24 +63,24 @@ export function updateWMSLayerParams(map, layer, params, STATE) {
       await source.refresh();
     }, 5000);
     map.once('rendercomplete', function(event) {
-      if (STATE.temporality == 'daily') {
-        $('#date').html(STATE.current.format('YYYY-MM-DD'));
+      if (state.temporality == 'daily') {
+        $('#date').html(state.currentDate.format('YYYY-MM-DD'));
       } else {
-        $('#date').html(STATE.current.format('YYYY-MM'));
+        $('#date').html(state.currentDate.format('YYYY-MM'));
       }
 
-      if (STATE.yearLoop) {
+      if (state.yearLoop) {
         let firstDate;
         let lastDate;
-        [firstDate, lastDate] = getSliderPositioning(STATE);
+        [firstDate, lastDate] = getSliderPositioning(state);
 
         const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-        const animateDistance = Math.abs(firstDate.diff(STATE.current, 'days') + 1);
+        const animateDistance = Math.abs(firstDate.diff(state.currentDate, 'days') + 1);
         const sliderPos = (animateDistance / totalDays) * 1000000;
         document.getElementById('timeline').value = sliderPos;
       } else {
-        const totalDays = Math.abs(STATE.start.diff(STATE.end, 'days') + 1);
-        const animateDistance = Math.abs(STATE.start.diff(STATE.current, 'days') + 1);
+        const totalDays = Math.abs(state.startDate.diff(state.endDate, 'days') + 1);
+        const animateDistance = Math.abs(state.startDate.diff(state.currentDate, 'days') + 1);
         const sliderPos = (animateDistance / totalDays) * 1000000;
         document.getElementById('timeline').value = sliderPos;
       }
@@ -93,10 +94,9 @@ export function updateWMSLayerParams(map, layer, params, STATE) {
 
 /** Create a layer for a map
  * @return {layer} layer
- * @param {object} STATE animation state
  */
-export function createLayer(STATE) {
-  const wmsParams = getWMSParams(STATE);
+export function createLayer() {
+  const wmsParams = getWMSParams();
   const source = new ImageWMS({
     url: 'https://nsidc.org/api/mapservices/NSIDC/wms',
     params: wmsParams,
@@ -110,10 +110,9 @@ export function createLayer(STATE) {
 /** Create a map
  * @return {map} Map
  * @param {projection} projection - The Projection to create the map with
- * @param {object} STATE Animation State
  */
-export function getMap(projection, STATE) {
-  const extent = getLocationParams(STATE).extent;
+export function getMap(projection) {
+  const extent = getLocationParams().extent;
   const map = new Map({ // New map
     target: 'map', // Div in which the map is displayed
     view: new View({
@@ -125,7 +124,7 @@ export function getMap(projection, STATE) {
     }),
   });
   const zoomToExtentControl = new ZoomToExtent({
-    extent: getLocationParams(STATE).extent,
+    extent: getLocationParams().extent,
     size: [5, 5],
   });
   map.addControl(zoomToExtentControl);// Add control to reset view
@@ -142,58 +141,58 @@ export function getMap(projection, STATE) {
 
 /** Get location parameters from CONSTANTS
  * @return {object} The parameters
- * @param {object} STATE Animation state
  */
-export function getLocationParams(STATE) {
-  const extent = CONSTANTS[STATE.hemi].extent;// Map size
+export function getLocationParams() {
+  let state = STATE.get();
+  const extent = CONSTANTS[state.hemi].extent;// Map size
   // var extent = [0,0,0,0];
 
-  $('#map').css('width', CONSTANTS[STATE.hemi].css.width);
-  $('#map').css('height', CONSTANTS[STATE.hemi].css.height);
-  $('#mapContainer').css('width', CONSTANTS[STATE.hemi].css.width);
-  $('#mapContainer').css('height', CONSTANTS[STATE.hemi].css.height);
-  $('#mapAlert').css('left', CONSTANTS[STATE.hemi].css.width*0.30);
-  $('#mapAlert').css('top', CONSTANTS[STATE.hemi].css.height*0.7);
-  const locationVal = CONSTANTS[STATE.hemi].locationVal;
-  const width = CONSTANTS[STATE.hemi].width;
-  const height = CONSTANTS[STATE.hemi].height;
-  const srs = CONSTANTS[STATE.hemi].srs;// Location for request url
+  $('#map').css('width', CONSTANTS[state.hemi].css.width);
+  $('#map').css('height', CONSTANTS[state.hemi].css.height);
+  $('#mapContainer').css('width', CONSTANTS[state.hemi].css.width);
+  $('#mapContainer').css('height', CONSTANTS[state.hemi].css.height);
+  $('#mapAlert').css('left', CONSTANTS[state.hemi].css.width*0.30);
+  $('#mapAlert').css('top', CONSTANTS[state.hemi].css.height*0.7);
+  const locationVal = CONSTANTS[state.hemi].locationVal;
+  const width = CONSTANTS[state.hemi].width;
+  const height = CONSTANTS[state.hemi].height;
+  const srs = CONSTANTS[state.hemi].srs;// Location for request url
 
   return {extent: extent, locationVal: locationVal, width: width, height: height, srs: srs};
 }
 
 /** Get the wms parameters
  * @return {object} wmsParameters
- * @param {object} STATE Animation State
  */
-export function getWMSParams(STATE) {
+export function getWMSParams() {
+  let state = STATE.get();
   let sourceType = 'monthly';
-  if (STATE.temporality == 'daily') {
+  if (state.temporality == 'daily') {
     sourceType = 'daily';
   }
-  const basemap = 'NSIDC:g02135_' + STATE.dataType+ '_raster_basemap';
+  const basemap = 'NSIDC:g02135_' + state.dataType+ '_raster_basemap';
   // const withMissing = 'NSIDC:g02135_' + STATE.dataType+ '_raster_with_missing';
   return {
-    LAYERS: 'NSIDC:g02135_' + STATE.dataType + `_raster_${sourceType}_` + STATE.hemi,
-    SRS: getLocationParams(STATE).srs,
-    BBOX: getLocationParams(STATE).locationVal,
+    LAYERS: 'NSIDC:g02135_' + state.dataType + `_raster_${sourceType}_` + state.hemi,
+    SRS: getLocationParams(state).srs,
+    BBOX: getLocationParams(state).locationVal,
     TILED: false,
     format: 'image/png',
-    TIME: STATE.current.format('YYYY-MM-DD'),
+    TIME: state.currentDate.format('YYYY-MM-DD'),
     STYLES: [basemap],
   };
 }
 
 /** Set the text covering the map
  * @param {string} text - Text to put over map
- * @param {object} STATE - Animation State
 */
-export function setNoDataOverlay(text, STATE) {// eslint-disable-line no-unused-vars
+export function setNoDataOverlay(text) {// eslint-disable-line no-unused-vars
+  let state = STATE.get();
   const source = new ImageStatic({
-    url: `${STATE.hemi}_nodata.png`,
+    url: `${state.hemi}_nodata.png`,
     serverType: 'geoserver',
     projection: map.getView().getProjection(),
-    imageExtent: CONSTANTS[STATE.hemi].extent,
+    imageExtent: CONSTANTS[state.hemi].extent,
   });
 
   const layer = new Image({source});
@@ -201,55 +200,54 @@ export function setNoDataOverlay(text, STATE) {// eslint-disable-line no-unused-
 }
 
 /** Toggle the visibility of the legend
- * @param {object} STATE animation state
  */
-export function toggleLegend(STATE) {
-  if (STATE.dataType == 'extent') {
+export function toggleLegend() {
+  let state = STATE.get();
+  if (state.dataType == 'extent') {
     $('#legend').attr('src', extentLegend);
   }
-  if (STATE.dataType == 'concentration') {
+  if (state.dataType == 'concentration') {
     $('#legend').attr('src', concentrationLegend);
   }
 }
 
 /** Get the positioning of the slider and get the first and last date selectors when in looping mode
- * @param {object} STATE - The state of the animation
  * @return {array} - The first and last dates to be displayed on the slider
 */
-function getSliderPositioning(STATE) {
+function getSliderPositioning() {
   const dayLoop = document.querySelector('input[name="dayLoop"]').value;
   const monthLoop = document.querySelector('select[name="monthLoop"]').value;
   let firstDate = moment();
-  firstDate.set({'year': STATE.startYear.year()});
+  firstDate.set({'year': STATE.getProp('startYear').year()});
   firstDate.set({'date': dayLoop});
   firstDate.set({'month': monthLoop});
 
-  while (!validDateInput(firstDate, STATE)) {
+  while (!validDateInput(firstDate)) {
     firstDate.add(1, 'y');
   }
 
   let lastDate = moment();
-  lastDate.set({'year': STATE.endYear.year()});
+  lastDate.set({'year': STATE.getProp('endYear').year()});
   lastDate.set({'date': dayLoop});
   lastDate.set({'month': monthLoop});
 
-  while (!validDateInput(lastDate, STATE)) {
+  while (!validDateInput(lastDate)) {
     lastDate.subtract(1, 'y');
   }
 
   return [firstDate, lastDate];
-};
+}
 
 /** Check if a given date is valid and available
  * @param {moment} date - The date to be tested
- * @param {object} STATE - The state of the animation
  * @return {boolean} - Valid date or not
 */
-function validDateInput(date, STATE) {
+function validDateInput(date) {
+  let state = STATE.get();
   // Get the key (layername) for searching the valid layers object
-  const objectKey = `g02135_${STATE.dataType}_raster_${STATE.temporality}_${STATE.hemi}`;
+  const objectKey = `g02135_${state.dataType}_raster_${state.temporality}_${state.hemi}`;
   // Return whether or not the current date is in the queried layer
-  return (STATE.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
+  return (state.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
 };
 
 export {getSliderPositioning, validDateInput};
