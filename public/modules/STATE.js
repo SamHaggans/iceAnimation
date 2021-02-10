@@ -47,9 +47,6 @@ function set(attr, value) {
 /** Read the configuration of the animation and save to STATE
 */
 function readConfiguration() {
-  STATE.startDate.hour(0);
-  STATE.currentDate.hour(10);
-  STATE.endDate.hour(20);
   // Get value for extent or concentration
   STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for North or South
@@ -65,6 +62,13 @@ function readConfiguration() {
   const month = document.querySelector('select[name="monthLoop"]').value;
   let daysInMonth = moment().set({'year': 2020, 'month': month}).daysInMonth();
   $('#dayLoop').attr({'max': daysInMonth});
+
+  // Set the hours on the date objects to ensure that
+  // dates that occur on the same day are ordered correctly
+  // (startDate before currentDate before endDate)
+  STATE.startDate.hour(0);
+  STATE.currentDate.hour(10);
+  STATE.endDate.hour(20);
 }
 
 /** Update a date value
