@@ -1,7 +1,5 @@
 // Packages
 import $ from 'jquery';
-window.jQuery = $;
-window.$ = $;
 
 import * as mapUtil from './modules/mapUtil.js';
 import * as util from './modules/util.js';

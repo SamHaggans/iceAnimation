@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "webpack --config webpack-test.config.js; mocha test-build/testBundle.js; exit",
     "lint": "eslint --ignore-path .gitignore . --fix",
     "build": "webpack --mode production",
     "serve": "node server.js",
@@ -33,6 +33,9 @@
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
-    "webpack-dev-server": "^3.11.2"
+    "mocha": "^8.2.1",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-node-externals": "^2.5.2",
+    "webpack-shell-plugin": "^0.5.0"
   }
 }
