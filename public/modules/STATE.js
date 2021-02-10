@@ -4,26 +4,21 @@ window.jQuery = $;
 window.$ = $;
 import moment from 'moment';
 
-let STATE = {};
-
-/** Initialize the STATE object
- */
-function initialize() {
-  STATE = {
-    stop: true,
-    rate: 100,
-    currentDate: moment(),
-    startDate: moment(),
-    endDate: moment(),
-    startYear: moment(),
-    endYear: moment(),
-    dataType: 'extent',
-    hemi: 'n',
-    temporality: 'daily',
-    yearLoop: false,
-    validDates: [],
-  };
-}
+// Initialize the STATE object to the starting values
+let STATE = {
+  stop: true,
+  rate: 100,
+  currentDate: moment(),
+  startDate: moment(),
+  endDate: moment(),
+  startYear: moment(),
+  endYear: moment(),
+  dataType: 'extent',
+  hemi: 'n',
+  temporality: 'daily',
+  yearLoop: false,
+  validDates: [],
+};
 
 /** Return the STATE object
 * @return {object} STATE - Animation state
@@ -180,7 +175,6 @@ function setStartDateToMoment(momentDate) {
   STATE.startDate = momentDate;
 }
 
-initialize();
 
 export {get, getProp, set, readConfiguration, setCurrentDate,
   setStartDate, setEndDate, addToCurrentDate, addToEndDate,
