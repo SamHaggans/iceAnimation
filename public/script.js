@@ -71,7 +71,7 @@ async function init() {
 
   await initialMapLoad();
 
-  STATE.setCurrentDateToMoment(moment(STATE.getProp('startDate')));
+  STATE.set('currentDate', moment(STATE.getProp('startDate')));
 
   STATE.set('stop', true);
 
@@ -124,16 +124,17 @@ function configureState(map, projection) {
     mapUtil.loadWMS(map, projection);
   }
   if (oldTemporality != STATE.getProp('temporality')) {
-    document.querySelector('input[name="sDate"]').value = DEFAULTS[state.temporality].start.format('YYYY-MM-DD');
-    document.querySelector('input[name="eDate"]').value = DEFAULTS[state.temporality].end.format('YYYY-MM-DD');
-    STATE.setStartDateToMoment(moment(document.querySelector('input[name="sDate"]').value));
-    STATE.setCurrentDateToMoment(moment(state.startDate));
-    STATE.setEndDateToMoment(moment(document.querySelector('input[name="eDate"]').value));
+    let temporality = STATE.getProp('temporality');
+    document.querySelector('input[name="sDate"]').value = DEFAULTS[temporality].start.format('YYYY-MM-DD');
+    document.querySelector('input[name="eDate"]').value = DEFAULTS[temporality].end.format('YYYY-MM-DD');
+    STATE.set('startDate', moment(document.querySelector('input[name="sDate"]').value));
+    STATE.set('currentDate', moment(STATE.getProp('startDate')));
+    STATE.set('endDate', moment(document.querySelector('input[name="eDate"]').value));
     while (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {
       nextDate();
     }
   }
-  STATE.setStartDate(state.startDate.startOf('day'));
+  STATE.updateStartDate(STATE.getProp('startDate').startOf('day'));
 
   updateCSS();
 
@@ -192,15 +193,15 @@ function updateCSS() {
 
 /** Find and move to next date for the animation*/
 function nextDate() {
-  STATE.setStartDate({'hour': 0});
-  STATE.setCurrentDate({'hour': 10});
-  STATE.setEndDate({'hour': 20});
+  STATE.updateStartDate({'hour': 0});
+  STATE.updateCurrentDate({'hour': 10});
+  STATE.updateEndDate({'hour': 20});
   let state = STATE.get();
   if (state.yearLoop) {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-    STATE.setCurrentDate({'date': dayLoop});
-    STATE.setCurrentDate({'month': monthLoop});
+    STATE.updateCurrentDate({'date': dayLoop});
+    STATE.updateCurrentDate({'month': monthLoop});
   }
   if (state.temporality == 'monthly') {
     if (state.yearLoop) {
@@ -208,7 +209,7 @@ function nextDate() {
     } else {
       STATE.addToCurrentDate({months: 1});
     }
-    STATE.setCurrentDate({'date': 1});
+    STATE.updateCurrentDate({'date': 1});
   } else {
     if (state.yearLoop) {
       STATE.addToCurrentDate({years: 1});
@@ -219,7 +220,7 @@ function nextDate() {
   if (!state.yearLoop) {
     if (STATE.getProp('currentDate').isAfter(STATE.getProp('endDate')) ||
         STATE.getProp('currentDate').isBefore(STATE.getProp('startDate'))) {
-      STATE.setCurrentDateToMoment(moment(STATE.getProp('startDate')));
+      STATE.set('currentDate', moment(STATE.getProp('startDate')));
     }
   }
 
@@ -230,20 +231,20 @@ function nextDate() {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
     if (STATE.getProp('currentDate').isBefore(firstDate)) {
-      STATE.setCurrentDate({'year': lastDate.year()});
+      STATE.updateCurrentDate({'year': lastDate.year()});
     } else if (STATE.getProp('currentDate').isAfter(lastDate)) {
-      STATE.setCurrentDate({'year': firstDate.year()});
+      STATE.updateCurrentDate({'year': firstDate.year()});
     }
-    STATE.setCurrentDate({'date': dayLoop});
-    STATE.setCurrentDate({'month': monthLoop});
+    STATE.updateCurrentDate({'date': dayLoop});
+    STATE.updateCurrentDate({'month': monthLoop});
   }
 
 
   if (state.yearLoop) {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-    STATE.setCurrentDate({'date': dayLoop});
-    STATE.setCurrentDate({'month': monthLoop});
+    STATE.updateCurrentDate({'date': dayLoop});
+    STATE.updateCurrentDate({'month': monthLoop});
   }
   if (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {
     nextDate();
@@ -252,9 +253,9 @@ function nextDate() {
 
 /** Find and move to previous date for the animation*/
 function previousDate() {
-  STATE.setStartDate({'hour': 0});
-  STATE.setCurrentDate({'hour': 10});
-  STATE.setEndDate({'hour': 20});
+  STATE.updateStartDate({'hour': 0});
+  STATE.updateCurrentDate({'hour': 10});
+  STATE.updateEndDate({'hour': 20});
   let state = STATE.get();
 
   if (state.temporality == 'monthly') {
@@ -263,7 +264,7 @@ function previousDate() {
     } else {
       STATE.subtractFromCurrentDate({months: 1});
     }
-    STATE.setCurrentDate({'date': 1});
+    STATE.updateCurrentDate({'date': 1});
   } else {
     if (STATE.yearLoop) {
       STATE.subtractFromCurrentDate({years: 1});
@@ -273,7 +274,7 @@ function previousDate() {
   }
   if (!state.yearLoop) {
     if (STATE.getProp('currentDate').isBefore(STATE.getProp('startDate'))) {
-      STATE.setCurrentDateToMoment(moment(STATE.getProp('endDate')));
+      STATE.set('currentDate', moment(STATE.getProp('endDate')));
     }
   }
 
@@ -284,12 +285,12 @@ function previousDate() {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
     if (STATE.getProp('currentDate').isBefore(STATE.getProp('firstDate'))) {
-      STATE.setCurrentDate({'year': lastDate.year()});
+      STATE.updateCurrentDate({'year': lastDate.year()});
     } else if (STATE.getProp('currentDate').isAfter(STATE.getProp('lastDate'))) {
-      STATE.setCurrentDate({'year': firstDate.year()});
+      STATE.updateCurrentDate({'year': firstDate.year()});
     }
-    STATE.setCurrentDate({'date': dayLoop});
-    STATE.setCurrentDate({'month': monthLoop});
+    STATE.updateCurrentDate({'date': dayLoop});
+    STATE.updateCurrentDate({'month': monthLoop});
   }
 
 
@@ -430,15 +431,15 @@ function setPlayheadBindings() {
       const dayLoop = document.querySelector('input[name="dayLoop"]').value;
       const monthLoop = document.querySelector('select[name="monthLoop"]').value;
 
-      STATE.setCurrentDate({'year': STATE.getProp('startYear').year()});
-      STATE.setCurrentDate({'date': dayLoop});
-      STATE.setCurrentDate({'month': monthLoop});
+      STATE.updateCurrentDate({'year': STATE.getProp('startYear').year()});
+      STATE.updateCurrentDate({'date': dayLoop});
+      STATE.updateCurrentDate({'month': monthLoop});
 
       while (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {
         nextDate();
       }
     } else {
-      STATE.setCurrentDateToMoment(moment(STATE.getProp('startDate')));
+      STATE.set('currentDate', moment(STATE.getProp('startDate')));
       while (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {
         nextDate();
       }
@@ -452,14 +453,14 @@ function setPlayheadBindings() {
       const dayLoop = document.querySelector('input[name="dayLoop"]').value;
       const monthLoop = document.querySelector('select[name="monthLoop"]').value;
 
-      STATE.setCurrentDate({'year': STATE.getProp('endYear').year()});
-      STATE.setCurrentDate({'date': dayLoop});
-      STATE.setCurrentDate({'month': monthLoop});
+      STATE.updateCurrentDate({'year': STATE.getProp('endYear').year()});
+      STATE.updateCurrentDate({'date': dayLoop});
+      STATE.updateCurrentDate({'month': monthLoop});
       while (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {
         previousDate();
       }
     } else {
-      STATE.setCurrentDateToMoment(moment(STATE.getProp('endDate')));
+      STATE.set('currentDate', moment(STATE.getProp('endDate')));
       while (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {
         previousDate();
       }
@@ -496,11 +497,11 @@ function setPlayheadBindings() {
     const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
     const sliderVal = $(this).val();
     const selectedTime = (sliderVal / CONSTANTS.timeline.maxValue) * totalDays;
-    STATE.setCurrentDateToMoment(moment(firstDate).add(selectedTime, 'd'));
+    STATE.set('currentDate', moment(firstDate).add(selectedTime, 'd'));
     if (STATE.getProp('yearLoop')) {
       const dayLoop = document.querySelector('input[name="dayLoop"]').value;
       const monthLoop = document.querySelector('select[name="monthLoop"]').value;
-      STATE.setCurrentDate({'date': dayLoop, 'month': monthLoop});
+      STATE.updateCurrentDate({'date': dayLoop, 'month': monthLoop});
     }
 
     if (!mapUtil.validDateInput(STATE.getProp('currentDate'))) {

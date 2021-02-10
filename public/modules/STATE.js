@@ -71,117 +71,70 @@ function readConfiguration() {
   STATE.endDate.hour(20);
 }
 
-/** Update a date value
- * @param {*} date - The date object to be updated
- * @param {*} values - The attribute-value pairs of the date to be set
-*/
-function setDate(date, values) {
-  STATE[date].set(values);
-}
-
 /** Update the currentDate value
  * @param {*} values - The attribute-value pairs of currentDate to be set
 */
-function setCurrentDate(values) {
-  setDate('currentDate', values);
+function updateCurrentDate(values) {
+  STATE['currentDate'].set(values);
 }
 
 /** Update the startDate value
  * @param {*} values - The attribute-value pairs of startDate to be set
 */
-function setStartDate(values) {
-  setDate('startDate', values);
+function updateStartDate(values) {
+  STATE['startDate'].set(values);
 }
 
 /** Update the endDate value
  * @param {*} values - The attribute-value pairs of endDate to be set
 */
-function setEndDate(values) {
-  setDate('endDate', values);
-}
-
-/** Add to a date value
- * @param {*} date - The date object to be updated
- * @param {*} values - The addition to be made
-*/
-function addToDate(date, values) {
-  STATE[date].add(values);
+function updateEndDate(values) {
+  STATE['endDate'].set(values);
 }
 
 /** Add to the currentDate value
  * @param {*} values - The attribute-value pairs of currentDate to be added
 */
 function addToCurrentDate(values) {
-  addToDate('currentDate', values);
+  STATE['currentDate'].add(values);
 }
 
 /** Add to the currentDate value
  * @param {*} values - The attribute-value pairs of startDate to be added
 */
 function addToStartDate(values) {
-  addToDate('startDate', values);
+  STATE['startDate'].add(values);
 }
 
 /** Add to the currentDate value
  * @param {*} values - The attribute-value pairs of endDate to be added
 */
 function addToEndDate(values) {
-  addToDate('endDate', values);
-}
-
-/** Subtract from a date value
- * @param {*} date - The date object to be updated
- * @param {*} values - The subtraction to be made
-*/
-function subtractFromDate(date, values) {
-  STATE[date].subtract(values);
+  STATE['endDate'].add(values);
 }
 
 /** Subtract from the currentDate value
  * @param {*} values - The attribute-value pairs of currentDate to be subtracted
 */
 function subtractFromCurrentDate(values) {
-  subtractFromDate('currentDate', values);
+  STATE['currentDate'].subtract(values);
 }
 
 /** Subtract from the currentDate value
  * @param {*} values - The attribute-value pairs of startDate to be subtracted
 */
 function subtractFromStartDate(values) {
-  subtractFromDate('startDate', values);
+  STATE['startDate'].subtract(values);
 }
 
 /** Subtract from the currentDate value
  * @param {*} values - The attribute-value pairs of endDate to be subtracted
 */
 function subtractFromEndDate(values) {
-  subtractFromDate('endDate', values);
+  STATE['endDate'].subtract(values);
 }
 
-/** Set the current date to a moment date
- * @param {*} momentDate - The moment date to which STATE will be set
-*/
-function setCurrentDateToMoment(momentDate) {
-  STATE.currentDate = momentDate;
-}
-
-/** Set the end date to a moment date
- * @param {*} momentDate - The moment date to which STATE will be set
-*/
-function setEndDateToMoment(momentDate) {
-  STATE.endDate = momentDate;
-}
-
-/** Set the starting date to a moment date
- * @param {*} momentDate - The moment date to which STATE will be set
-*/
-function setStartDateToMoment(momentDate) {
-  STATE.startDate = momentDate;
-}
-
-
-export {get, getProp, set, readConfiguration, setCurrentDate,
-  setStartDate, setEndDate, addToCurrentDate, addToEndDate,
+export {get, getProp, set, readConfiguration, updateCurrentDate,
+  updateStartDate, updateEndDate, addToCurrentDate, addToEndDate,
   addToStartDate, subtractFromCurrentDate, subtractFromEndDate,
-  subtractFromStartDate, setCurrentDateToMoment, setStartDateToMoment,
-  setEndDateToMoment};
+  subtractFromStartDate};
