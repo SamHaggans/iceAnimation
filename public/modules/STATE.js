@@ -4,6 +4,11 @@ window.jQuery = $;
 window.$ = $;
 import moment from 'moment';
 
+import * as mapUtil from './map.js';
+import * as page from './page.js';
+import * as dates from './dates.js';
+import * as timeline from './timeline.js';
+
 // Initialize the STATE object to the starting values
 let STATE = {
   stop: true,
@@ -18,6 +23,16 @@ let STATE = {
   temporality: 'daily',
   yearLoop: false,
   validDates: [],
+  DEFAULTS: {
+    daily: {
+      start: moment().year(1978).month(9).date(26),
+      end: moment(),
+    },
+    monthly: {
+      start: moment().year(1978).month(10).startOf('month'),
+      end: moment(),
+    },
+  },
 };
 
 /** Return the STATE object
@@ -134,7 +149,41 @@ function subtractFromEndDate(values) {
   STATE['endDate'].subtract(values);
 }
 
+/** Load and set the state configuration from the user inputs and return the correct map and projection
+ * @return {array} - An array containing the map and projection objects
+ * @param {map} map - The map to be used
+ * @param {projection} projection - The projection to be used
+*/
+function configureState(map, projection) {
+  const oldHemisphere = STATE.hemi;
+  const oldTemporality = STATE.temporality;
+
+  readConfiguration();
+  if (oldHemisphere != STATE.hemi) {
+    [map, projection] = mapUtil.resetMap();
+    mapUtil.loadWMS(map, projection);
+  }
+  if (oldTemporality != STATE.temporality) {
+    let temporality = STATE.temporality;
+    document.querySelector('input[name="sDate"]').value = STATE.DEFAULTS[temporality].start.format('YYYY-MM-DD');
+    document.querySelector('input[name="eDate"]').value = STATE.DEFAULTS[temporality].end.format('YYYY-MM-DD');
+    STATE.startDate = moment(document.querySelector('input[name="sDate"]').value);
+    STATE.currentDate = moment(STATE.startDate);
+    STATE.endDate = moment(document.querySelector('input[name="eDate"]').value);
+    while (!dates.validDateInput(STATE.currentDate)) {
+      dates.nextDate();
+    }
+  }
+  updateStartDate(STATE.startDate.startOf('day'));
+
+  page.updateCSS();
+
+  timeline.generateTimelineScale();
+
+  return [map, projection];
+}
+
 export {get, getProp, set, readConfiguration, updateCurrentDate,
   updateStartDate, updateEndDate, addToCurrentDate, addToEndDate,
   addToStartDate, subtractFromCurrentDate, subtractFromEndDate,
-  subtractFromStartDate};
+  subtractFromStartDate, configureState};

@@ -15,13 +15,13 @@ import {getCenter} from 'ol/extent';
 import moment from 'moment';
 
 import * as STATE from './STATE.js';
+import * as page from './page.js';
+import * as dates from './dates.js';
 
 import {CONSTANTS} from '../constants.js';
 
-// Static Image Assets
-import extentLegend from '../assets/extent_legend.png';
-import concentrationLegend from '../assets/concentration_legend.png';
-
+let map;
+let projection;
 /** Load the wms with the current params
  * @param {map} map - The map to be used
  * @param {projection} projection - The projection to be used
@@ -51,7 +51,7 @@ export function getProjection() {
  */
 export function updateWMSLayerParams(map, layer, params) {
   let state = STATE.get();
-  toggleLegend(state);
+  page.toggleLegend(state);
   return new Promise(async function(resolve, reject) {
     const source = layer.getSource();
     await source.updateParams(params);
@@ -199,17 +199,6 @@ export function setNoDataOverlay(text) {// eslint-disable-line no-unused-vars
   map.addLayer(layer);
 }
 
-/** Toggle the visibility of the legend
- */
-export function toggleLegend() {
-  let state = STATE.get();
-  if (state.dataType == 'extent') {
-    $('#legend').attr('src', extentLegend);
-  }
-  if (state.dataType == 'concentration') {
-    $('#legend').attr('src', concentrationLegend);
-  }
-}
 
 /** Get the positioning of the slider and get the first and last date selectors when in looping mode
  * @return {array} - The first and last dates to be displayed on the slider
@@ -222,7 +211,7 @@ function getSliderPositioning() {
   firstDate.set({'date': dayLoop});
   firstDate.set({'month': monthLoop});
 
-  while (!validDateInput(firstDate)) {
+  while (!dates.validDateInput(firstDate)) {
     firstDate.add(1, 'y');
   }
 
@@ -231,23 +220,36 @@ function getSliderPositioning() {
   lastDate.set({'date': dayLoop});
   lastDate.set({'month': monthLoop});
 
-  while (!validDateInput(lastDate)) {
+  while (!dates.validDateInput(lastDate)) {
     lastDate.subtract(1, 'y');
   }
 
   return [firstDate, lastDate];
 }
 
-/** Check if a given date is valid and available
- * @param {moment} date - The date to be tested
- * @return {boolean} - Valid date or not
-*/
-function validDateInput(date) {
-  let state = STATE.get();
-  // Get the key (layername) for searching the valid layers object
-  const objectKey = `g02135_${state.dataType}_raster_${state.temporality}_${state.hemi}`;
-  // Return whether or not the current date is in the queried layer
-  return (state.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
-};
+/** Recreate the map and projection objects
+ * @return {array} - An array containing the map and projection objects
+ */
+export function resetMap() {
+  $('#map').html('');// Empty map when a new animation occurs
+  let projection = getProjection();
+  let map = getMap(projection);
+  map.addLayer(createLayer());
+  return [map, projection];
+}
 
-export {getSliderPositioning, validDateInput};
+/** Initialize the map settings
+ * @return {Promise} - Resolves when loading is completed
+*/
+export function initialMapLoad() {
+  return new Promise(function(resolve, reject) {
+    STATE.readConfiguration();
+    let map;
+    let projection;
+    [map, projection] = resetMap();
+    loadWMS(map, projection);
+    resolve();
+  });
+}
+
+export {getSliderPositioning};
