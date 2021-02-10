@@ -2,7 +2,7 @@
  * @param {string} filename - The file to be read
  * @return {string} - The json read from the file
  */
-function readJSON(filename) { // eslint-disable-line no-unused-vars
+function readJSON(filename) {
   return new Promise(function(resolve, reject) {
     const request = new XMLHttpRequest();
     request.overrideMimeType('application/json');
