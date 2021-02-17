@@ -14,7 +14,6 @@ import {getCenter} from 'ol/extent';
 
 import * as STATE from './STATE.js';
 import * as page from './page.js';
-import * as dates from './dates.js';
 
 import {CONSTANTS} from '../constants.js';
 
