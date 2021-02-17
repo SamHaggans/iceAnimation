@@ -5,6 +5,7 @@ import * as STATE from './STATE.js';
 import * as mapUtil from './map.js';
 import * as dates from './dates.js';
 import * as util from './util.js';
+import * as timeline from './timeline.js';
 
 // Static Image Assets
 import extentLegend from '../assets/extent_legend.png';
@@ -58,14 +59,14 @@ function setPlayheadBindings() {
   $('#prevFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     dates.previousDate();
-    [map, projection] = STATE.configureState(map, projection);
-    mapUtil.loadWMS(map, projection);
+    STATE.configureState();
+    mapUtil.loadWMS();
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     dates.nextDate();
-    [map, projection] = STATE.configureState(map, projection);
-    mapUtil.loadWMS(map, projection);
+    STATE.configureState();
+    mapUtil.loadWMS();
   });
   $('#firstFrame').click(function() {// When animation button is clicked
     pauseAnimation();
@@ -77,17 +78,17 @@ function setPlayheadBindings() {
       STATE.updateCurrentDate({'date': dayLoop});
       STATE.updateCurrentDate({'month': monthLoop});
 
-      while (!dates.validDateInput(STATE.getProp('currentDate'))) {
+      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
         dates.nextDate();
       }
     } else {
       STATE.set('currentDate', moment(STATE.getProp('startDate')));
-      while (!dates.validDateInput(STATE.getProp('currentDate'))) {
+      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
         dates.nextDate();
       }
-      [map, projection] = STATE.configureState(map, projection);
-      mapUtil.loadWMS(map, projection);
     }
+    STATE.configureState();
+    mapUtil.loadWMS();
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     pauseAnimation();
@@ -98,17 +99,17 @@ function setPlayheadBindings() {
       STATE.updateCurrentDate({'year': STATE.getProp('endYear').year()});
       STATE.updateCurrentDate({'date': dayLoop});
       STATE.updateCurrentDate({'month': monthLoop});
-      while (!dates.validDateInput(STATE.getProp('currentDate'))) {
+      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
         dates.previousDate();
       }
     } else {
       STATE.set('currentDate', moment(STATE.getProp('endDate')));
-      while (!dates.validDateInput(STATE.getProp('currentDate'))) {
+      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
         dates.previousDate();
       }
-      [map, projection] = STATE.configureState(map, projection);
-      mapUtil.loadWMS(map, projection);
     }
+    STATE.configureState();
+    mapUtil.loadWMS();
   });
   document.getElementById('info-hover').onclick = function() {
     $('#missing-data-message').toggleClass('hidden');
@@ -134,7 +135,7 @@ function setPlayheadBindings() {
     pauseAnimation();
     let firstDate;
     let lastDate;
-    [firstDate, lastDate] = mapUtil.getSliderPositioning();
+    [firstDate, lastDate] = timeline.getSliderPositioning();
 
     const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
     const sliderVal = $(this).val();

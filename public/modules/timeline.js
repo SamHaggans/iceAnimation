@@ -11,7 +11,7 @@ function generateTimelineScale() {
     if (state.yearLoop) {
       let firstDate;
       let lastDate;
-      [firstDate, lastDate] = mapUtil.getSliderPositioning();
+      [firstDate, lastDate] = getSliderPositioning();
 
       let totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
       let forwardDays = (totalDays / 4) * i;
@@ -30,4 +30,31 @@ function generateTimelineScale() {
   }
 }
 
-export {generateTimelineScale};
+/** Get the positioning of the slider and get the first and last date selectors when in looping mode
+ * @return {array} - The first and last dates to be displayed on the slider
+*/
+function getSliderPositioning() {
+  const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+  const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+  let firstDate = moment();
+  firstDate.set({'year': STATE.getProp('startYear').year()});
+  firstDate.set({'date': dayLoop});
+  firstDate.set({'month': monthLoop});
+
+  while (!dates.validDateInput(firstDate)) {
+    firstDate.add(1, 'y');
+  }
+
+  let lastDate = moment();
+  lastDate.set({'year': STATE.getProp('endYear').year()});
+  lastDate.set({'date': dayLoop});
+  lastDate.set({'month': monthLoop});
+
+  while (!dates.validDateInput(lastDate)) {
+    lastDate.subtract(1, 'y');
+  }
+
+  return [firstDate, lastDate];
+}
+
+export {generateTimelineScale, getSliderPositioning};

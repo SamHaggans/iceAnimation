@@ -150,18 +150,15 @@ function subtractFromEndDate(values) {
 }
 
 /** Load and set the state configuration from the user inputs and return the correct map and projection
- * @return {array} - An array containing the map and projection objects
- * @param {map} map - The map to be used
- * @param {projection} projection - The projection to be used
 */
-function configureState(map, projection) {
+function configureState() {
   const oldHemisphere = STATE.hemi;
   const oldTemporality = STATE.temporality;
 
   readConfiguration();
   if (oldHemisphere != STATE.hemi) {
-    [map, projection] = mapUtil.resetMap();
-    mapUtil.loadWMS(map, projection);
+    mapUtil.resetMap();
+    mapUtil.loadWMS();
   }
   if (oldTemporality != STATE.temporality) {
     let temporality = STATE.temporality;
@@ -179,8 +176,6 @@ function configureState(map, projection) {
   page.updateCSS();
 
   timeline.generateTimelineScale();
-
-  return [map, projection];
 }
 
 export {get, getProp, set, readConfiguration, updateCurrentDate,

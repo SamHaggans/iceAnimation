@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 import * as STATE from './STATE.js';
-import * as mapUtil from './map.js';
+import * as timeline from './timeline.js';
 
 /** Find and move to next date for the animation*/
 function nextDate() {
@@ -39,7 +39,7 @@ function nextDate() {
   if (state.yearLoop) {
     let firstDate;
     let lastDate;
-    [firstDate, lastDate] = mapUtil.getSliderPositioning();
+    [firstDate, lastDate] = timeline.getSliderPositioning();
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
     if (STATE.getProp('currentDate').isBefore(firstDate)) {
@@ -93,7 +93,7 @@ function previousDate() {
   if (state.yearLoop) {
     let firstDate;
     let lastDate;
-    [firstDate, lastDate] = mapUtil.getSliderPositioning();
+    [firstDate, lastDate] = timeline.getSliderPositioning();
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
     if (STATE.getProp('currentDate').isBefore(STATE.getProp('firstDate'))) {
@@ -106,7 +106,7 @@ function previousDate() {
   }
 
 
-  if (validDateInput(STATE.getProp('currentDate'))) {
+  if (!validDateInput(STATE.getProp('currentDate'))) {
     previousDate();
   }
 }
