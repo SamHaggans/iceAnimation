@@ -65,10 +65,7 @@ function validDateInput(date) {
   let state = STATE.get();
   // Get the key (layername) for searching the valid layers object
   const objectKey = `g02135_${state.dataType}_raster_${state.temporality}_${state.hemi}`;
-  // Return whether or not the current date is:
-  // 1. In the queried layer
-  // 2. Not before the starting date
-  // 3. Not after the ending date
+  // Return whether or not the current date is in the queried layer
   return (state.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
 };
 export {nextDate, previousDate, validDateInput};
