@@ -23,13 +23,13 @@ let PROJECTION;
 
 /** Load the wms with the current params
  */
-export async function loadWMS() {
+async function loadWMS() {
   await updateWMSLayerParams();
 }
 
 /** Create a projection for a map
  */
-export function getProjection() {
+function getProjection() {
   let state = STATE.get();
   PROJECTION = new Projection({// Map projection
     code: CONSTANTS[state.hemi].srs,
@@ -40,7 +40,7 @@ export function getProjection() {
 /** Update a given layer with specific parameters
  * @return {promise} - A promise of updating the layer
  */
-export function updateWMSLayerParams() {
+function updateWMSLayerParams() {
   let layer = MAP.getLayers().getArray()[0];
   let params = getWMSParams();
   let state = STATE.get();
@@ -86,7 +86,7 @@ export function updateWMSLayerParams() {
 }
 
 /** Create a map */
-export function getMap() {
+function getMap() {
   const extent = getLocationParams().extent;
   MAP = new Map({ // New map
     target: 'map', // Div in which the map is displayed
@@ -125,7 +125,7 @@ export function getMap() {
 /** Get location parameters from CONSTANTS
  * @return {object} The parameters
  */
-export function getLocationParams() {
+function getLocationParams() {
   let state = STATE.get();
   const extent = CONSTANTS[state.hemi].extent;// Map size
   // var extent = [0,0,0,0];
@@ -147,7 +147,7 @@ export function getLocationParams() {
 /** Get the wms parameters
  * @return {object} wmsParameters
  */
-export function getWMSParams() {
+function getWMSParams() {
   let state = STATE.get();
   let sourceType = 'monthly';
   if (state.temporality == 'daily') {
@@ -167,7 +167,7 @@ export function getWMSParams() {
 }
 
 /** Recreate the map and projection objects */
-export function resetMap() {
+function resetMap() {
   $('#map').html('');// Empty map when a new animation occurs
   getProjection();
   getMap();
@@ -176,7 +176,7 @@ export function resetMap() {
 /** Initialize the map settings
  * @return {Promise} - Resolves when loading is completed
 */
-export function initialMapLoad() {
+function initialMapLoad() {
   return new Promise(function(resolve, reject) {
     STATE.readConfiguration();
     resetMap();
@@ -184,3 +184,5 @@ export function initialMapLoad() {
     resolve();
   });
 }
+
+export {loadWMS, getProjection, updateWMSLayerParams, getLocationParams, getWMSParams, resetMap, initialMapLoad};
