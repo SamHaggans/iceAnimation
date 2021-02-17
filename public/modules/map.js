@@ -14,18 +14,12 @@ import {getCenter} from 'ol/extent';
 
 import * as STATE from './STATE.js';
 import * as page from './page.js';
-import * as timeline from './timeline.js';
+import * as dates from './dates.js';
 
 import {CONSTANTS} from '../constants.js';
 
 let MAP;
 let PROJECTION;
-
-/** Load the wms with the current params
- */
-async function loadWMS() {
-  await updateWMSLayerParams();
-}
 
 /** Create a projection for a map
  */
@@ -37,10 +31,10 @@ function getProjection() {
   });
 }
 
-/** Update a given layer with specific parameters
+/** Update the map with the current parameters
  * @return {promise} - A promise of updating the layer
  */
-function updateWMSLayerParams() {
+function updateMap() {
   let layer = MAP.getLayers().getArray()[0];
   let params = getWMSParams();
   let state = STATE.get();
@@ -62,21 +56,15 @@ function updateWMSLayerParams() {
         $('#date').html(state.currentDate.format('YYYY-MM'));
       }
 
-      if (state.yearLoop) {
-        let firstDate;
-        let lastDate;
-        [firstDate, lastDate] = timeline.getSliderPositioning(state);
+      let firstDate = STATE.getProp('startDate');
+      let lastDate = STATE.getProp('lastDate');
 
-        const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
-        const animateDistance = Math.abs(firstDate.diff(state.currentDate, 'days') + 1);
-        const sliderPos = (animateDistance / totalDays) * 1000000;
-        document.getElementById('timeline').value = sliderPos;
-      } else {
-        const totalDays = Math.abs(state.startDate.diff(state.endDate, 'days') + 1);
-        const animateDistance = Math.abs(state.startDate.diff(state.currentDate, 'days') + 1);
-        const sliderPos = (animateDistance / totalDays) * 1000000;
-        document.getElementById('timeline').value = sliderPos;
-      }
+      const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
+      const animateDistance = Math.abs(firstDate.diff(state.currentDate, 'days') + 1);
+      const sliderPos = (animateDistance / totalDays) * 1000000;
+
+      document.getElementById('timeline').value = sliderPos;
+
       // Delete interval requests after load
       clearInterval(interval);
       // Wait for map to be ready to change the date tag
@@ -178,11 +166,11 @@ function resetMap() {
 */
 function initialMapLoad() {
   return new Promise(function(resolve, reject) {
-    STATE.readConfiguration();
+    STATE.updateState();
     resetMap();
-    loadWMS();
+    updateMap();
     resolve();
   });
 }
 
-export {loadWMS, getProjection, updateWMSLayerParams, getLocationParams, getWMSParams, resetMap, initialMapLoad};
+export {updateMap, getProjection, getLocationParams, getWMSParams, resetMap, initialMapLoad};

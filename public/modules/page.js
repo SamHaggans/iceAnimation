@@ -7,6 +7,8 @@ import * as dates from './dates.js';
 import * as util from './util.js';
 import * as timeline from './timeline.js';
 
+import {CONSTANTS} from '../constants.js';
+
 // Static Image Assets
 import extentLegend from '../assets/extent_legend.png';
 import concentrationLegend from '../assets/concentration_legend.png';
@@ -59,57 +61,36 @@ function setPlayheadBindings() {
   $('#prevFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     dates.previousDate();
-    STATE.configureState();
-    mapUtil.loadWMS();
+    STATE.updateState();
+    mapUtil.updateMap();
   });
   $('#nextFrame').click(function() {// When animation button is clicked
     pauseAnimation();
     dates.nextDate();
-    STATE.configureState();
-    mapUtil.loadWMS();
+    STATE.updateState();
+    mapUtil.updateMap();
   });
   $('#firstFrame').click(function() {// When animation button is clicked
     pauseAnimation();
-    if (STATE.getProp('yearLoop')) {
-      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
-      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
 
-      STATE.updateCurrentDate({'year': STATE.getProp('startYear').year()});
-      STATE.updateCurrentDate({'date': dayLoop});
-      STATE.updateCurrentDate({'month': monthLoop});
-
-      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
-        dates.nextDate();
-      }
-    } else {
-      STATE.set('currentDate', moment(STATE.getProp('startDate')));
-      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
-        dates.nextDate();
-      }
+    STATE.set('currentDate', moment(STATE.getProp('startDate')));
+    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+      dates.nextDate();
     }
-    STATE.configureState();
-    mapUtil.loadWMS();
+
+    STATE.updateState();
+    mapUtil.updateMap();
   });
   $('#lastFrame').click(async function() {// When animation button is clicked
     pauseAnimation();
-    if (STATE.getProp('yearLoop')) {
-      const dayLoop = document.querySelector('input[name="dayLoop"]').value;
-      const monthLoop = document.querySelector('select[name="monthLoop"]').value;
 
-      STATE.updateCurrentDate({'year': STATE.getProp('endYear').year()});
-      STATE.updateCurrentDate({'date': dayLoop});
-      STATE.updateCurrentDate({'month': monthLoop});
-      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
-        dates.previousDate();
-      }
-    } else {
-      STATE.set('currentDate', moment(STATE.getProp('endDate')));
-      if (!dates.validDateInput(STATE.getProp('currentDate'))) {
-        dates.previousDate();
-      }
+    STATE.set('currentDate', moment(STATE.getProp('endDate')));
+    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+      dates.previousDate();
     }
-    STATE.configureState();
-    mapUtil.loadWMS();
+
+    STATE.updateState();
+    mapUtil.updateMap();
   });
   document.getElementById('info-hover').onclick = function() {
     $('#missing-data-message').toggleClass('hidden');
@@ -133,9 +114,9 @@ function setPlayheadBindings() {
 
   document.getElementById('timeline').oninput = function(e) {
     pauseAnimation();
-    let firstDate;
-    let lastDate;
-    [firstDate, lastDate] = timeline.getSliderPositioning();
+
+    let firstDate = STATE.getProp('startDate');
+    let lastDate = STATE.getProp('lastDate');
 
     const totalDays = Math.abs(firstDate.diff(lastDate, 'days') + 1);
     const sliderVal = $(this).val();

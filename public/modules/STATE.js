@@ -16,8 +16,6 @@ let STATE = {
   currentDate: moment(),
   startDate: moment(),
   endDate: moment(),
-  startYear: moment(),
-  endYear: moment(),
   dataType: 'extent',
   hemi: 'n',
   temporality: 'daily',
@@ -61,7 +59,7 @@ function set(attr, value) {
 
 /** Read the configuration of the animation and save to STATE
 */
-function readConfiguration() {
+function readPageConfiguration() {
   // Get value for extent or concentration
   STATE.dataType = $('input[name=ext-con]:checked').val();
   // Get value for North or South
@@ -72,8 +70,29 @@ function readConfiguration() {
   STATE.yearLoop = $('#yearLoop').is(':checked');
   STATE.startDate = moment(document.querySelector('input[name="sDate"]').value);
   STATE.endDate = moment(document.querySelector('input[name="eDate"]').value);
-  STATE.startYear = moment(`${document.querySelector('input[name="sYear"]').value}-01-01`);
-  STATE.endYear = moment(`${document.querySelector('input[name="eYear"]').value}-12-31`);
+
+
+  if (STATE.yearLoop) {
+    const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+    const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+
+    STATE.startDate = moment();
+    STATE.startDate.set({'year': document.querySelector('input[name="sYear"]').value,
+      'date': dayLoop, 'month': monthLoop});
+
+    STATE.endDate = moment();
+    STATE.endDate.set({'year': document.querySelector('input[name="eYear"]').value,
+      'date': dayLoop, 'month': monthLoop});
+
+    while (!dates.validDateInput(STATE.startDate)) {
+      STATE.startDate.add(1, 'y');
+    }
+
+    while (!dates.validDateInput( STATE.endDate)) {
+      STATE.endDate.subtract(1, 'y');
+    }
+  }
+
   const month = document.querySelector('select[name="monthLoop"]').value;
   let daysInMonth = moment().set({'year': 2020, 'month': month}).daysInMonth();
   $('#dayLoop').attr({'max': daysInMonth});
@@ -91,20 +110,7 @@ function readConfiguration() {
 */
 function updateCurrentDate(values) {
   STATE['currentDate'].set(values);
-}
-
-/** Update the startDate value
- * @param {*} values - The attribute-value pairs of startDate to be set
-*/
-function updateStartDate(values) {
-  STATE['startDate'].set(values);
-}
-
-/** Update the endDate value
- * @param {*} values - The attribute-value pairs of endDate to be set
-*/
-function updateEndDate(values) {
-  STATE['endDate'].set(values);
+  STATE.currentDate.hour(10);
 }
 
 /** Add to the currentDate value
@@ -112,20 +118,7 @@ function updateEndDate(values) {
 */
 function addToCurrentDate(values) {
   STATE['currentDate'].add(values);
-}
-
-/** Add to the currentDate value
- * @param {*} values - The attribute-value pairs of startDate to be added
-*/
-function addToStartDate(values) {
-  STATE['startDate'].add(values);
-}
-
-/** Add to the currentDate value
- * @param {*} values - The attribute-value pairs of endDate to be added
-*/
-function addToEndDate(values) {
-  STATE['endDate'].add(values);
+  STATE.currentDate.hour(10);
 }
 
 /** Subtract from the currentDate value
@@ -133,52 +126,45 @@ function addToEndDate(values) {
 */
 function subtractFromCurrentDate(values) {
   STATE['currentDate'].subtract(values);
-}
-
-/** Subtract from the currentDate value
- * @param {*} values - The attribute-value pairs of startDate to be subtracted
-*/
-function subtractFromStartDate(values) {
-  STATE['startDate'].subtract(values);
-}
-
-/** Subtract from the currentDate value
- * @param {*} values - The attribute-value pairs of endDate to be subtracted
-*/
-function subtractFromEndDate(values) {
-  STATE['endDate'].subtract(values);
+  STATE.currentDate.hour(10);
 }
 
 /** Load and set the state configuration from the user inputs and return the correct map and projection
 */
-function configureState() {
+function updateState() {
   const oldHemisphere = STATE.hemi;
   const oldTemporality = STATE.temporality;
+  const oldYearLoop = STATE.yearLoop;
 
-  readConfiguration();
+
+  readPageConfiguration();
   if (oldHemisphere != STATE.hemi) {
     mapUtil.resetMap();
-    mapUtil.loadWMS();
+    mapUtil.updateMap();
   }
-  if (oldTemporality != STATE.temporality) {
-    let temporality = STATE.temporality;
-    document.querySelector('input[name="sDate"]').value = STATE.DEFAULTS[temporality].start.format('YYYY-MM-DD');
-    document.querySelector('input[name="eDate"]').value = STATE.DEFAULTS[temporality].end.format('YYYY-MM-DD');
-    STATE.startDate = moment(document.querySelector('input[name="sDate"]').value);
+
+  if (oldTemporality != STATE.temporality || oldYearLoop != STATE.yearLoop) {
     STATE.currentDate = moment(STATE.startDate);
-    STATE.endDate = moment(document.querySelector('input[name="eDate"]').value);
-    while (!dates.validDateInput(STATE.currentDate)) {
-      dates.nextDate();
-    }
   }
-  updateStartDate(STATE.startDate.startOf('day'));
+
+  if (STATE.currentDate.isBefore(STATE.startDate)) {
+    STATE.currentDate = moment(STATE.startDate);
+  }
+
+  if (STATE.currentDate.isAfter(STATE.endDate)) {
+    STATE.currentDate = moment(STATE.endDate);
+  }
+
+  if (STATE.yearLoop) {
+    const dayLoop = document.querySelector('input[name="dayLoop"]').value;
+    const monthLoop = document.querySelector('select[name="monthLoop"]').value;
+    updateCurrentDate({'date': dayLoop, 'month': monthLoop});
+  }
 
   page.updateCSS();
 
   timeline.generateTimelineScale();
 }
 
-export {get, getProp, set, readConfiguration, updateCurrentDate,
-  updateStartDate, updateEndDate, addToCurrentDate, addToEndDate,
-  addToStartDate, subtractFromCurrentDate, subtractFromEndDate,
-  subtractFromStartDate, configureState};
+export {get, getProp, set, updateCurrentDate,
+  addToCurrentDate, subtractFromCurrentDate, updateState};

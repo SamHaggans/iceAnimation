@@ -60,9 +60,9 @@ async function animationLoop() {
     if (!state.stop) {
       dates.nextDate();
     }
-    await STATE.configureState();
+    await STATE.updateState();
     STATE.set('rate', 2000 - $('#speedSlider').val());
-    await mapUtil.updateWMSLayerParams();
+    await mapUtil.updateMap();
     await util.sleep(!state.stop ? state.rate : 50);
   }
 }
