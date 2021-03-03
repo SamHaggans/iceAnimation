@@ -4,7 +4,7 @@ const outputDirectory = path.join(__dirname, 'test-build');
 
 module.exports = {
   mode: 'development',
-  entry: './test.js',
+  entry: './test/test.js',
   output: {
     path: outputDirectory,
     filename: 'testBundle.js',
