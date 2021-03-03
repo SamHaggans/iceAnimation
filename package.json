@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "webpack --config webpack-test.config.js; mocha test-build/testBundle.js; exit",
+    "test": "webpack --config webpack-test.config.js; mocha test-build/testBundle.js --timeout 10000; exit",
     "lint": "eslint --ignore-path .gitignore . --fix",
     "build": "webpack --mode production",
     "serve": "node server.js",

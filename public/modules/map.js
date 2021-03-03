@@ -1,6 +1,5 @@
 // Packages
 import $ from 'jquery';
-import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
 import ZoomToExtent from 'ol/control/ZoomToExtent';

@@ -6,6 +6,7 @@ import * as mapUtil from './map.js';
 import * as page from './page.js';
 import * as dates from './dates.js';
 import * as timeline from './timeline.js';
+import * as util from './util.js';
 
 // Initialize the STATE object to the starting values
 let STATE = {

@@ -14,13 +14,10 @@ export function test() {
           state.currentDate._isValid &&
           state.startDate._isValid &&
           state.endDate._isValid &&
-          state.startYear._isValid &&
-          state.startYear._isValid &&
           state.dataType == 'extent' &&
           state.hemi == 'n' &&
           state.temporality == 'daily' &&
-          state.yearLoop == false &&
-          state.validDates.length == 0,
+          state.yearLoop == false,
       );
     });
 
