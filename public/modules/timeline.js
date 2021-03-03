@@ -2,14 +2,11 @@ import $ from 'jquery';
 import moment from 'moment';
 
 import * as STATE from './STATE.js';
-import * as dates from './dates.js';
-
 /** Generate and set the scale dates for the timeline
  */
 function generateTimelineScale() {
   let state = STATE.get();
   for (let i = 0; i < 5; i++) {
-
     let firstDate = STATE.getProp('startDate');
     let lastDate = STATE.getProp('lastDate');
 

@@ -1,7 +1,6 @@
 import moment from 'moment';
 
 import * as STATE from './STATE.js';
-import * as timeline from './timeline.js';
 
 /** Find and move to next date for the animation*/
 function nextDate() {

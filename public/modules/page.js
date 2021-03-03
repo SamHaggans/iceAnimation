@@ -5,7 +5,6 @@ import * as STATE from './STATE.js';
 import * as mapUtil from './map.js';
 import * as dates from './dates.js';
 import * as util from './util.js';
-import * as timeline from './timeline.js';
 
 import {CONSTANTS} from '../constants.js';
 
