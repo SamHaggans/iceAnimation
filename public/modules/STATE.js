@@ -1,7 +1,5 @@
 // Packages
 import $ from 'jquery';
-window.jQuery = $;
-window.$ = $;
 import moment from 'moment';
 
 import * as mapUtil from './map.js';
