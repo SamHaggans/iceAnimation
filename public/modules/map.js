@@ -115,7 +115,6 @@ function getMap() {
 function getLocationParams() {
   let state = STATE.get();
   const extent = CONSTANTS[state.hemi].extent;// Map size
-  // var extent = [0,0,0,0];
 
   $('#map').css('width', CONSTANTS[state.hemi].css.width);
   $('#map').css('height', CONSTANTS[state.hemi].css.height);

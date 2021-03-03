@@ -110,7 +110,6 @@ function readPageConfiguration() {
 */
 function updateCurrentDate(values) {
   STATE['currentDate'].set(values);
-  STATE.currentDate.hour(10);
 }
 
 /** Add to the currentDate value
@@ -118,7 +117,6 @@ function updateCurrentDate(values) {
 */
 function addToCurrentDate(values) {
   STATE['currentDate'].add(values);
-  STATE.currentDate.hour(10);
 }
 
 /** Subtract from the currentDate value
@@ -126,10 +124,9 @@ function addToCurrentDate(values) {
 */
 function subtractFromCurrentDate(values) {
   STATE['currentDate'].subtract(values);
-  STATE.currentDate.hour(10);
 }
 
-/** Load and set the state configuration from the user inputs and return the correct map and projection
+/** Load and set the state configuration from the user inputs
 */
 function updateState() {
   const oldHemisphere = STATE.hemi;
