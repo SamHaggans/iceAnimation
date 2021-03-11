@@ -44,9 +44,7 @@ function getValidDatesFromGetCapabilities() {
   return new Promise(async function(resolve, reject) {
     const gcr = CONSTANTS.getCapabilities;
     const requestHTTP = `${gcr.server}service=${gcr.service}&version=${gcr.version}&request=${gcr.request}`;
-    console.log("pingo");
     const getCapabilities = await runXMLHTTPRequest(requestHTTP);
-    console.log("pongo");
     const parser = new DOMParser();
     const xmlDoc = parser.parseFromString(getCapabilities, 'text/xml');
     const validDates = [];
@@ -62,9 +60,7 @@ function getValidDatesFromGetCapabilities() {
         // Layer without extent tag, which means it is not relevant
       }
     }
-    STATE.set('validDates', validDates);
-    console.log("done");
-    resolve();
+    resolve(validDates);
   });
 }
 

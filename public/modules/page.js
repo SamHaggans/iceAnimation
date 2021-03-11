@@ -73,7 +73,7 @@ function setPlayheadBindings() {
     pauseAnimation();
 
     STATE.set('currentDate', moment(STATE.getProp('startDate')));
-    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+    if (!dates.availableDate(STATE.getProp('currentDate'))) {
       dates.nextDate();
     }
 
@@ -84,7 +84,7 @@ function setPlayheadBindings() {
     pauseAnimation();
 
     STATE.set('currentDate', moment(STATE.getProp('endDate')));
-    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+    if (!dates.availableDate(STATE.getProp('currentDate'))) {
       dates.previousDate();
     }
 
@@ -127,7 +127,7 @@ function setPlayheadBindings() {
       STATE.updateCurrentDate({'date': dayLoop, 'month': monthLoop});
     }
 
-    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+    if (!dates.availableDate(STATE.getProp('currentDate'))) {
       dates.nextDate();
     }
   };

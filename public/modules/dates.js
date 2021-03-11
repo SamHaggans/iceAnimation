@@ -4,6 +4,7 @@ import * as STATE from './STATE.js';
 
 /** Find and move to next date for the animation*/
 function nextDate() {
+
   let state = STATE.get();
 
   if (state.temporality == 'daily') {
@@ -12,9 +13,8 @@ function nextDate() {
     STATE.addToCurrentDate(state.yearLoop ? {years: 1} : {months: 1});
     STATE.updateCurrentDate({'date': 1});
   }
-
-  if (STATE.getProp('currentDate').isBefore(STATE.getProp('startDate')) ||
-      STATE.getProp('currentDate').isAfter(STATE.getProp('endDate'))) {
+  if (isBefore(STATE.getProp('currentDate'), STATE.getProp('startDate')) ||
+      isAfter(STATE.getProp('currentDate'), STATE.getProp('endDate'))) {
     STATE.set('currentDate', moment(STATE.getProp('startDate')));
   }
 
@@ -24,7 +24,7 @@ function nextDate() {
     STATE.updateCurrentDate({'date': dayLoop, 'month': monthLoop});
   }
 
-  if (!validDateInput(STATE.getProp('currentDate'))) {
+  if (!availableDate(STATE.getProp('currentDate'))) {
     nextDate();
   }
 }
@@ -40,18 +40,17 @@ function previousDate() {
     STATE.updateCurrentDate({'date': 1});
   }
 
-  if (STATE.getProp('currentDate').isBefore(STATE.getProp('startDate')) ||
-      STATE.getProp('currentDate').isAfter(STATE.getProp('endDate'))) {
+  if (isBefore(STATE.getProp('currentDate'), STATE.getProp('startDate')) ||
+      isAfter(STATE.getProp('currentDate'), STATE.getProp('endDate'))) {
     STATE.set('currentDate', moment(STATE.getProp('endDate')));
   }
-
   if (state.yearLoop) {
     const dayLoop = document.querySelector('input[name="dayLoop"]').value;
     const monthLoop = document.querySelector('select[name="monthLoop"]').value;
     STATE.updateCurrentDate({'date': dayLoop, 'month': monthLoop});
   }
 
-  if (!validDateInput(STATE.getProp('currentDate'))) {
+  if (!availableDate(STATE.getProp('currentDate'))) {
     previousDate();
   }
 }
@@ -60,11 +59,39 @@ function previousDate() {
  * @param {moment} date - The date to be tested
  * @return {boolean} - Valid date or not
 */
-function validDateInput(date) {
+function availableDate(date) {
   let state = STATE.get();
   // Get the key (layername) for searching the valid layers object
   const objectKey = `g02135_${state.dataType}_raster_${state.temporality}_${state.hemi}`;
   // Return whether or not the current date is in the queried layer
   return (state.validDates[objectKey].includes(date.utc().startOf('day').toISOString()));
 };
-export {nextDate, previousDate, validDateInput};
+export {nextDate, previousDate, availableDate};
+
+/** Check if a date is before another date
+ * @param {moment} date - The date to be checked
+ * @param {moment} comparison - The date to be compared against
+ * @return {boolean}
+*/
+function isBefore(date, comparison) {
+  // Return false if they are the same date
+  if (date.year() == comparison.year() && date.month() == comparison.month() && date.date() == comparison.date()) {
+    return false;
+  } else {
+    return date.isBefore(comparison);// Else return the moment check value
+  }
+}
+
+/** Check if a date is after another date
+ * @param {moment} date - The date to be checked
+ * @param {moment} comparison - The date to be compared against
+ * @return {boolean}
+*/
+function isAfter(date, comparison) {
+  // Return false if they are the same date
+  if (date.year() == comparison.year() && date.month() == comparison.month() && date.date() == comparison.date()) {
+    return false;
+  } else {
+    return date.isAfter(comparison);// Else return the moment check value
+  }
+}

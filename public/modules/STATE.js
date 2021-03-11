@@ -83,11 +83,11 @@ function readPageConfiguration() {
     STATE.endDate.set({'year': document.querySelector('input[name="eYear"]').value,
       'date': dayLoop, 'month': monthLoop});
 
-    while (!dates.validDateInput(STATE.startDate)) {
+    while (!dates.availableDate(STATE.startDate)) {
       STATE.startDate.add(1, 'y');
     }
 
-    while (!dates.validDateInput( STATE.endDate)) {
+    while (!dates.availableDate( STATE.endDate)) {
       STATE.endDate.subtract(1, 'y');
     }
   }
