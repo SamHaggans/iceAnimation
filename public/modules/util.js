@@ -1,6 +1,5 @@
 import {CONSTANTS} from '../constants.js';
 
-import * as STATE from './STATE.js';
 
 /** Read a json file
  * @param {string} filename - The file to be read

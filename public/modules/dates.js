@@ -4,7 +4,6 @@ import * as STATE from './STATE.js';
 
 /** Find and move to next date for the animation*/
 function nextDate() {
-
   let state = STATE.get();
 
   if (state.temporality == 'daily') {
