@@ -2,7 +2,7 @@ import moment from 'moment';
 
 import * as STATE from './STATE.js';
 
-/** Find and move to next date for the animation*/
+/** Find and move currentDate to the next date for the animation */
 function nextDate() {
   let state = STATE.get();
 
@@ -28,7 +28,7 @@ function nextDate() {
   }
 }
 
-/** Find and move to previous date for the animation*/
+/** Find and move curretnDate to the previous date for the animation */
 function previousDate() {
   let state = STATE.get();
 
@@ -54,7 +54,7 @@ function previousDate() {
   }
 }
 
-/** Check if a given date is valid and available
+/** Check if a given date is valid and available in the getCapabilities array
  * @param {moment} date - The date to be tested
  * @return {boolean} - Valid date or not
 */
@@ -67,7 +67,7 @@ function availableDate(date) {
 };
 export {nextDate, previousDate, availableDate};
 
-/** Check if a date is before another date
+/** Check if a moment date is before another moment date
  * @param {moment} date - The date to be checked
  * @param {moment} comparison - The date to be compared against
  * @return {boolean}
@@ -81,7 +81,7 @@ function isBefore(date, comparison) {
   }
 }
 
-/** Check if a date is after another date
+/** Check if a moment date is after another moment date
  * @param {moment} date - The date to be checked
  * @param {moment} comparison - The date to be compared against
  * @return {boolean}

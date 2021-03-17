@@ -17,8 +17,7 @@ import {CONSTANTS} from '../constants.js';
 let MAP;
 let PROJECTION;
 
-/** Create a projection for a map
- */
+/** Create and set the global PROJECTION for the MAP */
 function getProjection() {
   let state = STATE.get();
   PROJECTION = new Projection({// Map projection
@@ -27,9 +26,9 @@ function getProjection() {
   });
 }
 
-/** Update the map with the current parameters
+/** Update MAP with the current parameters
  * @return {promise} - A promise of updating the layer
- */
+*/
 function updateMap() {
   let layer = MAP.getLayers().getArray()[0];
   let params = getWMSParams();
@@ -69,7 +68,7 @@ function updateMap() {
   });
 }
 
-/** Create a map */
+/** Create the MAP object */
 function getMap() {
   const extent = getLocationParams().extent;
   MAP = new Map({ // New map
@@ -106,9 +105,9 @@ function getMap() {
   MAP.addLayer(layer);
 }
 
-/** Get location parameters from CONSTANTS
- * @return {object} The parameters
- */
+/** Get the constant location parameters from CONSTANTS.js
+ * @return {object} - The animation parameters
+*/
 function getLocationParams() {
   let state = STATE.get();
   const extent = CONSTANTS[state.hemi].extent;// Map size
@@ -128,8 +127,8 @@ function getLocationParams() {
 }
 
 /** Get the wms parameters
- * @return {object} wmsParameters
- */
+ * @return {object} - The correct wmsParameters
+*/
 function getWMSParams() {
   let state = STATE.get();
   let sourceType = 'monthly';

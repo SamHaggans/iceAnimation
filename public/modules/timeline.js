@@ -2,8 +2,7 @@ import $ from 'jquery';
 import moment from 'moment';
 
 import * as STATE from './STATE.js';
-/** Generate and set the scale dates for the timeline
- */
+/** Generate and set the scale dates for the timeline */
 function generateTimelineScale() {
   let state = STATE.get();
   for (let i = 0; i < 5; i++) {
