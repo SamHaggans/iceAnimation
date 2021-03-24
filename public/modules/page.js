@@ -5,7 +5,6 @@ import * as STATE from './STATE.js';
 import * as mapUtil from './map.js';
 import * as dates from './dates.js';
 import * as util from './util.js';
-import * as timeline from './timeline.js';
 
 import {CONSTANTS} from '../constants.js';
 
@@ -13,8 +12,7 @@ import {CONSTANTS} from '../constants.js';
 import extentLegend from '../assets/extent_legend.png';
 import concentrationLegend from '../assets/concentration_legend.png';
 
-/** Toggle the visibility of the legend
- */
+/** Toggle the visibility of the legend */
 function toggleLegend() {
   let state = STATE.get();
   if (state.dataType == 'extent') {
@@ -25,8 +23,7 @@ function toggleLegend() {
   }
 }
 
-/** Update CSS to reflect STATE
- */
+/** Update CSS to reflect STATE */
 function updateCSS() {
   let state = STATE.get();
   if (state.yearLoop) {
@@ -46,8 +43,7 @@ function updateCSS() {
   }
 }
 
-/** Set the action bindings to the playhead controls
- */
+/** Set the action bindings to the playhead controls */
 function setPlayheadBindings() {
   $('#playButton').click(function() {// When animation button is clicked
     if (STATE.getProp('stop')) {
@@ -74,7 +70,7 @@ function setPlayheadBindings() {
     pauseAnimation();
 
     STATE.set('currentDate', moment(STATE.getProp('startDate')));
-    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+    if (!dates.availableDate(STATE.getProp('currentDate'))) {
       dates.nextDate();
     }
 
@@ -85,7 +81,7 @@ function setPlayheadBindings() {
     pauseAnimation();
 
     STATE.set('currentDate', moment(STATE.getProp('endDate')));
-    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+    if (!dates.availableDate(STATE.getProp('currentDate'))) {
       dates.previousDate();
     }
 
@@ -128,15 +124,14 @@ function setPlayheadBindings() {
       STATE.updateCurrentDate({'date': dayLoop, 'month': monthLoop});
     }
 
-    if (!dates.validDateInput(STATE.getProp('currentDate'))) {
+    if (!dates.availableDate(STATE.getProp('currentDate'))) {
       dates.nextDate();
     }
   };
 }
 
 
-/** Pause animation
- */
+/** Pause animation */
 function pauseAnimation() {
   if (!STATE.getProp('stop')) {
     STATE.set('stop', true);
@@ -145,8 +140,7 @@ function pauseAnimation() {
   }
 }
 
-/** Find the ending dates based on the GetCapabilities data and set starting date text
- */
+/** Find the ending dates based on the GetCapabilities data and set starting date text */
 function setDateSettings() {
   let state = STATE.get();
   // Set the "last" day and month to be the last of the getCapabilities data
@@ -164,8 +158,7 @@ function setDateSettings() {
   document.querySelector('input[name="eDate"]').value = state.DEFAULTS[state.temporality].end.format('YYYY-MM-DD');
 }
 
-/** Set the configuration to default
- */
+/** Set the configuration to default */
 function setDefaultConfiguration() {
   $('input:radio[name=ext-con]').val(['extent']);// Default values
   $('input:radio[name=n-s]').val(['n']);

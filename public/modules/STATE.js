@@ -32,7 +32,7 @@ let STATE = {
 };
 
 /** Return the STATE object
-* @return {object} STATE - Animation state
+ * @return {object} STATE - Animation state
 */
 function get() {
   let cloneState = {...STATE};
@@ -48,15 +48,14 @@ function getProp(prop) {
 }
 
 /** Set a given attribute to a specific value
-* @param {*} attr - Attribute to be set
-* @param {*} value - Value to be stored in the attribute
+ * @param {*} attr - Attribute to be set
+ * @param {*} value - Value to be stored in the attribute
 */
 function set(attr, value) {
   STATE[attr] = value;
 }
 
-/** Read the configuration of the animation and save to STATE
-*/
+/** Read the configuration of the animation and save to STATE */
 function readPageConfiguration() {
   // Get value for extent or concentration
   STATE.dataType = $('input[name=ext-con]:checked').val();
@@ -82,11 +81,11 @@ function readPageConfiguration() {
     STATE.endDate.set({'year': document.querySelector('input[name="eYear"]').value,
       'date': dayLoop, 'month': monthLoop});
 
-    while (!dates.validDateInput(STATE.startDate)) {
+    while (!dates.availableDate(STATE.startDate)) {
       STATE.startDate.add(1, 'y');
     }
 
-    while (!dates.validDateInput( STATE.endDate)) {
+    while (!dates.availableDate( STATE.endDate)) {
       STATE.endDate.subtract(1, 'y');
     }
   }
@@ -124,8 +123,7 @@ function subtractFromCurrentDate(values) {
   STATE['currentDate'].subtract(values);
 }
 
-/** Load and set the state configuration from the user inputs
-*/
+/** Load and set the state configuration from the user inputs */
 function updateState() {
   const oldHemisphere = STATE.hemi;
   const oldTemporality = STATE.temporality;

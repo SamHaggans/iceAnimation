@@ -50,8 +50,7 @@ async function init() {
   $('#mapAlert').html('');
 }
 
-/** Run the animation loop
-*/
+/** Run the animation loop */
 async function animationLoop() {
   while (true) {
     let state = STATE.get();
