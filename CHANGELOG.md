@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0] - 2020-12-09
+- Rotate timeline dates and display year-month-day on slider
+
+## [1.5.4] - 2020-09-11
+- Fix positioning of elements in the config box and stop element overlap
+
 ## [1.5.3] - 2020-08-24
 - Fix bug with getSliderPositioning
 
