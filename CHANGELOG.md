@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.7.0] - 2020-03-24
+- Refactor general code structure and modulize various components of the application
+- Fix edge case inconsistencies with date movements
+- Add unit tests
+
 ## [1.6.0] - 2020-12-09
 - Rotate timeline dates and display year-month-day on slider
 
