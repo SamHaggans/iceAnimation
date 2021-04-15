@@ -2,6 +2,10 @@ import $ from 'jquery';
 import moment from 'moment';
 
 import * as STATE from './STATE.js';
+
+import * as timelineComponent from './timeline-slider.js';
+
+
 /** Generate and set the scale dates for the timeline */
 function generateTimelineScale() {
   let state = STATE.get();

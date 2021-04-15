@@ -259,7 +259,7 @@ a {
   margin-bottom: 0px;
 }
 
-.timelineScale{
+.timelineTick{
   flex-grow: 1;
   font-size: 14px;
   display: inline-block;
