@@ -1,5 +1,5 @@
 import {describe} from 'mocha';
-import * as assert from 'assert';
+import assert from 'assert';
 import moment from 'moment';
 
 import * as dates from '../public/modules/dates.js';
@@ -20,7 +20,7 @@ export function test() {
       STATE.set('endDate', endDate);
       STATE.set('startDate', startDate);
       dates.nextDate();
-      assert(
+      assert.ok(
           STATE.getProp('currentDate').year() == 1978 &&
           STATE.getProp('currentDate').month() == 9 &&
           STATE.getProp('currentDate').date() == 30,
@@ -33,7 +33,7 @@ export function test() {
       STATE.set('endDate', endDate);
       STATE.set('startDate', startDate);
       dates.nextDate();
-      assert(
+      assert.ok(
           STATE.getProp('currentDate').year() == 1978 &&
           STATE.getProp('currentDate').month() == 9 &&
           STATE.getProp('currentDate').date() == 26,
@@ -46,7 +46,7 @@ export function test() {
       STATE.set('endDate', endDate);
       STATE.set('startDate', startDate);
       dates.previousDate();
-      assert(
+      assert.ok(
           STATE.getProp('currentDate').year() == 1978 &&
           STATE.getProp('currentDate').month() == 9 &&
           STATE.getProp('currentDate').date() == 26,
@@ -59,7 +59,7 @@ export function test() {
       STATE.set('endDate', endDate);
       STATE.set('startDate', startDate);
       dates.previousDate();
-      assert(
+      assert.ok(
           STATE.getProp('currentDate').year() == 1978 &&
           STATE.getProp('currentDate').month() == 9 &&
           STATE.getProp('currentDate').date() == 30,
